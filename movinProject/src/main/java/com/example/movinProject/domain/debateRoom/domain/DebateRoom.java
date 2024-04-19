@@ -15,6 +15,10 @@ public class DebateRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String title;
+
+    private String topic;
+
     @Enumerated(EnumType.STRING)
     private StateType stateType;
 
@@ -24,9 +28,11 @@ public class DebateRoom {
 
     private int duration;
 
-    private String topic;
-
     private int maxUserNumber;
+
+    private int agreeJoinedUserNumber;
+
+    private int disagreeJoinedUserNumber;
 
     private String summarize;
 }

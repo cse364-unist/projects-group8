@@ -27,4 +27,18 @@ public class User {
     private int money;
 
     private LocalDateTime lastAttendance;
+
+    public static User create(
+            String userName,
+            String password,
+            String email
+
+    ) {
+        User user = new User();
+        user.userName = userName;
+        user.password = password;
+        user.email = email;
+        return user;
+    }
+
 }

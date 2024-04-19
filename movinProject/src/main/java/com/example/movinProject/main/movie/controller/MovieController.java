@@ -19,9 +19,9 @@ public class MovieController {
     private final MovieService movieService;
 
     @GetMapping("/mainPage")
-    public ResponseEntity<Map<String, List<Movie>>> getMainPageMovies(Double rating) {
+    public ResponseEntity<Map<String, List<Movie>>> getMainPageMovies() {
         List<Movie> debateMovies = movieService.findDebateMovies();
-        List<Movie> popularMovies = movieService.findPopularMovies(rating);
+        List<Movie> popularMovies = movieService.findPopularMovies(4.3);
 
         Map<String, List<Movie>> response = new HashMap<>();
         response.put("debateMovies", debateMovies);

@@ -11,7 +11,7 @@ public class MovieService {
     private MovieRepository movieRepository;
 
     public List<Movie> findDebateMovies() {
-        return movieRepository. findMoviesByOpenDebateRooms();
+        return movieRepository.findMoviesByOpenDebateRooms();
 
     }
 
