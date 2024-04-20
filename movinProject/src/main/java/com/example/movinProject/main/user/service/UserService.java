@@ -17,20 +17,6 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-
-    public Optional<UserDto> loginUser(String userName, String password) {
-        Optional<User> user = userRepository.findByUserName(userName);
-        if (user.isPresent() && user.get().getPassword().equals(password)) {
-                        return Optional.of(UserDto.builder()
-                    .id(user.get().getId())
-                    .name(user.get().getUserName())
-                    .money(user.get().getMoney())
-                    .lastAttendance(user.get().getLastAttendance())
-                    .build());
-        }
-        return Optional.empty();
-    }
-
     @Transactional
     public Optional<UserDto> registerUser(UserRegisterRequest request) {
         if (userRepository.existsByUserName(request.getUserName())) {
@@ -46,14 +32,6 @@ public class UserService {
                 .build());
     }
 
-    public Optional<UserDto> getUserDetails(String userName) {
-        return userRepository.findByUserName(userName)
-                .map(user -> UserDto.builder()
-                        .id(user.getId())
-                        .name(user.getUserName())
-                        .money(user.getMoney())
-                        .lastAttendance(user.getLastAttendance())
-                        .build());
-    }
+
 
 }
