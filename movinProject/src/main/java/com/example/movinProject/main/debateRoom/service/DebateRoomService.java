@@ -1,19 +1,191 @@
 package com.example.movinProject.main.debateRoom.service;
 
 
+import com.example.movinProject.domain.chat.domain.Chat;
+import com.example.movinProject.domain.chat.repository.ChatRepository;
+import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
 import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
 
+import com.example.movinProject.main.chatApiProxy.chatRoom.RealtimeDebateRoom;
+import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+@Slf4j
+@RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class DebateRoomService {
 
-    private DebateRoomRepository debateRoomRepository;
+    private final DebateRoomRepository debateRoomRepository;
+    private final DebateJoinedUserRepository debateJoinedUserRepository;
+    private final ChatRepository chatRepository;
+
+    private final ChatGPTService chatGPTService;
+
+    private final ObjectMapper objectMapper;
+    private Map<Long, RealtimeDebateRoom> chatRooms;
+    @PostConstruct
+    private void init() {
+        chatRooms = new LinkedHashMap<>();
+    }
+
+    public RealtimeDebateRoom findRoomById(Long roomId) {
+        return chatRooms.get(roomId);
+    }
+
+    @Transactional
+    private void startDebate(RealtimeDebateRoom room) {
+        room.addStepChangeListener(
+                (step, stepEndTime, realtimeDebateRoom) -> {
+                    RealtimeMessageDto stepChangeMessage = new RealtimeMessageDto();
+                    stepChangeMessage.setMessageType(RealtimeMessageDto.MessageType.StepChange);
+                    stepChangeMessage.setDebateRoomId(room.getDebateRoom().getId());
+                    stepChangeMessage.setStep(step);
+                    stepChangeMessage.setStepEndTime(stepEndTime);
+                    stepChangeMessage.setSendTime(LocalDateTime.now());
+
+                    realtimeDebateRoom.getSessions().parallelStream().forEach(s -> {
+                        try {
+                            s.sendMessage(new TextMessage(objectMapper.writeValueAsString(stepChangeMessage)));
+                        } catch (IOException e) {
+                            log.error("메시지 전송 중 오류가 발생했습니다.", e);
+                        }
+                    });
+                }
+        );
+
+        room.addModeratorMessageListener(
+                ((message, realtimeDebateRoom) -> {
+                    RealtimeMessageDto moderatorMessage = new RealtimeMessageDto();
+                    moderatorMessage.setMessageType(RealtimeMessageDto.MessageType.TALK);
+                    moderatorMessage.setDebateRoomId(room.getDebateRoom().getId());
+                    moderatorMessage.setSenderUserId(-1L);
+                    moderatorMessage.setSenderUserName("사회자");
+                    moderatorMessage.setMessage(message);
+                    moderatorMessage.setSendTime(LocalDateTime.now());
+                    Chat moderatorChat = Chat.createByRealtimeMessage(moderatorMessage);
+                    // 채팅 내용 저장
+                    chatRepository.save(moderatorChat);
+                    realtimeDebateRoom.getSessions().parallelStream().forEach(s -> {
+                        try {
+                            s.sendMessage(new TextMessage(objectMapper.writeValueAsString(moderatorMessage)));
+                        } catch (IOException e) {
+                            log.error("메시지 전송 중 오류가 발생했습니다.", e);
+                        }
+                    });
+                })
+        );
+//        chatGPTService.summarizeOpinions(room.getDebateRoom().getId());
+        
+        // 토론 시작
+        room.startDebate();
+    }
+
+
+    public void userEnter(WebSocketSession session, Long debateRoomId, Long userId, String userName, boolean isAgree){
+        RealtimeDebateRoom room = findRoomById(debateRoomId);
+
+        // if room is not exist, create new room
+        if(room == null) {
+            DebateRoom debateRoom = debateRoomRepository.findById(debateRoomId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 토론방입니다."));
+            room = new RealtimeDebateRoom(debateRoom);
+            chatRooms.put(debateRoomId, room);
+        }
+
+        RealtimeMessageDto realtimeMessage = new RealtimeMessageDto();
+        realtimeMessage.setMessageType(RealtimeMessageDto.MessageType.ENTER);
+        realtimeMessage.setDebateRoomId(debateRoomId);
+        realtimeMessage.setSenderUserId(userId);
+        realtimeMessage.setSenderUserName(userName);
+        realtimeMessage.setSenderAgree(isAgree);
+        realtimeMessage.setSendTime(LocalDateTime.now());
+
+        room.addClient(session);
+
+        // 메시지 전송
+        room.getSessions().parallelStream().forEach(s -> {
+            try {
+                s.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));
+            } catch (IOException e) {
+                log.error("메시지 전송 중 오류가 발생했습니다.", e);
+            }
+        });
+
+        // 만약 모든 사용자가 입장했다면, 토론 시작
+        // TODO: DebateJoinedUser Table에서 몇 명이 모여야 하는지 불러오기
+        List<Long> userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
+        if(room.getSessions().size() == userIds.size()) {
+            // 토론 시작
+            startDebate(room);
+        }
+    }
+
+    public void userLeave(WebSocketSession session, Long debateRoomId, Long userId, String userName, boolean isAgree) {
+        RealtimeDebateRoom room = findRoomById(debateRoomId);
+
+        RealtimeMessageDto realtimeMessage = new RealtimeMessageDto();
+        realtimeMessage.setMessageType(RealtimeMessageDto.MessageType.QUIT);
+        realtimeMessage.setDebateRoomId(debateRoomId);
+        realtimeMessage.setSenderUserId(userId);
+        realtimeMessage.setSenderUserName(userName);
+        realtimeMessage.setSenderAgree(isAgree);
+        realtimeMessage.setSendTime(LocalDateTime.now());
+
+        room.removeClient(session);
+
+        // 메시지 전송
+        room.getSessions().parallelStream().forEach(s -> {
+            try {
+                s.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));
+            } catch (IOException e) {
+                log.error("메시지 전송 중 오류가 발생했습니다.", e);
+            }
+        });
+    }
+    @Transactional
+    public void chatMessageReceived(Long debateRoomId, String message, Long userId, String userName, boolean isAgree) {
+        // 채팅방에 있는 모든 사용자에게 메시지 전송
+        RealtimeDebateRoom room = findRoomById(debateRoomId);
+
+        RealtimeMessageDto realtimeMessage = new RealtimeMessageDto();
+        realtimeMessage.setMessageType(RealtimeMessageDto.MessageType.TALK);
+        realtimeMessage.setDebateRoomId(debateRoomId);
+        realtimeMessage.setSenderUserId(userId);
+        realtimeMessage.setSenderUserName(userName);
+        realtimeMessage.setMessage(message);
+        realtimeMessage.setSenderAgree(isAgree);
+        realtimeMessage.setSendTime(LocalDateTime.now());
+
+        // 메시지 전송
+        room.getSessions().parallelStream().forEach(session -> {
+            try {
+                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));
+            } catch (IOException e) {
+                log.error("메시지 전송 중 오류가 발생했습니다.", e);
+            }
+        });
+
+        // TODO: 채팅 내용 저장 (Chat Table에 저장)
+        Chat createdChat = Chat.createByRealtimeMessage(realtimeMessage);
+        chatRepository.save(createdChat);
+    }
 
 
     public Map<String, List<DebateRoom>> getDebateRoomsGroupedByStateByMovieId(Long movieId) {

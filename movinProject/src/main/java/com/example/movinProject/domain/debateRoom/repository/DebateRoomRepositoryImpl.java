@@ -1,5 +1,6 @@
 package com.example.movinProject.domain.debateRoom.repository;
 
+import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
 import com.example.movinProject.domain.debateRoom.domain.QDebateRoom;
 import com.example.movinProject.domain.debateRoom.model.StateType;
@@ -31,4 +32,5 @@ public class DebateRoomRepositoryImpl implements DebateRoomRepositoryCustom{
                 .where(qDebateRoom.movieId.eq(movieId))
                 .fetch();
     }
+
 }

@@ -1,5 +1,5 @@
 HELP.md
-target/
+movinProject/target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -19,6 +19,7 @@ target/
 *.iml
 *.ipr
 
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -28,6 +29,7 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+
 
 ### VS Code ###
 .vscode/

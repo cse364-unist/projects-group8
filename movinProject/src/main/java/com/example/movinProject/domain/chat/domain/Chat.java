@@ -1,6 +1,8 @@
 package com.example.movinProject.domain.chat.domain;
 
 import com.example.movinProject.domain.chat.model.ChatType;
+import com.example.movinProject.main.chatApiProxy.RealtimeMessage;
+import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +17,7 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long DebateRoomId;
+    private Long debateRoomId;
     private Long userId;
     private String userName;
     private String message;
@@ -23,5 +25,18 @@ public class Chat {
     @Enumerated(EnumType.STRING)
     private ChatType chatType;
     private LocalDateTime date;
-
+    public static Chat createByRealtimeMessage(RealtimeMessageDto message){
+        Chat chat = new Chat();
+        chat.message = message.getMessage();
+        chat.date = message.getSendTime();
+        if(message.isSenderAgree()){
+            chat.chatType = ChatType.AGREE;
+        }else{
+            chat.chatType = ChatType.DISAGREE;
+        }
+        chat.userId = message.getSenderUserId();
+        chat.debateRoomId = message.getDebateRoomId();
+        chat.userName = message.getSenderUserName();
+        return chat;
+    }
 }
