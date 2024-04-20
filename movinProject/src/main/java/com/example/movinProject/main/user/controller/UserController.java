@@ -1,10 +1,8 @@
 package com.example.movinProject.main.user.controller;
 
 import com.example.movinProject.main.user.dto.UserDto;
-import com.example.movinProject.main.user.dto.UserLoginRequest;
 import com.example.movinProject.main.user.dto.UserRegisterRequest;
 import com.example.movinProject.main.user.service.UserService;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
