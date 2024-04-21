@@ -7,4 +7,6 @@ public interface DebateRoomRepositoryCustom {
     List<Long> findMovieIdsByOpenState();
 
     List<DebateRoom> findByMovieId(Long movieId);
+
+    List<DebateRoom> findDebateRoomsByUserName(String userName);
 }

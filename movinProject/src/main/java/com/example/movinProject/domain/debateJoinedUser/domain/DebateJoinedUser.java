@@ -16,6 +16,6 @@ public class DebateJoinedUser {
     private Long id;
 
     private Long debateRoomId;
-    private Long userId;
+    private String userName;
     private boolean agree;
 }
