@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class DebateRoomRepositoryImpl implements DebateRoomRepositoryCustom{

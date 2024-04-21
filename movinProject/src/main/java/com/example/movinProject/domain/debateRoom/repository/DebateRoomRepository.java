@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DebateRoomRepository extends JpaRepository<DebateRoom, Long>, DebateRoomRepositoryCustom {
-    DebateRoom findById(Long Id);
+
 }

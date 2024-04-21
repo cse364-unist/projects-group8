@@ -1,6 +1,8 @@
 package com.example.movinProject.main.debateRoom.service;
 
 
+import com.example.movinProject.config.exception.BadRequestException;
+import com.example.movinProject.config.exception.BadRequestType;
 import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.chat.repository.ChatRepository;
 import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
@@ -29,7 +31,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
