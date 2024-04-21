@@ -24,4 +24,12 @@ public class DebateVote {
     private boolean agree;
 
     private LocalDateTime date;
+
+    public boolean getAgree() {
+        return agree;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
 }
