@@ -41,4 +41,12 @@ public class DebateVote {
 
         return debateVote;
     };
+
+    public boolean getAgree() {
+        return agree;
+    }
+
+    public String getUserId() {
+        return userName;
+    }
 }
