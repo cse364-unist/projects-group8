@@ -58,4 +58,7 @@ public class User {
         return user;
     }
 
+    public void adjustMoney(int amount) {
+        this.money += amount;  // money 필드에 직접 접근
+    }
 }
