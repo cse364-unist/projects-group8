@@ -1,12 +1,13 @@
 package com.example.movinProject.main.user.controller;
 
 import com.example.movinProject.main.user.dto.UserDto;
-import com.example.movinProject.main.user.dto.UserLoginRequest;
 import com.example.movinProject.main.user.dto.UserRegisterRequest;
 import com.example.movinProject.main.user.service.UserService;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,18 +26,16 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    // Get User Details
-    /*
     @GetMapping("/my")
-    public ResponseEntity<UserDto> getUserDetails(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
+    public ResponseEntity<UserDto> getUserDetails(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return userService.getUserDetails(authentication.getName())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+
+        UserDto userDto = userService.getUserDetails(userDetails.getUsername());
+        return ResponseEntity.ok(userDto);
     }
-    */
+
 
 
 }

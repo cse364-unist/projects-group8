@@ -1,7 +1,10 @@
 package com.example.movinProject.main.movie.controller;
 
 import com.example.movinProject.domain.movie.domain.Movie;
+import com.example.movinProject.main.movie.dto.MovieDto;
+import com.example.movinProject.main.movie.dto.MovieSearchDto;
 import com.example.movinProject.main.movie.service.MovieService;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,14 +34,18 @@ public class MovieController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<Map<String, List<Movie>>> searchMovies(@RequestBody Map<String, Object> body) {
-        String keyword = (String) body.get("keyword");
-        int page = (int) body.get("size");
-        List<Movie> movies = movieService.searchMoviesByKeyword(keyword, page);
+    public ResponseEntity<Map<String, List<MovieDto>>> searchMovies(@RequestBody MovieSearchDto movieSearchDto) {
+        List<Movie> movies = movieService.searchMoviesByKeyword(movieSearchDto.getKeyword(), movieSearchDto.getPage());
+        List<MovieDto> movieDtos = movies.stream()
+                .map(movie -> MovieDto.builder()
+                        .id(movie.getId())
+                        .thumbnailUrl(movie.getThumbnailUrl())
+                        .name(movie.getTitle())
+                        .build())
+                .collect(Collectors.toList());
 
-        Map<String, List<Movie>> response = new HashMap<>();
-        response.put("movies", movies);
-
+        Map<String, List<MovieDto>> response = new HashMap<>();
+        response.put("movies", movieDtos);
         return ResponseEntity.ok(response);
     }
 

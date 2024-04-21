@@ -1,43 +1,30 @@
-package com.example.movinProject.domain.debateRoom.domain;
+package com.example.movinProject.main.debateRoom.dto;
 
+import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.domain.user.domain.User;
-import jakarta.persistence.*;
-import java.util.List;
+import com.example.movinProject.main.movie.dto.MovieDto;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
-@NoArgsConstructor
 @Getter
-public class DebateRoom {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+@Setter
+@NoArgsConstructor
+public class DebateRoomVoteDto {
+    private boolean voted;
+    private boolean agree;
     private String title;
-
     private String topic;
-
-    @Enumerated(EnumType.STRING)
     private StateType stateType;
-
-    private Long movieId;
-
     private LocalDateTime startTime;
-
     private int duration;
-
     private int maxUserNumber;
-
     private int agreeJoinedUserNumber;
-
     private int disagreeJoinedUserNumber;
-
     private String summarize;
-
-    @ManyToMany(mappedBy = "joinedDebateRooms")
-    private List<User> participants;
+    private Chat chat;
 }

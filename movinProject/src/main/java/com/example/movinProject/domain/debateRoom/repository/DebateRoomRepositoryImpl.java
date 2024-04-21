@@ -4,6 +4,7 @@ import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
 import com.example.movinProject.domain.debateRoom.domain.QDebateRoom;
 import com.example.movinProject.domain.debateRoom.model.StateType;
+import com.example.movinProject.domain.user.domain.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -33,4 +34,15 @@ public class DebateRoomRepositoryImpl implements DebateRoomRepositoryCustom{
                 .fetch();
     }
 
+
+    @Override
+    public List<DebateRoom> findDebateRoomsByUserName(String userName) {
+        QDebateRoom qDebateRoom = QDebateRoom.debateRoom;
+        QUser qUser = QUser.user;
+        return queryFactory
+                .selectFrom(qDebateRoom)
+                .join(qDebateRoom.participants, qUser)
+                .where(qUser.userName.eq(userName))
+                .fetch();
+    }
 }

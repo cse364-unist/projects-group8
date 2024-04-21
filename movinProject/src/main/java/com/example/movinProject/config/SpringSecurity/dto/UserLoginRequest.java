@@ -1,4 +1,4 @@
-package com.example.movinProject.main.user.dto;
+package com.example.movinProject.config.SpringSecurity.dto;
 
 import lombok.Getter;
 import lombok.Setter;
