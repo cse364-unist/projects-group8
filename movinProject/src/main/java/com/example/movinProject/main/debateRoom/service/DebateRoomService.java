@@ -5,7 +5,6 @@ import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.chat.repository.ChatRepository;
 import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
 import com.example.movinProject.domain.debateJoinedUser.domain.DebateJoinedUser;
-import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
 import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
@@ -44,6 +43,7 @@ public class DebateRoomService {
     private final DebateRoomRepository debateRoomRepository;
     private final DebateJoinedUserRepository debateJoinedUserRepository;
     private final ChatRepository chatRepository;
+    private DebateVoteRepository debateVoteRepository;
 
     private final ChatGPTService chatGPTService;
 
@@ -195,9 +195,9 @@ public class DebateRoomService {
         chatRepository.save(createdChat);
     }
 
-    private DebateVoteRepository debateVoteRepository;
 
-    private DebateJoinedUserRepository debateJoinedUserRepository;
+
+
 
     public Map<String, List<DebateRoom>> getDebateRoomsGroupedByStateByMovieId(Long movieId) {
         List<DebateRoom> rooms = debateRoomRepository.findByMovieId(movieId);
