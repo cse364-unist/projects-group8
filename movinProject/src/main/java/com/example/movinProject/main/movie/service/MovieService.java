@@ -4,11 +4,14 @@ import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
 import java.util.List;
 import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class MovieService {
-    private MovieRepository movieRepository;
+    private final MovieRepository movieRepository;
 
     public List<Movie> findDebateMovies() {
         return movieRepository.findMoviesByOpenDebateRooms();

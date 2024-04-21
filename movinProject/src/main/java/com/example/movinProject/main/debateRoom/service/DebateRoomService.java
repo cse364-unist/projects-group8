@@ -15,13 +15,13 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import com.example.movinProject.domain.debateVote.domain.DebateVote;
 import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
-import com.example.movinProject.main.debateVote.dto.Vote;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.example.movinProject.main.debateRoom.dto.VoteDto;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.example.movinProject.main.chatApiProxy.chatRoom.RealtimeDebateRoom;
@@ -44,7 +44,8 @@ public class DebateRoomService {
     private final DebateRoomRepository debateRoomRepository;
     private final DebateJoinedUserRepository debateJoinedUserRepository;
     private final ChatRepository chatRepository;
-    private DebateVoteRepository debateVoteRepository;
+    private final DebateVoteRepository debateVoteRepository;
+    private final UserRepository userRepository;
 
     private final ChatGPTService chatGPTService;
 
@@ -58,9 +59,23 @@ public class DebateRoomService {
     public RealtimeDebateRoom findRoomById(Long roomId) {
         return chatRooms.get(roomId);
     }
+    
+    
+    @Transactional
+    public Long create(DebateRoomCreateDto dto){
+        DebateRoom debateRoom = DebateRoom.init(
+                dto.getTitle(),
+                dto.getTopic(),
+                dto.getStartTime(),
+                dto.getMovieId()
+        );
+        DebateRoom savedDebateRoom = debateRoomRepository.save(debateRoom);
+        return savedDebateRoom.getId();
+    }
+    
 
     @Transactional
-    private void startDebate(RealtimeDebateRoom room) {
+    public void startDebate(RealtimeDebateRoom room) {
         room.addStepChangeListener(
                 (step, stepEndTime, realtimeDebateRoom) -> {
                     RealtimeMessageDto stepChangeMessage = new RealtimeMessageDto();
@@ -85,7 +100,7 @@ public class DebateRoomService {
                     RealtimeMessageDto moderatorMessage = new RealtimeMessageDto();
                     moderatorMessage.setMessageType(RealtimeMessageDto.MessageType.TALK);
                     moderatorMessage.setDebateRoomId(room.getDebateRoom().getId());
-                    moderatorMessage.setSenderUserId(-1L);
+                    moderatorMessage.setSenderUserId(Long.valueOf(-1));
                     moderatorMessage.setSenderUserName("사회자");
                     moderatorMessage.setMessage(message);
                     moderatorMessage.setSendTime(LocalDateTime.now());
@@ -114,7 +129,7 @@ public class DebateRoomService {
         // if room is not exist, create new room
         if(room == null) {
             DebateRoom debateRoom = debateRoomRepository.findById(debateRoomId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 토론방입니다."));
-            room = new RealtimeDebateRoom(debateRoom);
+            room = new RealtimeDebateRoom(debateRoom, chatGPTService);
             chatRooms.put(debateRoomId, room);
         }
 
@@ -197,9 +212,6 @@ public class DebateRoomService {
     }
 
 
-
-
-
     public Map<String, List<DebateRoom>> getDebateRoomsGroupedByStateByMovieId(Long movieId) {
         List<DebateRoom> rooms = debateRoomRepository.findByMovieId(movieId);
         Map<String, List<DebateRoom>> groupedRooms = new HashMap<>();
@@ -211,6 +223,7 @@ public class DebateRoomService {
                 .collect(Collectors.toList()));
         return groupedRooms;
     }
+
     public DebateRoomVoteDto getDebateRoomDetails(Long id, String userName) {
         DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);
         if (debateRoom == null) {
@@ -243,11 +256,18 @@ public class DebateRoomService {
             id, username, agree, LocalDateTime.of(2024,4,1,0,0));
 
         debateVoteRepository.save(vote);
-
         DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);
         if (debateRoom == null) {
             return null;
         }
+        debateRoom.addTotleMoney(100);
+        debateRoomRepository.save(debateRoom);
+        User user = userRepository.findByUserName(username).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        user.subMoney(100);
+        userRepository.save(user);
 
         DebateRoomVoteDto dto = new DebateRoomVoteDto();
         dto.setTitle(debateRoom.getTitle());
@@ -268,4 +288,56 @@ public class DebateRoomService {
         return dto;
     }
 
+    @Transactional
+    public VoteDto resultVoteInfo(Long id) {
+        DebateRoom endRoom = debateRoomRepository.findById(id).orElseThrow(() -> new BadRequestException(BadRequestType.CANNOT_FIND_DEBATE_ROOM));
+        List<DebateVote> list = debateVoteRepository.findByDebateRoomId(id);
+        VoteDto voteInfo = VoteDto.create(endRoom);
+
+        int agreeNum = 0;
+        int disagreeNum = 0;
+
+        List<User> agreeUser = new ArrayList<>();
+        List<User> disagreeUser = new ArrayList<>();
+        for (DebateVote v : list) {
+            if (v.isAgree()) {
+                agreeNum++;
+                User foundUser = userRepository.findByUserName(v.getUserName())
+                        .orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER));
+                agreeUser.add(foundUser);
+            }
+            else {
+                disagreeNum++;
+
+                User foundUser = userRepository.findByUserName(v.getUserName())
+                        .orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER));
+                disagreeUser.add(foundUser);
+            }
+        }
+        int totUserNum = agreeUser.size() + disagreeUser.size();
+        int money = endRoom.getTotalMoney() / totUserNum; // TODO: 분배를 위한 money amount를 계산하기
+        List<User> savedUsers = new ArrayList<>();
+        if (agreeNum > disagreeNum) {
+            for (User u : agreeUser) {
+                double rate = (double) agreeNum / (double) disagreeNum;
+                money += (int) (money * rate);
+                u.adjustMoney(money);
+                savedUsers.add(u);
+            }
+        }
+        else {
+            for (User u : disagreeUser) {
+                double rate = (double) disagreeNum / (double) agreeNum;
+                money += (int) (money * rate);
+                u.adjustMoney(money);
+                savedUsers.add(u);
+            }
+        }
+        // save all users at once
+        userRepository.saveAll(savedUsers);
+
+        endRoom.setStateType(StateType.CLOSE);
+        voteInfo.setState(endRoom.getStateType());
+        return voteInfo;
+    }
 }

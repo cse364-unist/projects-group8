@@ -6,10 +6,13 @@ import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
 import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
 import com.example.movinProject.domain.debateVote.domain.DebateVote;
 import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
+import com.example.movinProject.domain.movie.domain.Movie;
+import com.example.movinProject.domain.movie.repository.MovieRepository;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomDto;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
+import com.example.movinProject.main.movie.dto.MovieDto;
 import com.example.movinProject.main.user.dto.UserDto;
 import com.example.movinProject.main.user.dto.UserRegisterRequest;
 import io.micrometer.core.instrument.binder.db.MetricsDSLContext;
@@ -41,6 +44,8 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private MovieRepository movieRepository;
 
     @Transactional
     public Optional<UserDto> registerUser(UserRegisterRequest request) {
@@ -67,6 +72,14 @@ public class UserService {
         List<DebateRoom> debateRooms = debateRoomRepository.findDebateRoomsByUserName(user.getUserName());
 
         List<DebateRoomVoteDto> debateRoomVoteDtos = debateRooms.stream().map(debateRoom -> {
+            Movie movie = movieRepository.findById(debateRoom.getMovieId()).orElseThrow();
+            MovieDto movieDto = MovieDto.builder()
+                    .id(movie.getId())
+                    .name(movie.getTitle())
+                    .thumbnailUrl(movie.getThumbnailUrl())
+                    .build();
+
+
             DebateRoomVoteDto dto = new DebateRoomVoteDto();
             dto.setTitle(debateRoom.getTitle());
             dto.setTopic(debateRoom.getTopic());
@@ -77,7 +90,7 @@ public class UserService {
             dto.setAgreeJoinedUserNumber(debateRoom.getAgreeJoinedUserNumber());
             dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
             dto.setSummarize(debateRoom.getSummarize());
-
+            dto.setMovie(movieDto);
             Long debateRoomId = debateRoom.getId();
             DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, debateRoomId);
             if (debateVote != null) {

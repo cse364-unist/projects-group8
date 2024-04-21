@@ -2,10 +2,12 @@ package com.example.movinProject.domain.debateRoom.domain;
 
 import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -36,10 +38,23 @@ public class DebateRoom {
 
     private int disagreeJoinedUserNumber;
 
+    private int totalMoney;
+
     private String summarize;
+
+    public static DebateRoom init(String title, String topic, LocalDateTime startTime, Long movieId){
+        DebateRoom debateRoom = new DebateRoom();
+        debateRoom.title = title;
+        debateRoom.topic = topic;
+        debateRoom.startTime = startTime;
+        debateRoom.movieId = movieId;
+        return debateRoom;
+    }
 
     @ManyToMany(mappedBy = "joinedDebateRooms")
     private List<User> participants;
+
+    public void addTotleMoney(int money) {this.totalMoney += money;};
 
     public Long getId() {
         return id;

@@ -57,12 +57,15 @@ public class RealtimeDebateRoom {
 
     private LocalDateTime stepEndTime;
 
+    private ChatGPTService chatGPTService;
+
     // moderator summarize constant
 
 
     @Builder
-    public RealtimeDebateRoom(DebateRoom debateRoom) {
+    public RealtimeDebateRoom(DebateRoom debateRoom, ChatGPTService chatGPTService) {
         this.debateRoom = debateRoom;
+        this.chatGPTService = chatGPTService;
     }
 
     public void addClient(WebSocketSession session) {
@@ -106,11 +109,21 @@ public class RealtimeDebateRoom {
         stepEndTime = LocalDateTime.now().plusMinutes(debateSteps[currentDebateStep].duration);
         notifyStepChange();
 
-        // TODO: 사회자 메세지 전송 (With CHATGPT)
         if(currentDebateStep >= 1 && currentDebateStep <= 6) {
             notifyModeratorMessage(debateSteps[currentDebateStep].description + "을 시작합니다.");
         }else if(currentDebateStep == 7) {
-            notifyModeratorMessage("토론이 종료되었습니다.");
+            // 지피티 요약 받기
+            List<String> summarized = chatGPTService.summarizeOpinions(debateRoom.getId());
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("토론이 종료되었습니다.\n");
+            sb.append("요약 내용:\n\n");
+            sb.append("찬성 측:\n");
+            sb.append(summarized.get(AGREE) + "\n");
+            sb.append("반대 측:\n");
+            sb.append(summarized.get(DISAGREE) + "\n");
+            notifyModeratorMessage(sb.toString());
         }
 
         // TimerTask를 사용하여 다음 step으로 넘어가도록 구현

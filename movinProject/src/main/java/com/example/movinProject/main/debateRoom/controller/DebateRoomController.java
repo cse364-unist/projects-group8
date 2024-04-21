@@ -1,6 +1,7 @@
 package com.example.movinProject.main.debateRoom.controller;
 
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
 import com.example.movinProject.main.debateRoom.dto.VoteDto;
 import com.example.movinProject.main.debateRoom.service.DebateRoomService;
@@ -8,6 +9,7 @@ import com.example.movinProject.main.debateVote.dto.Vote;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,7 +29,7 @@ public class DebateRoomController {
     private final DebateRoomService debateRoomService;
 
     @GetMapping("/{movieId}")
-    public ResponseEntity<Map<String, List<DebateRoom>>> getDebateRoomsByMovieId(@RequestParam long movieId) {
+    public ResponseEntity<Map<String, List<DebateRoom>>> getDebateRoomsByMovieId(@RequestParam Long movieId) {
         Map<String, List<DebateRoom>> debateRooms = debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId);
         return ResponseEntity.ok(debateRooms);
     }
@@ -53,6 +55,13 @@ public class DebateRoomController {
     public ResponseEntity<DebateRoomVoteDto> vote(@PathVariable Long id, @RequestBody Vote vote, @AuthenticationPrincipal UserDetails userDetails) {
         DebateRoomVoteDto dto = debateRoomService.castVote(id, userDetails.getUsername(), vote.isVote());
         return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Long> create(@RequestBody DebateRoomCreateDto debateRoomCreateDto, @AuthenticationPrincipal UserDetails userDetails)
+    {
+        Long debateRoomId =  debateRoomService.create(debateRoomCreateDto);
+        return new ResponseEntity<>(debateRoomId, HttpStatus.CREATED);
     }
 
 }

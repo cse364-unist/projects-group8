@@ -20,4 +20,20 @@ public class Movie {
     private Double avgRating;
     private String thumbnailUrl;
     private String description;
+
+    public static Movie create(
+            String title,
+            String genre,
+            Double avgRating,
+            String thumbnailUrl,
+            String description
+    ){
+        Movie movie = new Movie();
+        movie.title = title;
+        movie.genre = genre;
+        movie.avgRating = avgRating;
+        movie.thumbnailUrl = thumbnailUrl;
+        movie.description = description;
+        return movie;
+    }
 }

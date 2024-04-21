@@ -17,6 +17,7 @@ import lombok.Setter;
 public class DebateRoomVoteDto {
     private boolean voted;
     private boolean agree;
+    private MovieDto movie;
     private String title;
     private String topic;
     private StateType stateType;
