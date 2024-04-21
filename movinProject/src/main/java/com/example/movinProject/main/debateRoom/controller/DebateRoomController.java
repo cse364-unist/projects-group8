@@ -76,7 +76,7 @@ public class DebateRoomController {
             }
         }
         endRoom.setStateType(StateType.End);
-        voteInfo.setState(endRoom.getState());
+        voteInfo.setState(endRoom.getStateType());
         return ResponseEntity.ok(voteInfo);
     }
 
