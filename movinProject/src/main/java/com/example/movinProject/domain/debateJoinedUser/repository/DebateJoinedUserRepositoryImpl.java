@@ -15,9 +15,9 @@ import java.util.List;
 public class DebateJoinedUserRepositoryImpl implements DebateJoinedUserRepositoryCustom{
     private final JPAQueryFactory queryFactory;
     @Override
-    public List<Long> findByDebateRoomId(Long debateRoomId) {
+    public List<String> findByDebateRoomId(Long debateRoomId) {
         QDebateJoinedUser debateJoinedUser = QDebateJoinedUser.debateJoinedUser;
-        return queryFactory.select(debateJoinedUser.userId)
+        return queryFactory.select(debateJoinedUser.userName)
                 .from(debateJoinedUser)
                 .where(debateJoinedUser.debateRoomId.eq(debateRoomId))
                 .fetch();

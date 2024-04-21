@@ -138,7 +138,7 @@ public class DebateRoomService {
 
         // 만약 모든 사용자가 입장했다면, 토론 시작
         // TODO: DebateJoinedUser Table에서 몇 명이 모여야 하는지 불러오기
-        List<Long> userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
+        List<String> userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
         if(room.getSessions().size() == userIds.size()) {
             // 토론 시작
             startDebate(room);
