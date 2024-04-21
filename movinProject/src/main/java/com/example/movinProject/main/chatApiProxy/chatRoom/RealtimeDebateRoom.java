@@ -101,6 +101,8 @@ public class RealtimeDebateRoom {
 
     private void nextStep() {
         currentDebateStep++;
+        int AGREE = 0;
+        int DISAGREE = 1;
         stepEndTime = LocalDateTime.now().plusMinutes(debateSteps[currentDebateStep].duration);
         notifyStepChange();
 
