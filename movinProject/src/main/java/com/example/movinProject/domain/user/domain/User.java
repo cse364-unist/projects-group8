@@ -62,4 +62,5 @@ public class User {
         this.money += amount;  // money 필드에 직접 접근
     }
     public void subMoney(int amount) {this.money -= amount;};
+
 }

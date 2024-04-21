@@ -18,6 +18,8 @@ import com.example.movinProject.domain.debateVote.repository.DebateVoteRepositor
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
 import com.example.movinProject.main.debateRoom.dto.VoteDto;
 
@@ -59,8 +61,8 @@ public class DebateRoomService {
     public RealtimeDebateRoom findRoomById(Long roomId) {
         return chatRooms.get(roomId);
     }
-    
-    
+
+
     @Transactional
     public Long create(DebateRoomCreateDto dto){
         DebateRoom debateRoom = DebateRoom.init(
@@ -72,10 +74,10 @@ public class DebateRoomService {
         DebateRoom savedDebateRoom = debateRoomRepository.save(debateRoom);
         return savedDebateRoom.getId();
     }
-    
+
 
     @Transactional
-    public void startDebate(RealtimeDebateRoom room) {
+    private void startDebate(RealtimeDebateRoom room) {
         room.addStepChangeListener(
                 (step, stepEndTime, realtimeDebateRoom) -> {
                     RealtimeMessageDto stepChangeMessage = new RealtimeMessageDto();
@@ -100,7 +102,7 @@ public class DebateRoomService {
                     RealtimeMessageDto moderatorMessage = new RealtimeMessageDto();
                     moderatorMessage.setMessageType(RealtimeMessageDto.MessageType.TALK);
                     moderatorMessage.setDebateRoomId(room.getDebateRoom().getId());
-                    moderatorMessage.setSenderUserId(Long.valueOf(-1));
+                    moderatorMessage.setSenderUserId(-1L);
                     moderatorMessage.setSenderUserName("사회자");
                     moderatorMessage.setMessage(message);
                     moderatorMessage.setSendTime(LocalDateTime.now());
