@@ -1,5 +1,6 @@
 package com.example.movinProject.main.chatApiProxy.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDateTime;
