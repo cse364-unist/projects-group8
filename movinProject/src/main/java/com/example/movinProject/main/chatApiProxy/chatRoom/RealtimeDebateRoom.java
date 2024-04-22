@@ -1,11 +1,13 @@
 package com.example.movinProject.main.chatApiProxy.chatRoom;
 
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.main.debateRoom.service.ChatGPTService;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -20,7 +22,7 @@ public class RealtimeDebateRoom {
         void onModeratorMessage(String message, RealtimeDebateRoom realtimeDebateRoom);
     }
 
-    private class DebateStep {
+    private static class DebateStep {
         private final int step;
         private final int duration;
         private final String description;
@@ -43,8 +45,28 @@ public class RealtimeDebateRoom {
             new DebateStep(7, 0, "토론 종료")
     };
 
+    @Getter
+    public class DebateRoomSessionInfo {
+        User user;
+        boolean isAgree;
+        WebSocketSession session;
+
+        public DebateRoomSessionInfo(User user, boolean isAgree, WebSocketSession session) {
+            this.user = user;
+            this.isAgree = isAgree;
+            this.session = session;
+        }
+
+        public DebateRoomSessionInfo(User user, boolean isAgree) {
+            this.user = user;
+            this.isAgree = isAgree;
+        }
+    }
+
     private DebateRoom debateRoom;
     private Set<WebSocketSession> sessions = new HashSet<>();
+
+    private ArrayList<DebateRoomSessionInfo> sessionInfos = new ArrayList<>();
 
     // step change listener
     private ArrayList<StepChangeListener> stepChangeListeners = new ArrayList<>();
@@ -68,12 +90,24 @@ public class RealtimeDebateRoom {
         this.chatGPTService = chatGPTService;
     }
 
-    public void addClient(WebSocketSession session) {
+    public void addClient(WebSocketSession session, User user, boolean isAgree) {
         sessions.add(session);
+        sessionInfos.add(new DebateRoomSessionInfo(user, isAgree, session));
     }
 
-    public void removeClient(WebSocketSession session) {
+    public DebateRoomSessionInfo removeClient(WebSocketSession session) {
         sessions.remove(session);
+        // pop sessionInfo
+        DebateRoomSessionInfo sessionInfo = sessionInfos.stream()
+                .filter(info -> info.session == session)
+                .findFirst()
+                .orElse(null);
+
+        if(sessionInfo == null) {
+            return null;
+        }
+
+        return new DebateRoomSessionInfo(sessionInfo.user, sessionInfo.isAgree);
     }
 
     public void addStepChangeListener(StepChangeListener listener) {
@@ -144,5 +178,12 @@ public class RealtimeDebateRoom {
         for (ModeratorMessageListener listener : moderatorMessageListeners) {
             listener.onModeratorMessage(message, this);
         }
+    }
+
+    public DebateRoomSessionInfo findDebateRoomSessionInfoBySession(WebSocketSession session) {
+        return sessionInfos.stream()
+                .filter(info -> info.session == session)
+                .findFirst()
+                .orElse(null);
     }
 }

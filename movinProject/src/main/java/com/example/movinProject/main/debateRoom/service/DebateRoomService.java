@@ -53,6 +53,9 @@ public class DebateRoomService {
 
     private final ObjectMapper objectMapper;
     private Map<Long, RealtimeDebateRoom> chatRooms;
+
+    private HashMap<WebSocketSession, Long> sessionToDebateRoomId = new HashMap<>();
+
     @PostConstruct
     private void init() {
         chatRooms = new LinkedHashMap<>();
@@ -77,7 +80,7 @@ public class DebateRoomService {
 
 
     @Transactional
-    private void startDebate(RealtimeDebateRoom room) {
+    public void startDebate(RealtimeDebateRoom room) {
         room.addStepChangeListener(
                 (step, stepEndTime, realtimeDebateRoom) -> {
                     RealtimeMessageDto stepChangeMessage = new RealtimeMessageDto();
@@ -99,14 +102,16 @@ public class DebateRoomService {
 
         room.addModeratorMessageListener(
                 ((message, realtimeDebateRoom) -> {
-                    RealtimeMessageDto moderatorMessage = new RealtimeMessageDto();
-                    moderatorMessage.setMessageType(RealtimeMessageDto.MessageType.TALK);
-                    moderatorMessage.setDebateRoomId(room.getDebateRoom().getId());
-                    moderatorMessage.setSenderUserId(-1L);
-                    moderatorMessage.setSenderUserName("사회자");
-                    moderatorMessage.setMessage(message);
-                    moderatorMessage.setSendTime(LocalDateTime.now());
+                    RealtimeMessageDto moderatorMessage = RealtimeMessageDto.builder()
+                            .messageType(RealtimeMessageDto.MessageType.TALK)
+                            .debateRoomId(room.getDebateRoom().getId())
+                            .senderUserId(-1L)
+                            .senderUserName("사회자")
+                            .message(message)
+                            .sendTime(LocalDateTime.now())
+                            .build();
                     Chat moderatorChat = Chat.createByRealtimeMessage(moderatorMessage);
+
                     // 채팅 내용 저장
                     chatRepository.save(moderatorChat);
                     realtimeDebateRoom.getSessions().parallelStream().forEach(s -> {
@@ -125,7 +130,7 @@ public class DebateRoomService {
     }
 
 
-    public void userEnter(WebSocketSession session, Long debateRoomId, Long userId, String userName, boolean isAgree){
+    public void userEnter(WebSocketSession session, Long debateRoomId, String userName){
         RealtimeDebateRoom room = findRoomById(debateRoomId);
 
         // if room is not exist, create new room
@@ -133,17 +138,30 @@ public class DebateRoomService {
             DebateRoom debateRoom = debateRoomRepository.findById(debateRoomId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 토론방입니다."));
             room = new RealtimeDebateRoom(debateRoom, chatGPTService);
             chatRooms.put(debateRoomId, room);
+            sessionToDebateRoomId.put(session, debateRoomId);
         }
 
-        RealtimeMessageDto realtimeMessage = new RealtimeMessageDto();
-        realtimeMessage.setMessageType(RealtimeMessageDto.MessageType.ENTER);
-        realtimeMessage.setDebateRoomId(debateRoomId);
-        realtimeMessage.setSenderUserId(userId);
-        realtimeMessage.setSenderUserName(userName);
-        realtimeMessage.setSenderAgree(isAgree);
-        realtimeMessage.setSendTime(LocalDateTime.now());
+        // Get User from db
+        User user = userRepository.findByUserName(
+                userName
+        ).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        room.addClient(session);
+        // Get user's agree
+        DebateJoinedUser debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(user.getUserName(), debateRoomId);
+        if(debateJoinedUser == null) {
+            throw new IllegalArgumentException("토론방에 참여하지 않은 사용자입니다.");
+        }
+        boolean isAgree = debateJoinedUser.isAgree();
+
+        RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder().
+                messageType(RealtimeMessageDto.MessageType.ENTER).
+                debateRoomId(debateRoomId).
+                senderUserId(user.getId()).
+                senderUserName(user.getUserName()).
+                isSenderAgree(isAgree).
+                sendTime(LocalDateTime.now()).
+                build();
+        room.addClient(session, user, isAgree);
 
         // 메시지 전송
         room.getSessions().parallelStream().forEach(s -> {
@@ -155,7 +173,6 @@ public class DebateRoomService {
         });
 
         // 만약 모든 사용자가 입장했다면, 토론 시작
-        // TODO: DebateJoinedUser Table에서 몇 명이 모여야 하는지 불러오기
         List<String> userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
         if(room.getSessions().size() == userIds.size()) {
             // 토론 시작
@@ -163,18 +180,39 @@ public class DebateRoomService {
         }
     }
 
-    public void userLeave(WebSocketSession session, Long debateRoomId, Long userId, String userName, boolean isAgree) {
-        RealtimeDebateRoom room = findRoomById(debateRoomId);
+    public void userLeave(WebSocketSession session) {
+        Long debateRoomId = sessionToDebateRoomId.get(session);
+        if(debateRoomId == null) {
+            throw new IllegalArgumentException("비정상적 접근입니다.");
+        }
 
-        RealtimeMessageDto realtimeMessage = new RealtimeMessageDto();
-        realtimeMessage.setMessageType(RealtimeMessageDto.MessageType.QUIT);
-        realtimeMessage.setDebateRoomId(debateRoomId);
-        realtimeMessage.setSenderUserId(userId);
-        realtimeMessage.setSenderUserName(userName);
-        realtimeMessage.setSenderAgree(isAgree);
-        realtimeMessage.setSendTime(LocalDateTime.now());
+        RealtimeDebateRoom room = findRoomById(debateRoomId);
+        if(room == null) {
+            throw new IllegalArgumentException("비정상적 접근입니다.");
+        }
+
+        RealtimeDebateRoom.DebateRoomSessionInfo sessionInfo = room.findDebateRoomSessionInfoBySession(session);
+        if(sessionInfo == null) {
+            throw new IllegalArgumentException("비정상적 접근입니다.");
+        }
+
+        RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder().
+                messageType(RealtimeMessageDto.MessageType.QUIT).
+                debateRoomId(debateRoomId).
+                senderUserId(sessionInfo.getUser().getId()).
+                senderUserName(sessionInfo.getUser().getUserName()).
+                isSenderAgree(sessionInfo.isAgree()).
+                sendTime(LocalDateTime.now()).
+                build();
 
         room.removeClient(session);
+        sessionToDebateRoomId.remove(session);
+
+        // 만약 모든 사용자가 퇴장했다면, 방 삭제
+        if(room.getSessions().isEmpty()) {
+            chatRooms.remove(debateRoomId);
+            return;
+        }
 
         // 메시지 전송
         room.getSessions().parallelStream().forEach(s -> {
@@ -185,30 +223,44 @@ public class DebateRoomService {
             }
         });
     }
-    @Transactional
-    public void chatMessageReceived(Long debateRoomId, String message, Long userId, String userName, boolean isAgree) {
-        // 채팅방에 있는 모든 사용자에게 메시지 전송
-        RealtimeDebateRoom room = findRoomById(debateRoomId);
 
-        RealtimeMessageDto realtimeMessage = new RealtimeMessageDto();
-        realtimeMessage.setMessageType(RealtimeMessageDto.MessageType.TALK);
-        realtimeMessage.setDebateRoomId(debateRoomId);
-        realtimeMessage.setSenderUserId(userId);
-        realtimeMessage.setSenderUserName(userName);
-        realtimeMessage.setMessage(message);
-        realtimeMessage.setSenderAgree(isAgree);
-        realtimeMessage.setSendTime(LocalDateTime.now());
+    @Transactional
+    public void chatMessageReceived(WebSocketSession session, String message) {
+        // 채팅방에 있는 모든 사용자에게 메시지 전송
+        // find the room that findDebateRoomSessionInfoBySession is not null
+        RealtimeDebateRoom room = findRoomById(sessionToDebateRoomId.get(session));
+        if(room == null) {
+            throw new IllegalArgumentException("오류가 발생했습니다.");
+        }
+
+        RealtimeDebateRoom.DebateRoomSessionInfo sessionInfo = room.findDebateRoomSessionInfoBySession(session);
+
+        if(sessionInfo == null) {
+            throw new IllegalArgumentException("비정상적 접근입니다.");
+        }
+
+        // TODO: DebateRoom이 시작한 상태인지 확인하고, 시작하지 않은 상태라면 메시지를 보내지 않도록 수정
+
+        RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder()
+                .messageType(RealtimeMessageDto.MessageType.TALK)
+                .debateRoomId(room.getDebateRoom().getId())
+                .senderUserId(sessionInfo.getUser().getId())
+                .senderUserName(sessionInfo.getUser().getUserName())
+                .message(message)
+                .isSenderAgree(sessionInfo.isAgree())
+                .sendTime(LocalDateTime.now())
+                .build();
 
         // 메시지 전송
-        room.getSessions().parallelStream().forEach(session -> {
+        room.getSessions().parallelStream().forEach(ss -> {
             try {
-                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));
+                ss.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));
             } catch (IOException e) {
                 log.error("메시지 전송 중 오류가 발생했습니다.", e);
             }
         });
 
-        // TODO: 채팅 내용 저장 (Chat Table에 저장)
+        // 채팅 내용 저장
         Chat createdChat = Chat.createByRealtimeMessage(realtimeMessage);
         chatRepository.save(createdChat);
     }
