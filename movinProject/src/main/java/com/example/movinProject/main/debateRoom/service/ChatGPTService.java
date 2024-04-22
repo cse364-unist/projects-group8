@@ -27,7 +27,7 @@ public class ChatGPTService {
     private final RestTemplate restTemplate;
     private final ChatRepository chatRepository;
 
-    private  ChatGPTResponse getChatGPTResponse(String prompt) {
+    public ChatGPTResponse getChatGPTResponse(String prompt) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -43,7 +43,8 @@ public class ChatGPTService {
 
         return restTemplate.postForObject(OPEN_AI_CHAT_ENDPOINT, request, ChatGPTResponse.class);
     }
-    public List<String> summarizeOpinions(Long debateRoomId){
+
+    public List<String> summarizeOpinions(Long debateRoomId) {
         // find all chats in debateRoom
         List<Chat> chats = chatRepository.findByDebateRoomId(debateRoomId);
 

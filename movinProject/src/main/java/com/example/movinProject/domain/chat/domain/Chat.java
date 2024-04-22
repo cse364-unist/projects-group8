@@ -1,6 +1,7 @@
 package com.example.movinProject.domain.chat.domain;
 
 import com.example.movinProject.domain.chat.model.ChatType;
+import com.example.movinProject.main.chat.dto.ChatCreateDto;
 import com.example.movinProject.main.chatApiProxy.RealtimeMessage;
 import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
 import jakarta.persistence.*;
@@ -37,6 +38,15 @@ public class Chat {
         chat.userId = message.getSenderUserId();
         chat.debateRoomId = message.getDebateRoomId();
         chat.userName = message.getSenderUserName();
+        return chat;
+    }
+    public static Chat init(ChatCreateDto dto){
+        Chat chat = new Chat();
+        chat.message = dto.getMessage();
+        chat.date = LocalDateTime.now();
+        chat.chatType = dto.getChatType();
+        chat.debateRoomId = dto.getDebateRoomId();
+
         return chat;
     }
 }
