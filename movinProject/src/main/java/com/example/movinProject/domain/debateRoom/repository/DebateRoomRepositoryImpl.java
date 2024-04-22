@@ -35,15 +35,4 @@ public class DebateRoomRepositoryImpl implements DebateRoomRepositoryCustom{
                 .fetch();
     }
 
-
-    @Override
-    public List<DebateRoom> findDebateRoomsByUserName(String userName) {
-        QDebateRoom qDebateRoom = QDebateRoom.debateRoom;
-        QUser qUser = QUser.user;
-        return queryFactory
-                .selectFrom(qDebateRoom)
-                .join(qDebateRoom.participants, qUser)
-                .where(qUser.userName.eq(userName))
-                .fetch();
-    }
 }

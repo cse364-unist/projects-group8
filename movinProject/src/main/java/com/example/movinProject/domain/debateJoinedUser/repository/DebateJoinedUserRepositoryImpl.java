@@ -9,7 +9,9 @@ import com.example.movinProject.domain.debateJoinedUser.domain.QDebateJoinedUser
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class DebateJoinedUserRepositoryImpl implements DebateJoinedUserRepositoryCustom{
@@ -24,13 +26,22 @@ public class DebateJoinedUserRepositoryImpl implements DebateJoinedUserRepositor
     }
 
     @Override
-    public DebateJoinedUser findByUserNameAndDebateRoomId(String username, Long debateRoomId) {
-
+    public Optional<DebateJoinedUser> findByUserNameAndDebateRoomId(String username, Long debateRoomId) {
         QDebateJoinedUser qDebateJoinedUser = QDebateJoinedUser.debateJoinedUser;
-            return queryFactory
+            return Optional.ofNullable(queryFactory
                     .selectFrom(qDebateJoinedUser)
                     .where(qDebateJoinedUser.userName.eq(username)
                             .and(qDebateJoinedUser.debateRoomId.eq(debateRoomId)))
-                    .fetchOne();
+                    .fetchOne());
     }
+
+    @Override
+    public List<Long> findIdsByUserName(String userName) {
+        QDebateJoinedUser qDebateJoinedUser = QDebateJoinedUser.debateJoinedUser;
+        return queryFactory
+                .select(qDebateJoinedUser.id)
+                .from(qDebateJoinedUser)
+                .where(qDebateJoinedUser.userName.eq(userName))
+                .fetch();
+}
 }

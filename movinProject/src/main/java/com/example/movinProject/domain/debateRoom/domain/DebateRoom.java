@@ -42,17 +42,15 @@ public class DebateRoom {
 
     private String summarize;
 
-    public static DebateRoom init(String title, String topic, LocalDateTime startTime, Long movieId){
+    public static DebateRoom init(String title, String topic, StateType stateType, LocalDateTime startTime, Long movieId){
         DebateRoom debateRoom = new DebateRoom();
         debateRoom.title = title;
         debateRoom.topic = topic;
+        debateRoom.stateType =stateType;
         debateRoom.startTime = startTime;
         debateRoom.movieId = movieId;
         return debateRoom;
     }
-
-    @ManyToMany(mappedBy = "joinedDebateRooms")
-    private List<User> participants;
 
     public void addTotleMoney(int money) {this.totalMoney += money;};
 

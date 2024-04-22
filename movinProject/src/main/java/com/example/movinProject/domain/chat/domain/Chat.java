@@ -21,6 +21,8 @@ public class Chat {
     private Long debateRoomId;
     private Long userId;
     private String userName;
+
+    @Column(columnDefinition = "NVARCHAR(10000)")
     private String message;
 
     @Enumerated(EnumType.STRING)
@@ -30,7 +32,9 @@ public class Chat {
         Chat chat = new Chat();
         chat.message = message.getMessage();
         chat.date = message.getSendTime();
-        if(message.isSenderAgree()){
+        if(message.getSenderUserId() == -1){
+            chat.chatType = ChatType.MODERATE;
+        } else if(message.isSenderAgree()){
             chat.chatType = ChatType.AGREE;
         }else{
             chat.chatType = ChatType.DISAGREE;

@@ -10,16 +10,15 @@ import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
-import com.example.movinProject.main.debateRoom.dto.DebateRoomDto;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
 import com.example.movinProject.main.movie.dto.MovieDto;
 import com.example.movinProject.main.user.dto.UserDto;
 import com.example.movinProject.main.user.dto.UserRegisterRequest;
-import io.micrometer.core.instrument.binder.db.MetricsDSLContext;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -69,7 +68,8 @@ public class UserService {
 
     public UserDto getUserDetails(String username) {
         User user = userRepository.findByUserName(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        List<DebateRoom> debateRooms = debateRoomRepository.findDebateRoomsByUserName(user.getUserName());
+        List<Long> debateRoomIds = debateJoinedUserRepository.findIdsByUserName(username);
+        List<DebateRoom> debateRooms = debateRoomRepository.findAllById(debateRoomIds);
 
         List<DebateRoomVoteDto> debateRoomVoteDtos = debateRooms.stream().map(debateRoom -> {
             Movie movie = movieRepository.findById(debateRoom.getMovieId()).orElseThrow();
@@ -94,12 +94,20 @@ public class UserService {
             Long debateRoomId = debateRoom.getId();
             DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, debateRoomId);
             if (debateVote != null) {
-                dto.setVoted(debateVote.isAgree());
+                dto.setVoted(true);
+                dto.setVoteAgree(debateVote.isAgree());
+            }else{
+                dto.setVoted(false);
+                dto.setVoteAgree(false);
             }
 
-            DebateJoinedUser debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, debateRoomId);
-            if (debateJoinedUser != null) {
-                dto.setAgree(debateJoinedUser.isAgree());
+            Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, debateRoomId);
+            if (debateJoinedUser.isPresent()) {
+                dto.setJoined(true);
+                dto.setAgree(debateJoinedUser.get().isAgree());
+            }else {
+                dto.setJoined(false);
+                dto.setAgree(false);
             }
 
             return dto;

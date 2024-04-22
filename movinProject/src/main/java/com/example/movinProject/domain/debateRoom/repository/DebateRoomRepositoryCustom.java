@@ -10,5 +10,4 @@ public interface DebateRoomRepositoryCustom {
 
     List<DebateRoom> findByMovieId(Long movieId);
 
-    List<DebateRoom> findDebateRoomsByUserName(String userName);
 }

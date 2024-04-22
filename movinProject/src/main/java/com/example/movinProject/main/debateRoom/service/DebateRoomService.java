@@ -17,9 +17,8 @@ import com.example.movinProject.domain.debateVote.domain.DebateVote;
 import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomChatDto;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
-import com.example.movinProject.domain.user.domain.User;
-import com.example.movinProject.domain.user.repository.UserRepository;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
 import com.example.movinProject.main.debateRoom.dto.VoteDto;
 
@@ -40,7 +39,7 @@ import org.springframework.web.socket.WebSocketSession;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional(readOnly = true)
+// @Transactional(readOnly = true)
 public class DebateRoomService {
 
     private final DebateRoomRepository debateRoomRepository;
@@ -71,6 +70,7 @@ public class DebateRoomService {
         DebateRoom debateRoom = DebateRoom.init(
                 dto.getTitle(),
                 dto.getTopic(),
+                StateType.OPEN,
                 dto.getStartTime(),
                 dto.getMovieId()
         );
@@ -79,8 +79,9 @@ public class DebateRoomService {
     }
 
 
-    @Transactional
+//    @Transactional
     public void startDebate(RealtimeDebateRoom room) {
+        System.out.println("토론 시작");
         room.addStepChangeListener(
                 (step, stepEndTime, realtimeDebateRoom) -> {
                     RealtimeMessageDto stepChangeMessage = new RealtimeMessageDto();
@@ -138,8 +139,9 @@ public class DebateRoomService {
             DebateRoom debateRoom = debateRoomRepository.findById(debateRoomId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 토론방입니다."));
             room = new RealtimeDebateRoom(debateRoom, chatGPTService);
             chatRooms.put(debateRoomId, room);
-            sessionToDebateRoomId.put(session, debateRoomId);
         }
+
+        sessionToDebateRoomId.put(session, debateRoomId);
 
         // Get User from db
         User user = userRepository.findByUserName(
@@ -147,11 +149,11 @@ public class DebateRoomService {
         ).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // Get user's agree
-        DebateJoinedUser debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(user.getUserName(), debateRoomId);
-        if(debateJoinedUser == null) {
+        Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(user.getUserName(), debateRoomId);
+        if(debateJoinedUser.isEmpty()) {
             throw new IllegalArgumentException("토론방에 참여하지 않은 사용자입니다.");
         }
-        boolean isAgree = debateJoinedUser.isAgree();
+        boolean isAgree = debateJoinedUser.get().isAgree();
 
         RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder().
                 messageType(RealtimeMessageDto.MessageType.ENTER).
@@ -210,6 +212,7 @@ public class DebateRoomService {
 
         // 만약 모든 사용자가 퇴장했다면, 방 삭제
         if(room.getSessions().isEmpty()) {
+            room.stopAll();
             chatRooms.remove(debateRoomId);
             return;
         }
@@ -224,7 +227,7 @@ public class DebateRoomService {
         });
     }
 
-    @Transactional
+//    @Transactional
     public void chatMessageReceived(WebSocketSession session, String message) {
         // 채팅방에 있는 모든 사용자에게 메시지 전송
         // find the room that findDebateRoomSessionInfoBySession is not null
@@ -278,11 +281,72 @@ public class DebateRoomService {
         return groupedRooms;
     }
 
-    public DebateRoomVoteDto getDebateRoomDetails(Long id, String userName) {
+    public DebateRoomChatDto getDebateRoomDetails(Long id, String userName) {
         DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);
         if (debateRoom == null) {
             return null;
         }
+
+        DebateRoomChatDto dto = new DebateRoomChatDto();
+        dto.setTitle(debateRoom.getTitle());
+        dto.setTopic(debateRoom.getTopic());
+        dto.setStateType(debateRoom.getStateType());
+        dto.setStartTime(debateRoom.getStartTime());
+        dto.setDuration(debateRoom.getDuration());
+        dto.setMaxUserNumber(debateRoom.getMaxUserNumber());
+        dto.setAgreeJoinedUserNumber(debateRoom.getAgreeJoinedUserNumber());
+        dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
+        dto.setSummarize(debateRoom.getSummarize());
+
+        DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);
+        if(debateVote != null) {
+            dto.setVoted(true);
+            dto.setVoteAgree(debateVote.isAgree());
+        }
+        else {
+            dto.setVoted(false);
+            dto.setVoteAgree(false);
+        }
+
+        Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, id);
+        if(debateJoinedUser.isPresent()){
+            dto.setJoined(true);
+            dto.setAgree(debateJoinedUser.get().isAgree());
+        }
+        else {
+            dto.setJoined(false);
+            dto.setAgree(false);
+        }
+        List<Chat> chats = chatRepository.findByDebateRoomId(id);
+
+        dto.setChats(chats);
+        return dto;
+    }
+
+    @Transactional
+    public DebateRoomVoteDto castjoin(Long id, String username, boolean agree) {
+        Optional<DebateJoinedUser> oriDebateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+        if(oriDebateJoinedUser.isPresent()) {
+            throw new RuntimeException("이미 참여한 토론입니다.");
+        }
+
+        DebateJoinedUser debateJoinedUser = DebateJoinedUser.create(
+        id, username, agree);
+
+        debateJoinedUserRepository.save(debateJoinedUser);
+
+        DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);
+        if (debateRoom == null) {
+            return null;
+        }
+        debateRoom.addTotleMoney(100);
+        debateRoomRepository.save(debateRoom);
+        User user = userRepository.findByUserName(username).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        user.subMoney(100);
+        userRepository.save(user);
 
         DebateRoomVoteDto dto = new DebateRoomVoteDto();
         dto.setTitle(debateRoom.getTitle());
@@ -295,12 +359,23 @@ public class DebateRoomService {
         dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
         dto.setSummarize(debateRoom.getSummarize());
 
-        DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);
-        dto.setVoted(debateVote.isAgree());
+        DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, id);
+        if(debateVote != null) {
+            dto.setVoted(true);
+            dto.setVoteAgree(debateVote.isAgree());
+        }
+        else {
+            dto.setVoted(false);
+            dto.setVoteAgree(false);
+        }
 
-        DebateJoinedUser debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, id);
-        dto.setAgree(debateJoinedUser.isAgree());
+
+        dto.setJoined(true);
+        dto.setAgree(agree);
+
+
         return dto;
+
     }
 
     @Transactional
@@ -334,10 +409,17 @@ public class DebateRoomService {
         dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
         dto.setSummarize(debateRoom.getSummarize());
 
-        dto.setVoted(agree);
+        dto.setVoted(true);
+        dto.setVoteAgree(agree);
 
-        DebateJoinedUser debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
-        dto.setAgree(debateJoinedUser.isAgree());
+        Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+        if(debateJoinedUser.get() != null) {
+            dto.setJoined(true);
+            dto.setAgree(debateJoinedUser.get().isAgree());
+        }else {
+            dto.setJoined(false);
+            dto.setAgree(false);
+        }
 
         return dto;
     }
@@ -394,4 +476,5 @@ public class DebateRoomService {
         voteInfo.setState(endRoom.getStateType());
         return voteInfo;
     }
+    
 }

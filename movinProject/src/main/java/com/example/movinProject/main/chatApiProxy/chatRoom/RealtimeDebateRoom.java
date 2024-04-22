@@ -81,6 +81,9 @@ public class RealtimeDebateRoom {
 
     private ChatGPTService chatGPTService;
 
+    private Timer stepTimer = null;
+
+
     // moderator summarize constant
 
 
@@ -136,11 +139,14 @@ public class RealtimeDebateRoom {
         nextStep();
     }
 
+
+    private final double factor = 20.0;
+    
     private void nextStep() {
         currentDebateStep++;
         int AGREE = 0;
         int DISAGREE = 1;
-        stepEndTime = LocalDateTime.now().plusMinutes(debateSteps[currentDebateStep].duration);
+        stepEndTime = LocalDateTime.now().plusSeconds((long) (debateSteps[currentDebateStep].duration / factor * 60));
         notifyStepChange();
 
         if(currentDebateStep >= 1 && currentDebateStep <= 6) {
@@ -166,12 +172,15 @@ public class RealtimeDebateRoom {
             return;
         }
 
-        new Timer().schedule(new TimerTask() {
+        if(stepTimer != null)
+            stepTimer.cancel();
+        stepTimer = new Timer();
+        stepTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 nextStep();
             }
-        }, (long) debateSteps[currentDebateStep].duration * 60 * 1000);
+        }, (long) ((long) debateSteps[currentDebateStep].duration * 60 * 1000 / factor));
     }
 
     private void notifyModeratorMessage(String message) {
@@ -185,5 +194,24 @@ public class RealtimeDebateRoom {
                 .filter(info -> info.session == session)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void stopAll() {
+        if(stepTimer != null)
+            stepTimer.cancel();
+
+        // close all sessions
+        for (WebSocketSession session : sessions) {
+            try {
+                session.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        sessions.clear();
+
+        // clear all sessionInfos
+        sessionInfos.clear();
     }
 }

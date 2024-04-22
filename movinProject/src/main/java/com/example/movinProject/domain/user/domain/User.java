@@ -37,14 +37,6 @@ public class User {
 
     private LocalDateTime lastAttendance;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "usertodebaterooms",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "debate_room_id")
-    )
-    private List<DebateRoom> joinedDebateRooms;
-
     public static User create(
             String userName,
             String password,

@@ -1,10 +1,12 @@
 package com.example.movinProject.main.debateRoom.controller;
 
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomChatDto;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
 import com.example.movinProject.main.debateRoom.dto.VoteDto;
 import com.example.movinProject.main.debateRoom.service.DebateRoomService;
+import com.example.movinProject.main.debateVote.dto.Joins;
 import com.example.movinProject.main.debateVote.dto.Vote;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +30,7 @@ public class DebateRoomController {
 
     private final DebateRoomService debateRoomService;
 
-    @GetMapping("/{movieId}")
+    @GetMapping("")
     public ResponseEntity<Map<String, List<DebateRoom>>> getDebateRoomsByMovieId(@RequestParam Long movieId) {
         Map<String, List<DebateRoom>> debateRooms = debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId);
         return ResponseEntity.ok(debateRooms);
@@ -43,8 +45,8 @@ public class DebateRoomController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<DebateRoomVoteDto> getDebateRoom(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        DebateRoomVoteDto dto = debateRoomService.getDebateRoomDetails(id, userDetails.getUsername());
+    public ResponseEntity<DebateRoomChatDto> getDebateRoom(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        DebateRoomChatDto dto = debateRoomService.getDebateRoomDetails(id, userDetails.getUsername());
         if (dto == null) {
             return ResponseEntity.notFound().build();
         }
@@ -54,6 +56,12 @@ public class DebateRoomController {
     @PostMapping("/{id}/vote")
     public ResponseEntity<DebateRoomVoteDto> vote(@PathVariable Long id, @RequestBody Vote vote, @AuthenticationPrincipal UserDetails userDetails) {
         DebateRoomVoteDto dto = debateRoomService.castVote(id, userDetails.getUsername(), vote.isVote());
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/{id}/join")
+    public ResponseEntity<DebateRoomVoteDto> join(@PathVariable Long id, @RequestBody Joins joins, @AuthenticationPrincipal UserDetails userDetails) {
+        DebateRoomVoteDto dto = debateRoomService.castjoin(id, userDetails.getUsername(), joins.isAgree());
         return ResponseEntity.ok(dto);
     }
 
