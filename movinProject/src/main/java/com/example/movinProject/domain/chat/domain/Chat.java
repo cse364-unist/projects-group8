@@ -46,7 +46,6 @@ public class Chat {
         chat.date = LocalDateTime.now();
         chat.chatType = dto.getChatType();
         chat.debateRoomId = dto.getDebateRoomId();
-
         return chat;
     }
 }
