@@ -4,9 +4,11 @@ import com.example.movinProject.domain.chat.model.ChatType;
 import com.example.movinProject.main.chat.dto.ChatCreateDto;
 import com.example.movinProject.main.chatApiProxy.RealtimeMessage;
 import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +29,11 @@ public class Chat {
 
     @Enumerated(EnumType.STRING)
     private ChatType chatType;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private LocalDateTime date;
+
     public static Chat createByRealtimeMessage(RealtimeMessageDto message){
         Chat chat = new Chat();
         chat.message = message.getMessage();

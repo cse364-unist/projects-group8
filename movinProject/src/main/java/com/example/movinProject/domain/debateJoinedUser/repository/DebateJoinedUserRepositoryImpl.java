@@ -17,11 +17,11 @@ import java.util.Optional;
 public class DebateJoinedUserRepositoryImpl implements DebateJoinedUserRepositoryCustom{
     private final JPAQueryFactory queryFactory;
     @Override
-    public List<String> findByDebateRoomId(Long debateRoomId) {
-        QDebateJoinedUser debateJoinedUser = QDebateJoinedUser.debateJoinedUser;
-        return queryFactory.select(debateJoinedUser.userName)
-                .from(debateJoinedUser)
-                .where(debateJoinedUser.debateRoomId.eq(debateRoomId))
+    public List<DebateJoinedUser> findByDebateRoomId(Long debateRoomId) {
+        QDebateJoinedUser qDebateJoinedUser = QDebateJoinedUser.debateJoinedUser;
+        return queryFactory
+                .selectFrom(qDebateJoinedUser)
+                .where(qDebateJoinedUser.debateRoomId.eq(debateRoomId))
                 .fetch();
     }
 

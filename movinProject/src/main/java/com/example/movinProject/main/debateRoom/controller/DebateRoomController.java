@@ -1,10 +1,7 @@
 package com.example.movinProject.main.debateRoom.controller;
 
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
-import com.example.movinProject.main.debateRoom.dto.DebateRoomChatDto;
-import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
-import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
-import com.example.movinProject.main.debateRoom.dto.VoteDto;
+import com.example.movinProject.main.debateRoom.dto.*;
 import com.example.movinProject.main.debateRoom.service.DebateRoomService;
 import com.example.movinProject.main.debateVote.dto.Joins;
 import com.example.movinProject.main.debateVote.dto.Vote;
@@ -31,8 +28,8 @@ public class DebateRoomController {
     private final DebateRoomService debateRoomService;
 
     @GetMapping("")
-    public ResponseEntity<Map<String, List<DebateRoom>>> getDebateRoomsByMovieId(@RequestParam Long movieId) {
-        Map<String, List<DebateRoom>> debateRooms = debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId);
+    public ResponseEntity<Map<String, List<DebateRoomDto>>> getDebateRoomsByMovieId(@RequestParam Long movieId) {
+        Map<String, List<DebateRoomDto>> debateRooms = debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId);
         return ResponseEntity.ok(debateRooms);
     }
 

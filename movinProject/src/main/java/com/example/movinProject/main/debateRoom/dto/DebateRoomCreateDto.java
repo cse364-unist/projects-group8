@@ -1,8 +1,10 @@
 package com.example.movinProject.main.debateRoom.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
 public class DebateRoomCreateDto {
     String title;
     String topic;
+
     LocalDateTime startTime;
+
     Long movieId;
 }

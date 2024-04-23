@@ -3,8 +3,10 @@ package com.example.movinProject.main.chatApiProxy.chatRoom;
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.main.debateRoom.service.ChatGPTService;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.lang.reflect.Array;
@@ -20,6 +22,10 @@ public class RealtimeDebateRoom {
 
     public interface ModeratorMessageListener {
         void onModeratorMessage(String message, RealtimeDebateRoom realtimeDebateRoom);
+    }
+
+    public interface SummarizeCreatedListener {
+        void onSummarizeCreated(String summarized, RealtimeDebateRoom realtimeDebateRoom);
     }
 
     private static class DebateStep {
@@ -63,6 +69,7 @@ public class RealtimeDebateRoom {
         }
     }
 
+
     private DebateRoom debateRoom;
     private Set<WebSocketSession> sessions = new HashSet<>();
 
@@ -74,9 +81,14 @@ public class RealtimeDebateRoom {
     // moderator message listener
     private ArrayList<ModeratorMessageListener> moderatorMessageListeners = new ArrayList<>();
 
+    // summarize created listener
+    private ArrayList<SummarizeCreatedListener> summarizeCreatedListeners = new ArrayList<>();
+
     // 0: 토론 시작 전, 1: 긍정측 입론 (5분), 2: 부정측 질의 및 긍정측 답변(2분), 3: 부정측 입론 (5분), 4: 긍정측 질의 및 부정측 답변(2분), 5: 긍정측 반박 (3분), 6: 부정측 반박 (3분), 7: 토론 종료
     private int currentDebateStep = 0;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private LocalDateTime stepEndTime;
 
     private ChatGPTService chatGPTService;
@@ -125,9 +137,14 @@ public class RealtimeDebateRoom {
         moderatorMessageListeners.add(listener);
     }
 
+    public void addSummarizeCreatedListener(SummarizeCreatedListener listener) {
+        summarizeCreatedListeners.add(listener);
+    }
+
     public void removeModeratorMessageListener(ModeratorMessageListener listener) {
         moderatorMessageListeners.remove(listener);
     }
+
 
     public void notifyStepChange() {
         for (StepChangeListener listener : stepChangeListeners) {
@@ -164,6 +181,12 @@ public class RealtimeDebateRoom {
             sb.append("반대 측:\n");
             sb.append(summarized.get(DISAGREE) + "\n");
             notifyModeratorMessage(sb.toString());
+
+            for (SummarizeCreatedListener listener : summarizeCreatedListeners) {
+                listener.onSummarizeCreated(
+                        "찬성 측:\n" + summarized.get(AGREE) + "\n반대 측:\n" + summarized.get(DISAGREE) + "\n"
+                        , this);
+            }
         }
 
         // TimerTask를 사용하여 다음 step으로 넘어가도록 구현

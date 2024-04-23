@@ -60,10 +60,20 @@ public class UserService {
         UserDto userDto = new UserDto();
         userDto.setId(newUser.getId());
         userDto.setName(newUser.getUserName());
-        userDto.setMoney(0);
+        userDto.setMoney(500);
         userDto.setLastAttendance(LocalDateTime.of(2024, 4, 1, 0, 0));
 
         return Optional.of(userDto);
+    }
+
+    private void setJoinedUserNumberToDTO(DebateRoomVoteDto debateRoomVoteDTO, Long debateRoomId) {
+        List<DebateJoinedUser> allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
+        debateRoomVoteDTO.setAgreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()
+        );
+        debateRoomVoteDTO.setDisagreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(j -> !j.isAgree()).count()
+        );
     }
 
     public UserDto getUserDetails(String username) {
@@ -87,8 +97,7 @@ public class UserService {
             dto.setStartTime(debateRoom.getStartTime());
             dto.setDuration(debateRoom.getDuration());
             dto.setMaxUserNumber(debateRoom.getMaxUserNumber());
-            dto.setAgreeJoinedUserNumber(debateRoom.getAgreeJoinedUserNumber());
-            dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
+            setJoinedUserNumberToDTO(dto, debateRoom.getId());
             dto.setSummarize(debateRoom.getSummarize());
             dto.setMovie(movieDto);
             Long debateRoomId = debateRoom.getId();

@@ -15,18 +15,19 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import com.example.movinProject.domain.debateVote.domain.DebateVote;
 import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
+import com.example.movinProject.domain.movie.domain.Movie;
+import com.example.movinProject.domain.movie.repository.MovieRepository;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
-import com.example.movinProject.main.debateRoom.dto.DebateRoomChatDto;
-import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
-import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
-import com.example.movinProject.main.debateRoom.dto.VoteDto;
+import com.example.movinProject.main.debateRoom.dto.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.example.movinProject.main.chatApiProxy.chatRoom.RealtimeDebateRoom;
 import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
+import com.example.movinProject.main.movie.dto.MovieDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class DebateRoomService {
     private final ChatRepository chatRepository;
     private final DebateVoteRepository debateVoteRepository;
     private final UserRepository userRepository;
+    private final MovieRepository movieRepository;
 
     private final ChatGPTService chatGPTService;
 
@@ -79,9 +81,16 @@ public class DebateRoomService {
     }
 
 
-//    @Transactional
+    //    @Transactional
     public void startDebate(RealtimeDebateRoom room) {
         System.out.println("토론 시작");
+        // 토론방 상태 변경
+        {
+            DebateRoom changedDebateRoom = room.getDebateRoom();
+            changedDebateRoom.setStateType(StateType.DISCUSS);
+            debateRoomRepository.save(changedDebateRoom);
+        }
+
         room.addStepChangeListener(
                 (step, stepEndTime, realtimeDebateRoom) -> {
                     RealtimeMessageDto stepChangeMessage = new RealtimeMessageDto();
@@ -98,6 +107,13 @@ public class DebateRoomService {
                             log.error("메시지 전송 중 오류가 발생했습니다.", e);
                         }
                     });
+
+                    if(step == 7) {
+                        // 토론방 상태 변경 (토론 종료, 투표 시작)
+                        DebateRoom debateRoom = room.getDebateRoom();
+                        debateRoom.setStateType(StateType.VOTE);
+                        debateRoomRepository.save(debateRoom);
+                    }
                 }
         );
 
@@ -124,7 +140,20 @@ public class DebateRoomService {
                     });
                 })
         );
-//        chatGPTService.summarizeOpinions(room.getDebateRoom().getId());
+
+        room.addSummarizeCreatedListener(new RealtimeDebateRoom.SummarizeCreatedListener() {
+                                             @Override
+                                             @Transactional
+                                             public void onSummarizeCreated(String summarized, RealtimeDebateRoom realtimeDebateRoom) {
+                                                 // Load debate room
+                                                 DebateRoom debateRoom = debateRoomRepository.findById(realtimeDebateRoom.getDebateRoom().getId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 토론방입니다."));
+                                                 debateRoom.setSummarize(summarized);
+                                                 // Save summarize
+                                                 debateRoomRepository.save(debateRoom);
+                                             }
+                                         }
+
+        );
 
         // 토론 시작
         room.startDebate();
@@ -175,7 +204,7 @@ public class DebateRoomService {
         });
 
         // 만약 모든 사용자가 입장했다면, 토론 시작
-        List<String> userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
+        List<DebateJoinedUser> userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
         if(room.getSessions().size() == userIds.size()) {
             // 토론 시작
             startDebate(room);
@@ -227,7 +256,7 @@ public class DebateRoomService {
         });
     }
 
-//    @Transactional
+    //    @Transactional
     public void chatMessageReceived(WebSocketSession session, String message) {
         // 채팅방에 있는 모든 사용자에게 메시지 전송
         // find the room that findDebateRoomSessionInfoBySession is not null
@@ -268,17 +297,82 @@ public class DebateRoomService {
         chatRepository.save(createdChat);
     }
 
+    // 여기 밑은 REST API
 
-    public Map<String, List<DebateRoom>> getDebateRoomsGroupedByStateByMovieId(Long movieId) {
+    public Map<String, List<DebateRoomDto>> getDebateRoomsGroupedByStateByMovieId(Long movieId) {
         List<DebateRoom> rooms = debateRoomRepository.findByMovieId(movieId);
-        Map<String, List<DebateRoom>> groupedRooms = new HashMap<>();
+        Map<String, List<DebateRoomDto>> groupedRooms = new HashMap<>();
         groupedRooms.put("openDebateRooms", rooms.stream()
                 .filter(room -> StateType.OPEN.equals(room.getStateType()))
+                .map( room ->  DebateRoomDto.builder()
+                            .id(room.getId())
+                            .title(room.getTitle())
+                            .topic(room.getTopic())
+                            .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
+                            .startTime(room.getStartTime())
+                            .duration(room.getDuration())
+                            .maxUserNumber(room.getMaxUserNumber())
+                            .build()
+                )
                 .collect(Collectors.toList()));
         groupedRooms.put("voteDebateRooms", rooms.stream()
                 .filter(room -> StateType.VOTE.equals(room.getStateType()))
+                .map( room ->  DebateRoomDto.builder()
+                            .id(room.getId())
+                            .title(room.getTitle())
+                            .topic(room.getTopic())
+                            .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
+                            .startTime(room.getStartTime())
+                            .duration(room.getDuration())
+                            .maxUserNumber(room.getMaxUserNumber())
+                            .build()
+                )
                 .collect(Collectors.toList()));
+
+
         return groupedRooms;
+    }
+
+    private void setJoinedUserNumberToDTO(DebateRoomChatDto debateRoomChatDTO, Long debateRoomId) {
+        List<DebateJoinedUser> allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
+        debateRoomChatDTO.setAgreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()
+        );
+        debateRoomChatDTO.setDisagreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(j -> !j.isAgree()).count()
+        );
+    }
+
+    private void setJoinedUserNumberToDTO(DebateRoomVoteDto debateRoomVoteDTO, Long debateRoomId) {
+        List<DebateJoinedUser> allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
+        debateRoomVoteDTO.setAgreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()
+        );
+        debateRoomVoteDTO.setDisagreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(j -> !j.isAgree()).count()
+        );
+    }
+
+    private void setJoinedUserNumberToDTO(VoteDto debateRoomVoteDTO, Long debateRoomId) {
+        List<DebateJoinedUser> allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
+        debateRoomVoteDTO.setAgreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()
+        );
+        debateRoomVoteDTO.setDisagreeJoinedUserNumber(
+                (int) allJoinedUsers.stream().filter(j -> !j.isAgree()).count()
+        );
+    }
+
+    private Optional<MovieDto> getMovieDto(Long movieId) {
+        Movie movie = movieRepository.findById(movieId).orElse(null);
+        if (movie == null) {
+            return Optional.empty();
+        }
+        return Optional.of(MovieDto.builder()
+                .id(movie.getId())
+                .name(movie.getTitle())
+                .thumbnailUrl(movie.getThumbnailUrl())
+                .build());
     }
 
     public DebateRoomChatDto getDebateRoomDetails(Long id, String userName) {
@@ -294,8 +388,11 @@ public class DebateRoomService {
         dto.setStartTime(debateRoom.getStartTime());
         dto.setDuration(debateRoom.getDuration());
         dto.setMaxUserNumber(debateRoom.getMaxUserNumber());
-        dto.setAgreeJoinedUserNumber(debateRoom.getAgreeJoinedUserNumber());
-        dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
+        dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")));
+
+        // Get joined user number
+        setJoinedUserNumberToDTO(dto, id);
+
         dto.setSummarize(debateRoom.getSummarize());
 
         DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);
@@ -355,8 +452,10 @@ public class DebateRoomService {
         dto.setStartTime(debateRoom.getStartTime());
         dto.setDuration(debateRoom.getDuration());
         dto.setMaxUserNumber(debateRoom.getMaxUserNumber());
-        dto.setAgreeJoinedUserNumber(debateRoom.getAgreeJoinedUserNumber());
-        dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
+        dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")));
+
+        setJoinedUserNumberToDTO(dto, id);
+
         dto.setSummarize(debateRoom.getSummarize());
 
         DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, id);
@@ -405,8 +504,9 @@ public class DebateRoomService {
         dto.setStartTime(debateRoom.getStartTime());
         dto.setDuration(debateRoom.getDuration());
         dto.setMaxUserNumber(debateRoom.getMaxUserNumber());
-        dto.setAgreeJoinedUserNumber(debateRoom.getAgreeJoinedUserNumber());
-        dto.setDisagreeJoinedUserNumber(debateRoom.getDisagreeJoinedUserNumber());
+        dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")));
+
+        setJoinedUserNumberToDTO(dto, id);
         dto.setSummarize(debateRoom.getSummarize());
 
         dto.setVoted(true);
@@ -427,8 +527,17 @@ public class DebateRoomService {
     @Transactional
     public VoteDto resultVoteInfo(Long id) {
         DebateRoom endRoom = debateRoomRepository.findById(id).orElseThrow(() -> new BadRequestException(BadRequestType.CANNOT_FIND_DEBATE_ROOM));
+
         List<DebateVote> list = debateVoteRepository.findByDebateRoomId(id);
-        VoteDto voteInfo = VoteDto.create(endRoom);
+        VoteDto voteInfo = VoteDto.builder()
+                .title(endRoom.getTitle())
+                .topic(endRoom.getTopic())
+                .state(endRoom.getStateType())
+                .startTime(endRoom.getStartTime())
+                .duration(endRoom.getDuration())
+                .maxUserNumber(endRoom.getMaxUserNumber())
+                .build();
+        setJoinedUserNumberToDTO(voteInfo, id);
 
         int agreeNum = 0;
         int disagreeNum = 0;
@@ -450,8 +559,27 @@ public class DebateRoomService {
                 disagreeUser.add(foundUser);
             }
         }
+
+        List<DebateJoinedUser> allDebateJoinedUser = debateJoinedUserRepository.findByDebateRoomId(id);
+
+        List<User> allUsers = allDebateJoinedUser.stream()
+                .map(j -> userRepository.findByUserName(j.getUserName()).orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER)))
+                .toList();
+        List<User> notVotedUsers = allUsers.stream()
+                .filter(u -> list.stream().noneMatch(v -> v.getUserName().equals(u.getUserName())))
+                .toList();
+        List<User> notVotedAgreeUsers = notVotedUsers.stream()
+                .filter(u -> allDebateJoinedUser.stream().anyMatch(j -> j.getUserName().equals(u.getUserName()) && j.isAgree()))
+                .toList();
+        List<User> notVotedDisagreeUsers = notVotedUsers.stream()
+                .filter(u -> allDebateJoinedUser.stream().anyMatch(j -> j.getUserName().equals(u.getUserName()) && !j.isAgree()))
+                .toList();
+
         int totalMoney = endRoom.getTotalMoney();
-        List<User> winners = agreeNum > disagreeNum ? agreeUser : disagreeUser;
+        List<User> winners = agreeNum > disagreeNum ?
+                Stream.concat(agreeUser.stream(), notVotedAgreeUsers.stream()).toList() :
+                Stream.concat(disagreeUser.stream(), notVotedDisagreeUsers.stream()).toList();
+
         int winnerCount = winners.size();
         int moneyPerUser = totalMoney / winnerCount;
 
@@ -459,8 +587,10 @@ public class DebateRoomService {
             user.adjustMoney(moneyPerUser);
         }
 
-        userRepository.saveAll(agreeUser);
-        userRepository.saveAll(disagreeUser);
+        userRepository.saveAll(winners);
+
+        endRoom.setTotalMoney(0);
+        debateRoomRepository.save(endRoom);
 
         endRoom.setStateType(StateType.CLOSE);
         voteInfo.setState(endRoom.getStateType());

@@ -3,6 +3,7 @@ package com.example.movinProject.main.debateRoom.dto;
 import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.main.movie.dto.MovieDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.Optional;
 
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @Setter
@@ -23,7 +25,11 @@ public class DebateRoomVoteDto {
     private String title;
     private String topic;
     private StateType stateType;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private LocalDateTime startTime;
+
     private int duration;
     private int maxUserNumber;
     private int agreeJoinedUserNumber;

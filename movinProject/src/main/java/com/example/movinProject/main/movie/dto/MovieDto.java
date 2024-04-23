@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class MovieDto {
-
     private Long id;
     private String thumbnailUrl;
     private String name;

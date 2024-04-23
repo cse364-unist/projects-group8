@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.List;
 
 public interface DebateJoinedUserRepositoryCustom {
-    List<String> findByDebateRoomId(Long debateRoomId);
+    List<DebateJoinedUser> findByDebateRoomId(Long debateRoomId);
     Optional<DebateJoinedUser> findByUserNameAndDebateRoomId(String username, Long debateRoomId);
     List<Long> findIdsByUserName(String username);
 }

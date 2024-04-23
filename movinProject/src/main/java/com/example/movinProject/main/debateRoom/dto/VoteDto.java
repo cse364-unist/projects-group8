@@ -3,18 +3,26 @@ package com.example.movinProject.main.debateRoom.dto;
 import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
 import com.example.movinProject.domain.debateRoom.model.StateType;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.swing.plaf.nimbus.State;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Builder
 public class VoteDto {
     private boolean vote;
     private boolean agree;
     private String title;
     private String topic;
     private StateType state;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private LocalDateTime startTime;
+
     private int duration;
     private int maxUserNumber;
     private int agreeJoinedUserNumber;
@@ -25,19 +33,7 @@ public class VoteDto {
     public boolean isVote() {
         return vote;
     }
-    public static VoteDto create(DebateRoom endRoom){
-        VoteDto newVoteDto = new VoteDto();
-        newVoteDto.title = endRoom.getTitle();
-        newVoteDto.topic = endRoom.getTopic();
-        newVoteDto.state= endRoom.getStateType();
-        newVoteDto.startTime = endRoom.getStartTime();
-        newVoteDto.duration = endRoom.getDuration();
-        newVoteDto.maxUserNumber = endRoom.getMaxUserNumber();
-        newVoteDto.agreeJoinedUserNumber = endRoom.getAgreeJoinedUserNumber();
-        newVoteDto.disagreeJoinedUserNumber = endRoom.getDisagreeJoinedUserNumber();
-        newVoteDto.summarize = endRoom.getSummarize();
-        return newVoteDto;
-    }
+
     public void setVote(boolean vote) {
         this.vote = vote;
     }

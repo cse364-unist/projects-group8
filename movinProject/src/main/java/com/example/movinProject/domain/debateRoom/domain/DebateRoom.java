@@ -3,11 +3,13 @@ package com.example.movinProject.domain.debateRoom.domain;
 import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -28,15 +30,13 @@ public class DebateRoom {
 
     private Long movieId;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Seoul")
     private LocalDateTime startTime;
 
     private int duration;
 
     private int maxUserNumber;
-
-    private int agreeJoinedUserNumber;
-
-    private int disagreeJoinedUserNumber;
 
     private int totalMoney;
 
@@ -49,6 +49,8 @@ public class DebateRoom {
         debateRoom.stateType =stateType;
         debateRoom.startTime = startTime;
         debateRoom.movieId = movieId;
+        debateRoom.duration = 20;
+        debateRoom.maxUserNumber = 10;
         return debateRoom;
     }
 
@@ -110,24 +112,19 @@ public class DebateRoom {
         this.maxUserNumber = maxUserNumber;
     }
 
-    public int getAgreeJoinedUserNumber() {
-        return agreeJoinedUserNumber;
-    }
-    public void setAgreeJoinedUserNumber(int agreeJoinedUserNumber) {
-        this.agreeJoinedUserNumber = agreeJoinedUserNumber;
-    }
-
-    public int getDisagreeJoinedUserNumber() {
-        return disagreeJoinedUserNumber;
-    }
-    public void setDisagreeJoinedUserNumber(int disagreeJoinedUserNumber) {
-        this.disagreeJoinedUserNumber = disagreeJoinedUserNumber;
-    }
 
     public String getSummarize() {
         return summarize;
     }
     public void setSummarize(String summarize) {
         this.summarize = summarize;
+    }
+
+    public void setTotalMoney(int totalMoney) {
+        this.totalMoney = totalMoney;
+    }
+
+    public int getTotalMoney() {
+        return totalMoney;
     }
 }
