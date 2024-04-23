@@ -36,4 +36,21 @@ public class Movie {
         movie.description = description;
         return movie;
     }
+    public static Movie createTest(
+            Long id,
+            String title,
+            String genre,
+            Double avgRating,
+            String thumbnailUrl,
+            String description
+    ){
+        Movie movie = new Movie();
+        movie.id = id;
+        movie.title = title;
+        movie.genre = genre;
+        movie.avgRating = avgRating;
+        movie.thumbnailUrl = thumbnailUrl;
+        movie.description = description;
+        return movie;
+    }
 }

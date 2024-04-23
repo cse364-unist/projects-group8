@@ -1,5 +1,6 @@
 package com.example.movinProject.main.movie.service;
 
+import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
 import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
 import java.util.List;
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MovieService {
     private final MovieRepository movieRepository;
+    private final DebateRoomRepository debateRoomRepository;
 
     public List<Movie> findDebateMovies() {
-        return movieRepository.findMoviesByOpenDebateRooms();
+        List<Long> openDebateRoomIds = debateRoomRepository.findMovieIdsByOpenState();
+        return movieRepository.findMoviesByOpenDebateRooms(openDebateRoomIds);
 
     }
 
