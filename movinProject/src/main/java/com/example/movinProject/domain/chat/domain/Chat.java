@@ -52,4 +52,11 @@ public class Chat {
         chat.debateRoomId = dto.getDebateRoomId();
         return chat;
     }
+
+    public static Chat cr(Long userId) {
+        Chat chat = new Chat();
+        chat.userId = userId;
+        return chat;
+    }
+
 }
