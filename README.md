@@ -17,12 +17,20 @@ our project is Movie based discussion service. Additionally, vote & game money s
 ## user API
 Firstly, user should register their ID into server and login. (swagger can help this stage)
 - **localhost:8080/users/register**\
-request : {
+request : 
+<pre>
+<code>
+{
   "userName": "string",
   "password": "string",
   "email": "string"
   }
-response : {
+</code>
+</pre>
+response : 
+<pre>
+<code>
+{
   "id": 0,
   "name": "string",
   "joinedDebateRooms": [
@@ -59,17 +67,22 @@ response : {
   "money": 0,
   "lastAttendance": "2024-04-23T07:28:33.552Z"
   }
-
+</code>
+</pre>
 - **localhost:8080/users/my**\
 request : no parameter (when already authenticated)\
-response : {
+response : 
+<pre>
+<code>
+{
   "id": 1,
   "name": "string",
   "joinedDebateRooms": [],
   "money": 0,
   "lastAttendance": null
   }
-
+</code>
+</pre>
 
 **you should authenticate by using this jwt. insert the jwt token into "Authorize" button.**
 ## debateRoom API
@@ -77,10 +90,16 @@ movie is preloaded when the server is built. (movieId = 1 or 2 is occupied by th
 
 - **localhost:8080/debateRooms/{id}/vote**\
 request body:
+<pre>
+<code>
   {
   "vote": true
-  }\
+  }
+</code>
+</pre>
 response body:
+<pre>
+<code>
   {
   "voted": true,
   "voteAgree": true,
@@ -110,12 +129,20 @@ response body:
   "date": "2024-04-23T07:40:33.545Z"
   }
   }
+</code>
+</pre>
 - **localhost:8080/debateRooms/{id}/join**\
 request body:
+<pre>
+<code>
   {
   "agree": true
-  }\
+  }
+</code>
+</pre>
 response body:
+<pre>
+<code>
   {
   "voted": true,
   "voteAgree": true,
@@ -145,9 +172,13 @@ response body:
   "date": "2024-04-23T07:42:00.469Z"
   }
   }
+</code>
+</pre>
 - **localhost:8080/debateRooms/{id}/end**\
 request parameter(path variable): existing debateRoomId\
 response body:
+<pre>
+<code>
   {
   "vote": true,
   "agree": true,
@@ -172,19 +203,27 @@ response body:
   },...
   ]
   }
+</code>
+</pre>
 - **localhost:8080/debateRooms/create**\
 request body:
+<pre>
+<code>
   {
   "title": "string",
   "topic": "string",
   "startTime": "2024-04-23T07:34:00.042Z",
   "movieId": 1
-  }\
+  }
+</code>
+</pre>
 response body : 1 (or any long number which is newly created debateRoom's id)
 
 - **localhost:8080/debateRooms**\
 request : request parameter should be existing movieId\
 response body:
+<pre>
+<code>
   {
   "additionalProp1": [
   {
@@ -235,9 +274,13 @@ response body:
   }
   ]
   }
+</code>
+</pre>
 - **localhost:8080/debateRooms/{id}**\
 request parameter(path variable) : debateRoomId\
 response body :
+<pre>
+<code>
   {
   "voted": true,
   "voteAgree": true,
@@ -269,15 +312,22 @@ response body :
   }
   ]
   }
-
+</code>
+</pre>
 ## movie API
 - **localhost:8080/movies/search**\
 request body:
+<pre>
+<code>
   {
   "keyword": "string",
   "page": 0
-  }\
+  }
+</code>
+</pre>
 response body:
+<pre>
+<code>
   {
   "additionalProp1": [
   {
@@ -301,9 +351,13 @@ response body:
   }
   ]
   }
+</code>
+</pre>
 - **localhost:8080/movies/{id}**\
 request parameter(path variable) : existing movie's id\
 response body :
+<pre>
+<code>
   {
   "id": 0,
   "title": "string",
@@ -312,9 +366,13 @@ response body :
   "thumbnailUrl": "string",
   "description": "string"
   }
+</code>
+</pre>
 - **localhost:8080/movies/mainPage**\
 request : no parameter\
 response :
+<pre>
+<code>
   {
   "additionalProp1": [
   {
@@ -347,39 +405,59 @@ response :
   }
   ]
   }
-
-
-
+</code>
+</pre>
 
 ## chat-gpt API 
 - **localhost:8080/chats/summarize**\
 request body :
+<pre>
+<code>
   {
   "debateRoomId": 0
-  }\
+  }
+</code>
+</pre>
 response body : list of string where first is agree summary & second is disagree summary
+<pre>
+<code>
   [
   "agree opinions' summary",
   "disagree opinions' summary"
   ]
+</code>
+</pre>
 
 ## chat API (just for testing)
 - **localhost:8080/chats/create**\
 request body :
+<pre>
+<code>
   {
   "debateRoomId": 0,
   "message": "string",
   "chatType": "AGREE"
-  }\
+  }
+</code>
+</pre>
 response body : 1 (just long number which is newly created chat's id)
 
 ## authentication API
 - **localhost:8080/auth/v1/login**\
 request body :
+<pre>
+<code>
   {
   "userName": "string",
   "password": "string"
-  }\
-response body: {
+  }
+</code>
+</pre>
+response body: (token is **jwt**)
+<pre>
+<code>
+{
   "token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmciLCJpYXQiOjE3MTM4NTczNjQsImV4cCI6MTcxMzg2MDk2NH0.H1rMhD4-DgQgIcKGvKutrDSd1EAtxY3r36YRfJG3l94"
-  } (token is **jwt**)\
+  } 
+</code>
+</pre>
