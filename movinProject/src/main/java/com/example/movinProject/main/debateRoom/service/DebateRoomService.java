@@ -413,7 +413,7 @@ public class DebateRoomService {
         dto.setVoteAgree(agree);
 
         Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
-        if(debateJoinedUser.get() != null) {
+        if(debateJoinedUser.isPresent()) {
             dto.setJoined(true);
             dto.setAgree(debateJoinedUser.get().isAgree());
         }else {
@@ -450,27 +450,17 @@ public class DebateRoomService {
                 disagreeUser.add(foundUser);
             }
         }
-        int totUserNum = agreeUser.size() + disagreeUser.size();
-        int money = endRoom.getTotalMoney() / totUserNum; // TODO: 분배를 위한 money amount를 계산하기
-        List<User> savedUsers = new ArrayList<>();
-        if (agreeNum > disagreeNum) {
-            for (User u : agreeUser) {
-                double rate = (double) agreeNum / (double) disagreeNum;
-                money += (int) (money * rate);
-                u.adjustMoney(money);
-                savedUsers.add(u);
-            }
+        int totalMoney = endRoom.getTotalMoney();
+        List<User> winners = agreeNum > disagreeNum ? agreeUser : disagreeUser;
+        int winnerCount = winners.size();
+        int moneyPerUser = totalMoney / winnerCount;
+
+        for (User user : winners) {
+            user.adjustMoney(moneyPerUser);
         }
-        else {
-            for (User u : disagreeUser) {
-                double rate = (double) disagreeNum / (double) agreeNum;
-                money += (int) (money * rate);
-                u.adjustMoney(money);
-                savedUsers.add(u);
-            }
-        }
-        // save all users at once
-        userRepository.saveAll(savedUsers);
+
+        userRepository.saveAll(agreeUser);
+        userRepository.saveAll(disagreeUser);
 
         endRoom.setStateType(StateType.CLOSE);
         voteInfo.setState(endRoom.getStateType());
