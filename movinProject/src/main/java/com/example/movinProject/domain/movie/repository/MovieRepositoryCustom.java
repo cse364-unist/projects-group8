@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface MovieRepositoryCustom {
 
-    List<Movie> findMoviesByOpenDebateRooms();
+    List<Movie> findMoviesByOpenDebateRooms(List<Long> openDebateRoomIds);
 
     List<Movie> findMoviesWithAverageRatingAbove(Double rating);
 

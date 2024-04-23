@@ -13,14 +13,13 @@ public class MovieRepositoryImpl implements MovieRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    private final DebateRoomRepository debateRoomRepository;
+
 
     @Override
-    public List<Movie> findMoviesByOpenDebateRooms() {
-        List<Long> openDebateRoomMovieIds = debateRoomRepository.findMovieIdsByOpenState();
+    public List<Movie> findMoviesByOpenDebateRooms(List<Long> openDebateRoomIds) {
         return queryFactory
                 .selectFrom(QMovie.movie)
-                .where(QMovie.movie.id.in(openDebateRoomMovieIds))
+                .where(QMovie.movie.id.in(openDebateRoomIds))
                 .fetch();
     }
 

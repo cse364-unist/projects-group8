@@ -54,6 +54,17 @@ public class DebateRoom {
         return debateRoom;
     }
 
+    public static DebateRoom initTest(Long id, String title, String topic, StateType stateType, LocalDateTime startTime, Long movieId){
+        DebateRoom debateRoom = new DebateRoom();
+        debateRoom.id = id;
+        debateRoom.title = title;
+        debateRoom.topic = topic;
+        debateRoom.stateType =stateType;
+        debateRoom.startTime = startTime;
+        debateRoom.movieId = movieId;
+        return debateRoom;
+    }
+
     public void addTotleMoney(int money) {this.totalMoney += money;};
 
     public Long getId() {
