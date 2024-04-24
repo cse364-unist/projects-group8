@@ -44,7 +44,24 @@ public class DebateVote {
         debateVote.date = date;
 
         return debateVote;
-    };
+    }
+
+    public static DebateVote createTest(
+            Long id,
+            Long debateRoomId,
+            String userName,
+            boolean agree,
+            LocalDateTime date
+    ) {
+        DebateVote debateVote = new DebateVote();
+        debateVote.id = id;
+        debateVote.debateRoomId = debateRoomId;
+        debateVote.userName = userName;
+        debateVote.agree = agree;
+        debateVote.date = date;
+
+        return debateVote;
+    }
 
 
     public String getUserId() {

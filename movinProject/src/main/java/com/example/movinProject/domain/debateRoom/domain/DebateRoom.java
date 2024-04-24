@@ -62,6 +62,8 @@ public class DebateRoom {
         debateRoom.stateType =stateType;
         debateRoom.startTime = startTime;
         debateRoom.movieId = movieId;
+        debateRoom.duration = 20;
+        debateRoom.maxUserNumber = 10;
         return debateRoom;
     }
 

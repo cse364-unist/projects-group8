@@ -58,6 +58,15 @@ public class Chat {
         chat.debateRoomId = dto.getDebateRoomId();
         return chat;
     }
+    public static Chat createTest(Long id, String message, ChatType chatType, LocalDateTime date, Long debateRoomId){
+        Chat chat = new Chat();
+        chat.id = id;
+        chat.message = message;
+        chat.date = date;
+        chat.chatType = chatType;
+        chat.debateRoomId = debateRoomId;
+        return chat;
+    }
 
     public static Chat cr(Long userId) {
         Chat chat = new Chat();

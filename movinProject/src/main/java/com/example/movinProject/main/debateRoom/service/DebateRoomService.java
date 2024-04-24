@@ -547,13 +547,13 @@ public class DebateRoomService {
         for (DebateVote v : list) {
             if (v.isAgree()) {
                 agreeNum++;
+
                 User foundUser = userRepository.findByUserName(v.getUserName())
                         .orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER));
                 agreeUser.add(foundUser);
             }
             else {
                 disagreeNum++;
-
                 User foundUser = userRepository.findByUserName(v.getUserName())
                         .orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER));
                 disagreeUser.add(foundUser);

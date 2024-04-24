@@ -31,7 +31,7 @@ public class ChatGPTService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + apiKey);
+        headers.set("Authorization", "Bearer " + this.apiKey);
 
         ChatGPTRequest chatGPTRequest = new ChatGPTRequest();
         chatGPTRequest.setModel("gpt-3.5-turbo");
@@ -78,4 +78,5 @@ public class ChatGPTService {
                 .getContent();
         return List.of(agreeSummary, disagreeSummary);
     }
+
 }

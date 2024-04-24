@@ -84,6 +84,7 @@ class MovieServiceTest {
         List<Movie> results = movieService.findPopularMovies(testingRating);
         for(int i = 0; i < 4; i++){
             Assertions.assertEquals(expectedMovies.get(i), results.get(i));
+
         }
     }
 

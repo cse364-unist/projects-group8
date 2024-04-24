@@ -53,6 +53,22 @@ public class User {
         user.email = email;
         return user;
     }
+    public static User createTest(
+
+            Long id,
+            String userName,
+            String password,
+            String email
+
+    ) {
+        User user = new User();
+        user.id = id;
+        user.userName = userName;
+        user.password = password;
+        user.email = email;
+        return user;
+    }
+
 
     public void adjustMoney(int amount) {
         this.money += amount;  // money 필드에 직접 접근
