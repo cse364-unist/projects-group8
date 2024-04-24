@@ -9,7 +9,6 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-
 public class ChatCreateDto {
     private Long debateRoomId;
     private String message;
