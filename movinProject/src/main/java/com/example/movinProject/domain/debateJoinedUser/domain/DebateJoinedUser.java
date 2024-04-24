@@ -27,4 +27,14 @@ public class DebateJoinedUser {
 
         return debateJoinedUser;
     }
+    public static DebateJoinedUser createTest(Long id, Long debateRoomId, String userName, boolean agree) {
+        DebateJoinedUser debateJoinedUser = new DebateJoinedUser();
+
+        debateJoinedUser.id = id;
+        debateJoinedUser.debateRoomId = debateRoomId;
+        debateJoinedUser.userName = userName;
+        debateJoinedUser.agree = agree;
+
+        return debateJoinedUser;
+    }
 }

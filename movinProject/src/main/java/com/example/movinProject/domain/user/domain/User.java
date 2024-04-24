@@ -51,6 +51,22 @@ public class User {
         user.userName = userName;
         user.password = password;
         user.email = email;
+        user.money = 500;
+        return user;
+    }
+    public static User createTest(
+            Long id,
+            String userName,
+            String password,
+            String email
+
+    ) {
+        User user = new User();
+        user.id = id;
+        user.userName = userName;
+        user.password = password;
+        user.email = email;
+        user.money = 500;
         return user;
     }
 
