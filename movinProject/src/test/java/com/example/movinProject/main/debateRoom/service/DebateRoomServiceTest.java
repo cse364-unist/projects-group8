@@ -90,6 +90,7 @@ class DebateRoomServiceTest {
 
         private DebateVote vote1;
         private DebateVote vote2;
+        private DebateVote vote3;
 
         private User user1;
         private User user2;
@@ -115,6 +116,7 @@ class DebateRoomServiceTest {
 
             vote1 = DebateVote.createTest(1L, 1L, "user1", true, now);
             vote2 = DebateVote.createTest(2L, 1L, "user2", true, now);
+            vote3 = DebateVote.createTest(3L, 1L, "user3", false, now);
 
             user1 = User.createTest(1L, "user1", "password1", "email1");
             user2 = User.createTest(2L, "user2", "password2", "email2");
@@ -254,6 +256,41 @@ class DebateRoomServiceTest {
 
             // assertion
             assertDebateRoomChatDto(resultDto, expectedDto);
+
+        }
+
+        @Test
+        void getDebateRoomDetails_null01() {
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user1";
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.empty());
+            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(vote1);
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(debateJoinedUser1));
+            when(chatRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(chat1, chat2));
+            DebateRoomChatDto resultDto = debateRoomService.getDebateRoomDetails(debateRoomId, userName);
+
+            // assertion
+             Assertions.assertEquals(resultDto, null);
+        }
+
+        @Test
+        void getDebateRoomDetails_Vote_false() {
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user1";
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(this.debateRoom1));
+            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.empty());
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(debateJoinedUser1));
+            when(chatRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(chat1, chat2));
+            DebateRoomChatDto resultDto = debateRoomService.getDebateRoomDetails(debateRoomId, userName);
+
+            // assertion
+             Assertions.assertEquals(resultDto, null);
 
         }
 
