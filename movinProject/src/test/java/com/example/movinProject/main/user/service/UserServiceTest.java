@@ -36,6 +36,8 @@ class UserServiceTest {
     @Mock
     private DebateJoinedUserRepository debateJoinedUserRepository;
 
+
+
     @Mock
     private DebateVoteRepository debateVoteRepository;
 
