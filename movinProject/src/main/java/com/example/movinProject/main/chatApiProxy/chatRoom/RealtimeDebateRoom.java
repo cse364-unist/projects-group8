@@ -40,7 +40,7 @@ public class RealtimeDebateRoom {
         }
     }
 
-    private final DebateStep[] debateSteps = {
+    private static final DebateStep[] debateSteps = {
             new DebateStep(0, 0, "토론 시작 전"),
             new DebateStep(1, 5, "긍정측 입론"),
             new DebateStep(2, 2, "부정측 질의 및 긍정측 답변"),
@@ -120,7 +120,10 @@ public class RealtimeDebateRoom {
 
         if(sessionInfo == null) {
             return null;
+        }else{
+            sessionInfos.remove(sessionInfo);
         }
+
 
         return new DebateRoomSessionInfo(sessionInfo.user, sessionInfo.isAgree);
     }
@@ -157,7 +160,7 @@ public class RealtimeDebateRoom {
     }
 
 
-    private final double factor = 20.0;
+    private double factor = 20.0;
     
     private void nextStep() {
         currentDebateStep++;
