@@ -207,14 +207,15 @@ class DebateRoomServiceTest {
         }
 
         @Test
-        void getDebateRoomsGroupedByStateByMovieIdWithExceptionOpen(){
+        void getDebateRoomsGroupedByStateByMovieIdWithExceptionOpen() {
             Long movieId = 5L;
             when(debateRoomRepository.findByMovieId(movieId)).thenReturn(List.of(openDebateRoom));
             when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));
             Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId));
         }
+
         @Test
-        void getDebateRoomsGroupedByStateByMovieIdWithExceptionVote(){
+        void getDebateRoomsGroupedByStateByMovieIdWithExceptionVote() {
             Long movieId = 7L;
             when(debateRoomRepository.findByMovieId(movieId)).thenReturn(List.of(voteDebateRoom));
             when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));
@@ -351,18 +352,18 @@ class DebateRoomServiceTest {
         }
 
         @Test
-        void castjoinExistJoinedUserException(){
+        void castjoinExistJoinedUserException() {
             String userName = "user3";
             Long debateRoomId = 1L;
             Long movieId = 1L;
             boolean agree = true;
             when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(debateJoinedUser1));
-            Assertions.assertThrows(RuntimeException.class, ()-> debateRoomService.castjoin(debateRoomId, userName, agree));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.castjoin(debateRoomId, userName, agree));
 
         }
 
         @Test
-        void castjoinDebateRoomException(){
+        void castjoinDebateRoomException() {
             String userName = "user3";
             Long debateRoomId = 1L;
             Long movieId = 1L;
@@ -375,7 +376,7 @@ class DebateRoomServiceTest {
         }
 
         @Test
-        void castjoinUserException(){
+        void castjoinUserException() {
             String userName = "user3";
             Long debateRoomId = 1L;
             Long movieId = 1L;
@@ -384,11 +385,11 @@ class DebateRoomServiceTest {
             when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));
             when(userRepository.findByUserName(userName)).thenReturn(Optional.ofNullable(null));
 
-            Assertions.assertThrows(RuntimeException.class, ()-> debateRoomService.castjoin(debateRoomId, userName, agree));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.castjoin(debateRoomId, userName, agree));
         }
 
         @Test
-        void castjoinMovieException(){
+        void castjoinMovieException() {
             String userName = "user3";
             Long debateRoomId = 1L;
             Long movieId = 1L;
@@ -398,12 +399,12 @@ class DebateRoomServiceTest {
             when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));
             when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));
 
-            Assertions.assertThrows(RuntimeException.class, ()-> debateRoomService.castjoin(debateRoomId, userName, agree));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.castjoin(debateRoomId, userName, agree));
 
         }
 
         @Test
-        void castjoinDebateVoteNull(){
+        void castjoinDebateVoteNull() {
             String userName = "user3";
             Long debateRoomId = 1L;
             Long movieId = 1L;
@@ -503,17 +504,17 @@ class DebateRoomServiceTest {
         }
 
         @Test
-        void resultVoteInfoDebateRoomException(){
+        void resultVoteInfoDebateRoomException() {
             Long debateRoomId = 1L;
             List<DebateVote> votes = List.of(vote1, vote2);
             List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
 
             when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(null));
-            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.resultVoteInfo(debateRoomId));
         }
 
         @Test
-        void resultVoteInfoDisagreeVote(){
+        void resultVoteInfoDisagreeVote() {
             Long debateRoomId = 1L;
             List<DebateVote> votes = List.of(vote1, vote3, vote4);
             List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
@@ -531,8 +532,9 @@ class DebateRoomServiceTest {
             VoteDto resultDto = debateRoomService.resultVoteInfo(debateRoomId);
             Assertions.assertEquals(resultDto.getState(), debateRoom1.getStateType());
         }
+
         @Test
-        void resultVoteInfoUserExceptionInAgree(){
+        void resultVoteInfoUserExceptionInAgree() {
             Long debateRoomId = 1L;
             List<DebateVote> votes = List.of(vote1, vote2, vote3);
             List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
@@ -544,10 +546,11 @@ class DebateRoomServiceTest {
             when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.ofNullable(null));
             when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.of(user3));
 
-            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.resultVoteInfo(debateRoomId));
         }
+
         @Test
-        void resultVoteInfoUserExceptionInDisagree(){
+        void resultVoteInfoUserExceptionInDisagree() {
             Long debateRoomId = 1L;
             List<DebateVote> votes = List.of(vote1, vote2, vote3);
             List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
@@ -559,11 +562,11 @@ class DebateRoomServiceTest {
             when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));
             when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.ofNullable(null));
 
-            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.resultVoteInfo(debateRoomId));
         }
 
         @Test
-        void resultVoteInfoJoinedUserException(){
+        void resultVoteInfoJoinedUserException() {
             Long debateRoomId = 1L;
             List<DebateVote> votes = List.of(vote1, vote2);
             List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
@@ -574,11 +577,11 @@ class DebateRoomServiceTest {
             when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));
             when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));
 
-            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.resultVoteInfo(debateRoomId));
         }
 
         @Test
-        void resultVoteInfoJoinedUserFilterBranchTest(){
+        void resultVoteInfoJoinedUserFilterBranchTest() {
             DebateVote debateVote1 = DebateVote.createTest(1L, 1L, "name1", true, LocalDateTime.now());
             DebateVote debateVote2 = DebateVote.createTest(2L, 1L, "name2", false, LocalDateTime.now());
             DebateVote debateVote3 = DebateVote.createTest(3L, 1L, "name3", true, LocalDateTime.now());
@@ -591,7 +594,6 @@ class DebateRoomServiceTest {
             User filterUser3 = User.createTest(3L, "name3", "1111", "1@ex.com");
             User juser1 = User.createTest(3L, "juser1", "1111", "1@ex.com");
             User juser2 = User.createTest(3L, "juser2", "1111", "1@ex.com");
-
 
 
             Long testId = 1L;
@@ -608,16 +610,16 @@ class DebateRoomServiceTest {
             VoteDto voteInfo = debateRoomService.resultVoteInfo(testId);
 
             //testing
-            Assertions.assertEquals(debateRoom1.getTitle(),voteInfo.getTitle());
-            Assertions.assertEquals(debateRoom1.getTopic(),voteInfo.getTopic());
-            Assertions.assertEquals(StateType.CLOSE,voteInfo.getState());
-            Assertions.assertEquals(debateRoom1.getStartTime(),voteInfo.getStartTime());
-            Assertions.assertEquals(debateRoom1.getDuration(),voteInfo.getDuration());
-            Assertions.assertEquals(debateRoom1.getMaxUserNumber(),voteInfo.getMaxUserNumber());
+            Assertions.assertEquals(debateRoom1.getTitle(), voteInfo.getTitle());
+            Assertions.assertEquals(debateRoom1.getTopic(), voteInfo.getTopic());
+            Assertions.assertEquals(StateType.CLOSE, voteInfo.getState());
+            Assertions.assertEquals(debateRoom1.getStartTime(), voteInfo.getStartTime());
+            Assertions.assertEquals(debateRoom1.getDuration(), voteInfo.getDuration());
+            Assertions.assertEquals(debateRoom1.getMaxUserNumber(), voteInfo.getMaxUserNumber());
         }
 
         @Test
-        void resultVoteInfoUserCannotFindExceptionByJoinedUserRepo(){
+        void resultVoteInfoUserCannotFindExceptionByJoinedUserRepo() {
             Long debateRoomId = 1L;
             List<DebateVote> votes = List.of(vote1, vote2);
             List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1, debateJoinedUser3);
@@ -629,27 +631,26 @@ class DebateRoomServiceTest {
             when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));
             when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.ofNullable(null));
 
-            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.resultVoteInfo(debateRoomId));
 
         }
-
 
 
     }
 
-        void assertVoteDto(VoteDto resultDto, VoteDto expectedDto) {
-            Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());
-            Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());
-            Assertions.assertEquals(resultDto.getState(), expectedDto.getState());
-            Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());
-            Assertions.assertEquals(resultDto.getStartTime(), expectedDto.getStartTime());
+    void assertVoteDto(VoteDto resultDto, VoteDto expectedDto) {
+        Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());
+        Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());
+        Assertions.assertEquals(resultDto.getState(), expectedDto.getState());
+        Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());
+        Assertions.assertEquals(resultDto.getStartTime(), expectedDto.getStartTime());
 
 
-        }
+    }
 
-        @Test
-        void create() {
-            // debateRoomRepository.save(debateRoom)
+    @Test
+    void create() {
+        // debateRoomRepository.save(debateRoom)
 //            LocalDateTime now = LocalDateTime.now();
 //            Long movieId = 1L;
 //
@@ -667,7 +668,7 @@ class DebateRoomServiceTest {
 //
 //
 //            Assertions.assertEquals(result, debateRoom.getId());
-        }
     }
+}
 
 
