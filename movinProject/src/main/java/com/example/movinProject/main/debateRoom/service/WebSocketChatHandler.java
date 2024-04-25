@@ -56,12 +56,11 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
         }
 
         if (realtimeMessage.getType().equals(RealtimeMessage.MessageType.ENTER)) {
+            // Case ENTER
             this.debateRoomService.userEnter(session, realtimeMessage.getDebateRoomId(), userName);
-        } else if (realtimeMessage.getType().equals(RealtimeMessage.MessageType.TALK)) {
+        } else{
+            // Case TALK
             this.debateRoomService.chatMessageReceived(session, realtimeMessage.getMessage());
-        } else {
-            // Unknown message type
-            log.error("Unknown message type");
         }
     }
 
