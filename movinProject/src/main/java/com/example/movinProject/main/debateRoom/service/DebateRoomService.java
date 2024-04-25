@@ -421,16 +421,12 @@ public class DebateRoomService {
 
         debateJoinedUserRepository.save(debateJoinedUser);
 
-        DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);
-        if (debateRoom == null) {
-            return null;
-        }
+        DebateRoom debateRoom = debateRoomRepository.findById(id).orElseThrow(() ->new RuntimeException("cannot find debateRoom"));
+
         debateRoom.addTotleMoney(100);
         debateRoomRepository.save(debateRoom);
-        User user = userRepository.findByUserName(username).orElse(null);
-        if (user == null) {
-            return null;
-        }
+        User user = userRepository.findByUserName(username).orElseThrow(()-> new RuntimeException("cannot find user"));
+
         user.subMoney(100);
         userRepository.save(user);
 
@@ -515,7 +511,7 @@ public class DebateRoomService {
 
     @Transactional
     public VoteDto resultVoteInfo(Long id) {
-        DebateRoom endRoom = debateRoomRepository.findById(id).orElseThrow(() -> new BadRequestException(BadRequestType.CANNOT_FIND_DEBATE_ROOM));
+        DebateRoom endRoom = debateRoomRepository.findById(id).orElseThrow(() -> new RuntimeException("cannnot find debateRoom"));
 
         List<DebateVote> list = debateVoteRepository.findByDebateRoomId(id);
         VoteDto voteInfo = VoteDto.builder()
@@ -538,13 +534,13 @@ public class DebateRoomService {
                 agreeNum++;
 
                 User foundUser = userRepository.findByUserName(v.getUserName())
-                        .orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER));
+                        .orElseThrow(()-> new RuntimeException("cannot find user"));
                 agreeUser.add(foundUser);
             }
             else {
                 disagreeNum++;
                 User foundUser = userRepository.findByUserName(v.getUserName())
-                        .orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER));
+                        .orElseThrow(()-> new RuntimeException("cannot find user"));
                 disagreeUser.add(foundUser);
             }
         }
@@ -552,7 +548,7 @@ public class DebateRoomService {
         List<DebateJoinedUser> allDebateJoinedUser = debateJoinedUserRepository.findByDebateRoomId(id);
 
         List<User> allUsers = allDebateJoinedUser.stream()
-                .map(j -> userRepository.findByUserName(j.getUserName()).orElseThrow(()-> new BadRequestException(BadRequestType.CANNOT_FIND_USER)))
+                .map(j -> userRepository.findByUserName(j.getUserName()).orElseThrow(()-> new RuntimeException("cannot find user")))
                 .toList();
         List<User> notVotedUsers = allUsers.stream()
                 .filter(u -> list.stream().noneMatch(v -> v.getUserName().equals(u.getUserName())))

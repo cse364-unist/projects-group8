@@ -1,5 +1,6 @@
 package com.example.movinProject.main.debateRoom.service;
 
+import com.example.movinProject.config.exception.BadRequestType;
 import com.example.movinProject.domain.chat.domain.Chat;
 import com.example.movinProject.domain.chat.model.ChatType;
 import com.example.movinProject.domain.chat.repository.ChatRepository;
@@ -371,16 +372,22 @@ class DebateRoomServiceTest {
         private DebateRoom debateRoom4;
         private DebateRoom debateRoom5;
         private DebateRoom debateRoom6;
+        private DebateRoom openDebateRoom;
+        private DebateRoom voteDebateRoom;
 
         private DebateVote vote1;
         private DebateVote vote2;
+        private DebateVote vote3;
+        private DebateVote vote4;
 
         private User user1;
         private User user2;
         private User user3;
+        private User user4;
 
         private DebateJoinedUser debateJoinedUser1;
         private DebateJoinedUser debateJoinedUser2;
+        private DebateJoinedUser debateJoinedUser3;
 
         private Chat chat1;
         private Chat chat2;
@@ -397,24 +404,31 @@ class DebateRoomServiceTest {
             debateRoom5 = DebateRoom.initTest(5L, "title1", "topic5", StateType.OPEN, now, 1L);
             debateRoom6 = DebateRoom.initTest(6L, "title1", "topic6", StateType.VOTE, now, 1L);
 
+            openDebateRoom = DebateRoom.initTest(7L, "title1", "topic7", StateType.OPEN, now, 5L);
+            voteDebateRoom = DebateRoom.initTest(8L, "title1", "topic8", StateType.VOTE, now, 7L);
+
+
             vote1 = DebateVote.createTest(1L, 1L, "user1", true, now);
             vote2 = DebateVote.createTest(2L, 1L, "user2", true, now);
+            vote3 = DebateVote.createTest(3L, 1L, "user3", false, now);
+            vote4 = DebateVote.createTest(4L, 1L, "user4", false, now);
 
             user1 = User.createTest(1L, "user1", "password1", "email1");
             user2 = User.createTest(2L, "user2", "password2", "email2");
 
             user3 = User.createTest(3L, "user3", "password3", "email3");
-
+            user4 = User.createTest(4L, "user4", "password4", "email4");
 
             debateJoinedUser1 = DebateJoinedUser.create(1L, "user1", true);
             debateJoinedUser2 = DebateJoinedUser.create(2L, "user2", false);
+            debateJoinedUser3 = DebateJoinedUser.create(1L, "user3", true);
 
             chat1 = Chat.createTest(1L, "message1", ChatType.AGREE, now, 1L);
             chat2 = Chat.createTest(2L, "message2", ChatType.DISAGREE, now, 1L);
         }
 
         @Test
-        void getDebateRoomsGroupedByStateByMovieId() {
+        void getDebateRoomsGroupedByStateByMovieIdWithNoException() {
             // debateRoomRepository.findByMovieId(movieId);
             // movieRepository.findById(movieId).orElse(null);
             Long movieId = 1L;
@@ -476,6 +490,22 @@ class DebateRoomServiceTest {
 
         }
 
+        @Test
+        void getDebateRoomsGroupedByStateByMovieIdWithExceptionOpen(){
+            Long movieId = 5L;
+            when(debateRoomRepository.findByMovieId(movieId)).thenReturn(List.of(openDebateRoom));
+            when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId));
+        }
+        @Test
+        void getDebateRoomsGroupedByStateByMovieIdWithExceptionVote(){
+            Long movieId = 7L;
+            when(debateRoomRepository.findByMovieId(movieId)).thenReturn(List.of(voteDebateRoom));
+            when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId));
+
+        }
+
         void assertAllFieldsInDebateRoomDto(DebateRoomDto resultDto, DebateRoomDto expectedDto) {
             // movieDto assertion
             Assertions.assertEquals(resultDto.getMovie().getId(), expectedDto.getMovie().getId());
@@ -497,7 +527,7 @@ class DebateRoomServiceTest {
         }
 
         @Test
-        void getDebateRoomDetails() {
+        void getDebateRoomDetails1() {
             // debateRoomRepository.findById(id).orElse(null);
             // debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);
             // debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, id);
@@ -537,8 +567,9 @@ class DebateRoomServiceTest {
 
             // assertion
             assertDebateRoomChatDto(resultDto, expectedDto);
-
+//            Assertions.assertThrows(BadRequestType.CANNOT_FIND_DEBATE_ROOM, debateRoomService.getDebateRoomDetails(debateRoomId, userName));
         }
+
 
         void assertDebateRoomChatDto(DebateRoomChatDto resultDto, DebateRoomChatDto expectedDto) {
             Assertions.assertEquals(resultDto.getAgreeJoinedUserNumber(), expectedDto.getAgreeJoinedUserNumber());
@@ -603,6 +634,75 @@ class DebateRoomServiceTest {
             assertDebateRoomVoteDto(resultDto, expectedDto);
         }
 
+        @Test
+        void castjoinExistJoinedUserException(){
+            String userName = "user3";
+            Long debateRoomId = 1L;
+            Long movieId = 1L;
+            boolean agree = true;
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(debateJoinedUser1));
+            Assertions.assertThrows(RuntimeException.class, ()-> debateRoomService.castjoin(debateRoomId, userName, agree));
+
+        }
+
+        @Test
+        void castjoinDebateRoomException(){
+            String userName = "user3";
+            Long debateRoomId = 1L;
+            Long movieId = 1L;
+            boolean agree = true;
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(null));
+
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.castjoin(debateRoomId, userName, agree));
+
+        }
+
+        @Test
+        void castjoinUserException(){
+            String userName = "user3";
+            Long debateRoomId = 1L;
+            Long movieId = 1L;
+            boolean agree = true;
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));
+            when(userRepository.findByUserName(userName)).thenReturn(Optional.ofNullable(null));
+
+            Assertions.assertThrows(RuntimeException.class, ()-> debateRoomService.castjoin(debateRoomId, userName, agree));
+        }
+
+        @Test
+        void castjoinMovieException(){
+            String userName = "user3";
+            Long debateRoomId = 1L;
+            Long movieId = 1L;
+            boolean agree = true;
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));
+            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));
+            when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));
+
+            Assertions.assertThrows(RuntimeException.class, ()-> debateRoomService.castjoin(debateRoomId, userName, agree));
+
+        }
+
+        @Test
+        void castjoinDebateVoteNull(){
+            String userName = "user3";
+            Long debateRoomId = 1L;
+            Long movieId = 1L;
+            boolean agree = true;
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));
+            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));
+            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(null);
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+
+            DebateRoomVoteDto resultDto = debateRoomService.castjoin(debateRoomId, userName, agree);
+            Assertions.assertFalse(resultDto.isVoted());
+            Assertions.assertFalse(resultDto.isVoteAgree());
+        }
+
         void assertDebateRoomVoteDto(DebateRoomVoteDto resultDto, DebateRoomVoteDto expectedDto) {
             Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());
             Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());
@@ -665,7 +765,7 @@ class DebateRoomServiceTest {
             List<DebateVote> votes = List.of(vote1, vote2);
             List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
 
-
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(allDebateJoinedUser);
             when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
             when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);
             when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));
@@ -685,6 +785,141 @@ class DebateRoomServiceTest {
             // assertion
             assertVoteDto(resultDto, expectedDto);
         }
+
+        @Test
+        void resultVoteInfoDebateRoomException(){
+            Long debateRoomId = 1L;
+            List<DebateVote> votes = List.of(vote1, vote2);
+            List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(null));
+            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+        }
+
+        @Test
+        void resultVoteInfoDisagreeVote(){
+            Long debateRoomId = 1L;
+            List<DebateVote> votes = List.of(vote1, vote3, vote4);
+            List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
+
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
+            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(allDebateJoinedUser);
+            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));
+            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));
+            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.of(user3));
+            when(userRepository.findByUserName(user4.getUserName())).thenReturn(Optional.of(user4));
+
+
+            VoteDto resultDto = debateRoomService.resultVoteInfo(debateRoomId);
+            Assertions.assertEquals(resultDto.getState(), debateRoom1.getStateType());
+        }
+        @Test
+        void resultVoteInfoUserExceptionInAgree(){
+            Long debateRoomId = 1L;
+            List<DebateVote> votes = List.of(vote1, vote2, vote3);
+            List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
+
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
+            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);
+            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));
+            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.ofNullable(null));
+            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.of(user3));
+
+            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+        }
+        @Test
+        void resultVoteInfoUserExceptionInDisagree(){
+            Long debateRoomId = 1L;
+            List<DebateVote> votes = List.of(vote1, vote2, vote3);
+            List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
+
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
+            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);
+            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));
+            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));
+            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.ofNullable(null));
+
+            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+        }
+
+        @Test
+        void resultVoteInfoJoinedUserException(){
+            Long debateRoomId = 1L;
+            List<DebateVote> votes = List.of(vote1, vote2);
+            List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1);
+
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(null);
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
+            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);
+            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));
+            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));
+
+            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+        }
+
+        @Test
+        void resultVoteInfoJoinedUserFilterBranchTest(){
+            DebateVote debateVote1 = DebateVote.createTest(1L, 1L, "name1", true, LocalDateTime.now());
+            DebateVote debateVote2 = DebateVote.createTest(2L, 1L, "name2", false, LocalDateTime.now());
+            DebateVote debateVote3 = DebateVote.createTest(3L, 1L, "name3", true, LocalDateTime.now());
+
+            DebateJoinedUser duser1 = DebateJoinedUser.createTest(1L, 1L, "juser1", true);
+            DebateJoinedUser duser2 = DebateJoinedUser.createTest(2L, 1L, "juser2", false);
+
+            User filterUser1 = User.createTest(1L, "name1", "1111", "1@ex.com");
+            User filterUser2 = User.createTest(2L, "name2", "1111", "1@ex.com");
+            User filterUser3 = User.createTest(3L, "name3", "1111", "1@ex.com");
+            User juser1 = User.createTest(3L, "juser1", "1111", "1@ex.com");
+            User juser2 = User.createTest(3L, "juser2", "1111", "1@ex.com");
+
+
+
+            Long testId = 1L;
+            List<DebateVote> list = List.of(debateVote1, debateVote2, debateVote3);
+            List<DebateJoinedUser> list2 = List.of(duser1, duser2);
+            when(debateRoomRepository.findById(testId)).thenReturn(Optional.of(debateRoom1));
+            when(debateVoteRepository.findByDebateRoomId(testId)).thenReturn(list);
+            when(userRepository.findByUserName("name1")).thenReturn(Optional.of(filterUser1));
+            when(userRepository.findByUserName("name2")).thenReturn(Optional.of(filterUser2));
+            when(userRepository.findByUserName("name3")).thenReturn(Optional.of(filterUser3));
+            when(userRepository.findByUserName("juser1")).thenReturn(Optional.of(juser1));
+            when(userRepository.findByUserName("juser2")).thenReturn(Optional.of(juser2));
+            when(debateJoinedUserRepository.findByDebateRoomId(testId)).thenReturn(list2);
+            VoteDto voteInfo = debateRoomService.resultVoteInfo(testId);
+
+            //testing
+            Assertions.assertEquals(debateRoom1.getTitle(),voteInfo.getTitle());
+            Assertions.assertEquals(debateRoom1.getTopic(),voteInfo.getTopic());
+            Assertions.assertEquals(StateType.CLOSE,voteInfo.getState());
+            Assertions.assertEquals(debateRoom1.getStartTime(),voteInfo.getStartTime());
+            Assertions.assertEquals(debateRoom1.getDuration(),voteInfo.getDuration());
+            Assertions.assertEquals(debateRoom1.getMaxUserNumber(),voteInfo.getMaxUserNumber());
+        }
+
+        @Test
+        void resultVoteInfoUserCannotFindExceptionByJoinedUserRepo(){
+            Long debateRoomId = 1L;
+            List<DebateVote> votes = List.of(vote1, vote2);
+            List<DebateJoinedUser> allDebateJoinedUser = List.of(debateJoinedUser1, debateJoinedUser3);
+
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(allDebateJoinedUser);
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
+            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);
+            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.ofNullable(user1));
+            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));
+            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.ofNullable(null));
+
+            Assertions.assertThrows(RuntimeException.class, ()->debateRoomService.resultVoteInfo(debateRoomId));
+
+        }
+
+
+
+    }
 
         void assertVoteDto(VoteDto resultDto, VoteDto expectedDto) {
             Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());
@@ -720,4 +955,3 @@ class DebateRoomServiceTest {
     }
 
 
-}

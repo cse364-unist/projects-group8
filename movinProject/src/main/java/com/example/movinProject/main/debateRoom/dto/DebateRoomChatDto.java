@@ -37,4 +37,14 @@ public class DebateRoomChatDto {
     private int disagreeJoinedUserNumber;
     private String summarize;
     private List<Chat> chats;
+
+    public static DebateRoomChatDto createtest(String title) {
+        DebateRoomChatDto dto = new DebateRoomChatDto();
+        dto.setTitle("tid");
+
+        return dto;
+    }
+
+
+
 }
