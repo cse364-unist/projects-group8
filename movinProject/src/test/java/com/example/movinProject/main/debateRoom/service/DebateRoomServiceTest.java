@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.mockito.AdditionalAnswers;
 
 class DebateRoomServiceTest {
     @Mock
@@ -372,6 +373,7 @@ class DebateRoomServiceTest {
         private DebateRoom debateRoom4;
         private DebateRoom debateRoom5;
         private DebateRoom debateRoom6;
+        private DebateRoom debateRoom7;
         private DebateRoom openDebateRoom;
         private DebateRoom voteDebateRoom;
 
@@ -379,6 +381,7 @@ class DebateRoomServiceTest {
         private DebateVote vote2;
         private DebateVote vote3;
         private DebateVote vote4;
+        private DebateVote vote5;
 
         private User user1;
         private User user2;
@@ -388,6 +391,7 @@ class DebateRoomServiceTest {
         private DebateJoinedUser debateJoinedUser1;
         private DebateJoinedUser debateJoinedUser2;
         private DebateJoinedUser debateJoinedUser3;
+        private DebateJoinedUser debateJoinedUser5;
 
         private Chat chat1;
         private Chat chat2;
@@ -403,6 +407,7 @@ class DebateRoomServiceTest {
             debateRoom4 = DebateRoom.initTest(4L, "title1", "topic4", StateType.VOTE, now, 1L);
             debateRoom5 = DebateRoom.initTest(5L, "title1", "topic5", StateType.OPEN, now, 1L);
             debateRoom6 = DebateRoom.initTest(6L, "title1", "topic6", StateType.VOTE, now, 1L);
+            debateRoom7 = DebateRoom.initTest(6L, "title1", "topic6", StateType.VOTE, now, null);
 
             openDebateRoom = DebateRoom.initTest(7L, "title1", "topic7", StateType.OPEN, now, 5L);
             voteDebateRoom = DebateRoom.initTest(8L, "title1", "topic8", StateType.VOTE, now, 7L);
@@ -412,6 +417,7 @@ class DebateRoomServiceTest {
             vote2 = DebateVote.createTest(2L, 1L, "user2", true, now);
             vote3 = DebateVote.createTest(3L, 1L, "user3", false, now);
             vote4 = DebateVote.createTest(4L, 1L, "user4", false, now);
+            vote5 = DebateVote.createTest(1L, 1L, "user5", false, now);
 
             user1 = User.createTest(1L, "user1", "password1", "email1");
             user2 = User.createTest(2L, "user2", "password2", "email2");
@@ -422,6 +428,7 @@ class DebateRoomServiceTest {
             debateJoinedUser1 = DebateJoinedUser.create(1L, "user1", true);
             debateJoinedUser2 = DebateJoinedUser.create(2L, "user2", false);
             debateJoinedUser3 = DebateJoinedUser.create(1L, "user3", true);
+            debateJoinedUser5 = DebateJoinedUser.create(1L, "user5", false);
 
             chat1 = Chat.createTest(1L, "message1", ChatType.AGREE, now, 1L);
             chat2 = Chat.createTest(2L, "message2", ChatType.DISAGREE, now, 1L);
@@ -572,6 +579,50 @@ class DebateRoomServiceTest {
         }
 
         @Test
+        void getDebateRoomDetails2() {
+            // debateRoomRepository.findById(id).orElse(null);
+            // debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, id);
+            // chatRepository.findByDebateRoomId(id);
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user5";
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(this.debateRoom1));
+            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(vote5);
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(debateJoinedUser5));
+            when(chatRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(chat1, chat2));
+            DebateRoomChatDto resultDto = debateRoomService.getDebateRoomDetails(debateRoomId, userName);
+            // make expectation
+            // DebateRoomChatDto expectedDto = new DebateRoomChatDto();
+            // expectedDto.setTitle(debateRoom1.getTitle());
+            // expectedDto.setTopic(debateRoom1.getTopic());
+            // expectedDto.setStateType(debateRoom1.getStateType());
+            // expectedDto.setStartTime(debateRoom1.getStartTime());
+            // expectedDto.setDuration(debateRoom1.getDuration());
+            // expectedDto.setMaxUserNumber(debateRoom1.getMaxUserNumber());
+            // expectedDto.setMovie(MovieDto.builder()
+            //         .name(movie1.getTitle())
+            //         .id(movie1.getId())
+            //         .thumbnailUrl(movie1.getThumbnailUrl())
+            //         .build());
+            // expectedDto.setAgreeJoinedUserNumber(0);
+            // expectedDto.setDisagreeJoinedUserNumber(1);
+            // expectedDto.setChats(List.of(chat1, chat2));
+            // // user1은 debateRoom1에 참여 + agree를 했음.
+            // expectedDto.setVoted(true);
+            // expectedDto.setVoteAgree(vote5.isAgree());
+
+            // expectedDto.setJoined(true);
+            // expectedDto.setAgree(debateJoinedUser5.isAgree());
+
+            // // assertion
+            // assertDebateRoomChatDto(resultDto, expectedDto);
+//            Assertions.assertThrows(BadRequestType.CANNOT_FIND_DEBATE_ROOM, debateRoomService.getDebateRoomDetails(debateRoomId, userName));
+        }
+
+        @Test
         void getDebateRoomDetails_null01() {
             Long movieId = 1L;
             Long debateRoomId = 1L;
@@ -605,26 +656,25 @@ class DebateRoomServiceTest {
             //  Assertions.assertEquals(resultDto, null);
 
         }
-        // @Test
-        // void getDebateRoomDetails_notMovie() {
-        //     Long movieId = 1L;
-        //     Long debateRoomId = 1L;
-        //     String userName = "user1";
-        //     when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
-        //     when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(this.debateRoom7));
-        //     assertThrows(RuntimeException.class, () -> {
-        //         dto.setMovie(debateRoomService.getMovieDto(debateRoom.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")));
-        //     });
-        //     when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(null);
-        //     when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.empty());
-        //     when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(debateJoinedUser1));
-        //     when(chatRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(chat1, chat2));
-        //     DebateRoomChatDto resultDto = debateRoomService.getDebateRoomDetails(debateRoomId, userName);
+        @Test
+        void getDebateRoomDetails_notMovie() {
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user1";
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(this.debateRoom7));
+            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(null);
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.empty());
+            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(debateJoinedUser1));
+            when(chatRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(chat1, chat2));
+            Assertions.assertThrows(RuntimeException.class, () -> {
+                debateRoomService.getDebateRoomDetails(debateRoomId, userName);
+            });
+            
+            // assertion
+            // Assertions.assertEquals(exception, );
 
-        //     // assertion
-        //     //  Assertions.assertEquals(resultDto, null);
-
-        // }
+        }
 
         void assertDebateRoomChatDto(DebateRoomChatDto resultDto, DebateRoomChatDto expectedDto) {
             Assertions.assertEquals(resultDto.getAgreeJoinedUserNumber(), expectedDto.getAgreeJoinedUserNumber());
@@ -812,6 +862,86 @@ class DebateRoomServiceTest {
         }
 
         @Test
+        void castVote_null01() {
+            // debateRoomRepository.findById(id).orElse(null);
+            // userRepository.findByUserName(username).orElse(null);
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user1";
+            boolean agree = true;
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.empty());
+            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            DebateRoomVoteDto resultDto = debateRoomService.castVote(debateRoomId, userName, agree);
+            // expectation
+            
+            Assertions.assertEquals(resultDto, null);
+
+        }
+
+        @Test
+        void castVote_null02() {
+            // debateRoomRepository.findById(id).orElse(null);
+            // userRepository.findByUserName(username).orElse(null);
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user1";
+            boolean agree = true;
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
+            when(userRepository.findByUserName(userName)).thenReturn(Optional.empty());
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            DebateRoomVoteDto resultDto = debateRoomService.castVote(debateRoomId, userName, agree);
+            // expectation
+            
+            Assertions.assertEquals(resultDto, null);
+
+        }
+
+        @Test
+        void castVote_notJoined() {
+            // debateRoomRepository.findById(id).orElse(null);
+            // userRepository.findByUserName(username).orElse(null);
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user1";
+            boolean agree = true;
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));
+            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.empty());
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            DebateRoomVoteDto resultDto = debateRoomService.castVote(debateRoomId, userName, agree);
+            // expectation
+
+        }
+
+        @Test
+        void castVote_notmovie() {
+            // debateRoomRepository.findById(id).orElse(null);
+            // userRepository.findByUserName(username).orElse(null);
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+            Long movieId = 1L;
+            Long debateRoomId = 1L;
+            String userName = "user1";
+            boolean agree = true;
+
+            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom7));
+            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));
+            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));
+            
+            // expectation
+            Assertions.assertThrows(RuntimeException.class, () -> debateRoomService.castVote(debateRoomId, userName, agree));
+        }
+
+        @Test
         void resultVoteInfo() {
             // debateRoomRepository.findById(id).orElseThrow(() -> new BadRequestException(BadRequestType.CANNOT_FIND_DEBATE_ROOM));
             // debateVoteRepository.findByDebateRoomId(id);
@@ -987,25 +1117,32 @@ class DebateRoomServiceTest {
     }
 
     @Test
+    void setJoinedUserNumberToDTO_Test() {
+
+    }
+    private DebateRoomRepository debateRoomRepository1;
+
+    @Test
     void create() {
-        // debateRoomRepository.save(debateRoom)
-//            LocalDateTime now = LocalDateTime.now();
-//            Long movieId = 1L;
-//
-//            DebateRoomCreateDto dto = new DebateRoomCreateDto();
-//            dto.setTitle("title1");
-//            dto.setTopic("topic1");
-//            dto.setStartTime(now);
-//            dto.setMovieId(movieId);
-//            DebateRoom debateRoom = DebateRoom.initTest(1L, dto.getTitle(), dto.getTopic(), StateType.OPEN, dto.getStartTime(), dto.getMovieId());
-//            when(debateRoomRepository.save(debateRoom)).thenReturn(debateRoom);
-//
-//            Long result = debateRoomService.create(dto);
-//
-//
-//
-//
-//            Assertions.assertEquals(result, debateRoom.getId());
+           LocalDateTime now = LocalDateTime.now();
+           Long movieId = 1L;
+
+           DebateRoomCreateDto dto = new DebateRoomCreateDto();
+           dto.setTitle("title1");
+           dto.setTopic("topic1");
+           dto.setStartTime(now);
+           dto.setMovieId(movieId);
+           DebateRoom debateRoom = DebateRoom.initTest(1L, dto.getTitle(), dto.getTopic(), StateType.OPEN, dto.getStartTime(), dto.getMovieId());
+            // debateRoomRepository.save(debateRoom);
+           Assertions.assertEquals(1L, debateRoom.getId());
+           when(debateRoomRepository.save(any(DebateRoom.class))).then(AdditionalAnswers.returnsFirstArg());
+
+           Long result = debateRoomService.create(dto);
+
+
+
+
+           Assertions.assertEquals(result, null);
     }
 }
 
