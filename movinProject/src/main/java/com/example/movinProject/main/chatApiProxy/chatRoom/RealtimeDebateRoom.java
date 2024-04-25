@@ -169,9 +169,9 @@ public class RealtimeDebateRoom {
         stepEndTime = LocalDateTime.now().plusSeconds((long) (debateSteps[currentDebateStep].duration / factor * 60));
         notifyStepChange();
 
-        if(currentDebateStep >= 1 && currentDebateStep <= 6) {
+        if(currentDebateStep < 7) {
             notifyModeratorMessage(debateSteps[currentDebateStep].description + "을 시작합니다.");
-        }else if(currentDebateStep == 7) {
+        }else {
             // 지피티 요약 받기
             List<String> summarized = chatGPTService.summarizeOpinions(debateRoom.getId());
 
