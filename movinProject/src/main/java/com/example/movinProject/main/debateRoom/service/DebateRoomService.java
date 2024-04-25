@@ -218,14 +218,7 @@ public class DebateRoomService {
         }
 
         RealtimeDebateRoom room = findRoomById(debateRoomId);
-        if(room == null) {
-            throw new IllegalArgumentException("비정상적 접근입니다.");
-        }
-
         RealtimeDebateRoom.DebateRoomSessionInfo sessionInfo = room.findDebateRoomSessionInfoBySession(session);
-        if(sessionInfo == null) {
-            throw new IllegalArgumentException("비정상적 접근입니다.");
-        }
 
         RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder().
                 messageType(RealtimeMessageDto.MessageType.QUIT).
@@ -266,10 +259,6 @@ public class DebateRoomService {
         }
 
         RealtimeDebateRoom.DebateRoomSessionInfo sessionInfo = room.findDebateRoomSessionInfoBySession(session);
-
-        if(sessionInfo == null) {
-            throw new IllegalArgumentException("비정상적 접근입니다.");
-        }
 
         // TODO: DebateRoom이 시작한 상태인지 확인하고, 시작하지 않은 상태라면 메시지를 보내지 않도록 수정
 

@@ -15,24 +15,33 @@ import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.chatApiProxy.chatRoom.RealtimeDebateRoom;
 import com.example.movinProject.main.debateRoom.dto.*;
 import com.example.movinProject.main.movie.dto.MovieDto;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class DebateRoomServiceTest {
     @Mock
@@ -47,6 +56,8 @@ class DebateRoomServiceTest {
     private UserRepository userRepository;
     @Mock
     private MovieRepository movieRepository;
+    @Mock
+    private TextMessage textMessage;
 
     @InjectMocks
     private DebateRoomService debateRoomService;
@@ -56,26 +67,300 @@ class DebateRoomServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void findRoomById() {
+    @Nested
+    class RealtimeRelatedTest {
+
+        @BeforeEach
+        void setUp() throws JsonProcessingException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+            // 데이터베이스 가상 데이터
+            // 1. User 생성
+            User user1 = User.createTest(1L, "user1", "password1", "email1");
+            User user2 = User.createTest(2L, "user2", "password2", "email2");
+            when(userRepository.findByUserName("user1")).thenReturn(Optional.of(user1));
+            when(userRepository.findByUserName("user2")).thenReturn(Optional.of(user2));
+
+            // 2. DebateRoom 생성
+            DebateRoom debateRoom1 = DebateRoom.initTest(1L, "title1", "topic1", StateType.OPEN, LocalDateTime.now(), 1L);
+            when(debateRoomRepository.findById(1L)).thenReturn(Optional.of(debateRoom1));
+
+            // 3. DebateJoinedUser 생성 (2명)
+            DebateJoinedUser debateJoinedUser1 = DebateJoinedUser.create(1L, "user1", true);
+            DebateJoinedUser debateJoinedUser2 = DebateJoinedUser.create(2L, "user2", false);
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId("user1", 1L)).thenReturn(Optional.of(debateJoinedUser1));
+            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId("user2", 1L)).thenReturn(Optional.of(debateJoinedUser2));
+            when(debateJoinedUserRepository.findByDebateRoomId(1L)).thenReturn(List.of(debateJoinedUser1, debateJoinedUser2));
+
+            // Set objectMapper to debateRoomService which is private field and objectMapper is Mocked
+            ObjectMapper virtualObjectMapper = mock(ObjectMapper.class);
+            // if writeValueAsString is called, always return "test"
+            when(virtualObjectMapper.writeValueAsString(any())).thenReturn("test");
+            ReflectionTestUtils.setField(debateRoomService, "objectMapper", virtualObjectMapper);
+
+            // call init method to debateRoomService which is private method
+            Method method = debateRoomService.getClass().getDeclaredMethod("init");
+            method.setAccessible(true);
+            method.invoke(debateRoomService);
+        }
+
+        @Test
+        void userEnter() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            // assert
+            HashMap<WebSocketSession, Long> sessionMap = (HashMap<WebSocketSession, Long>)ReflectionTestUtils.getField(debateRoomService, "sessionToDebateRoomId");
+            Assertions.assertEquals(sessionMap.size(), 2);
+        }
+
+        @Test
+        void userEnterButNotExistingRoom() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+
+            // assert throw
+            Assertions.assertThrows(IllegalArgumentException.class, () -> {
+                debateRoomService.userEnter(virtualSession1, 2L, "user1");
+            });
+        }
+
+        @Test
+        void userEnterButNotJoined() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            // Create third user
+            User user3 = User.createTest(3L, "user3", "password3", "email3");
+            when(userRepository.findByUserName("user3")).thenReturn(Optional.of(user3));
+
+            // call userEnter method with user3
+            WebSocketSession virtualSession3 = mock(WebSocketSession.class);
+
+            // assert throw
+            Assertions.assertThrows(IllegalArgumentException.class, () -> {
+                debateRoomService.userEnter(virtualSession3, 1L, "user3");
+            });
+        }
+
+        @Test
+        void userEnterButNotExistingUser() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            // call userEnter method with user3
+            WebSocketSession virtualSession3 = mock(WebSocketSession.class);
+
+            // assert throw
+            Assertions.assertThrows(IllegalArgumentException.class, () -> {
+                debateRoomService.userEnter(virtualSession3, 1L, "user3");
+            });
+        }
+
+        @Test
+        void userLeave() {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            // 유저 퇴장
+            debateRoomService.userLeave(virtualSession1);
+            debateRoomService.userLeave(virtualSession2);
+
+            // assert
+            HashMap<WebSocketSession, Long> sessionMap = (HashMap<WebSocketSession, Long>)ReflectionTestUtils.getField(debateRoomService, "sessionToDebateRoomId");
+            Assertions.assertEquals(sessionMap.size(), 0);
+        }
+
+        @Test
+        void userLeaveTwice() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+
+            // Delete debateRoom
+            when(debateRoomRepository.findById(1L)).thenReturn(Optional.ofNullable(null));
+
+            debateRoomService.userLeave(virtualSession1);
+
+            // assert throw
+            Assertions.assertThrows(IllegalArgumentException.class, () -> {
+                // 유저 퇴장
+                debateRoomService.userLeave(virtualSession1);
+            });
+        }
+
+        @Test
+        void handleErrorWhenEnterAndSendMessage() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            // throw error when sendMessage
+            Mockito.doThrow(new IOException()).when(virtualSession1).sendMessage(any(WebSocketMessage.class));
+            Mockito.doThrow(new IOException()).when(virtualSession2).sendMessage(any(WebSocketMessage.class));
+
+            // assert not throw
+            Assertions.assertDoesNotThrow(() -> {
+                debateRoomService.userEnter(virtualSession1, 1L, "user1");
+                debateRoomService.userEnter(virtualSession2, 1L, "user2");
+            });
+        }
+
+        @Test
+        void handleErrorWhenLeaveAndSendMessage() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            // throw error when sendMessage
+            Mockito.doThrow(new IOException()).when(virtualSession1).sendMessage(any(WebSocketMessage.class));
+            Mockito.doThrow(new IOException()).when(virtualSession2).sendMessage(any(WebSocketMessage.class));
+
+            // assert not throw
+            Assertions.assertDoesNotThrow(() -> {
+                debateRoomService.userLeave(virtualSession1);
+                debateRoomService.userLeave(virtualSession2);
+            });
+        }
+
+        @Test
+        void endDebateRoomByStepFinish() {
+            // mock ChatGptService
+            ChatGPTService chatGptService = mock(ChatGPTService.class);
+            ReflectionTestUtils.setField(debateRoomService, "chatGPTService", chatGptService);
+            when(chatGptService.summarizeOpinions(any())).thenReturn(
+                    List.of(new String[]{"summary1", "summary2"})
+            );
+
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+
+            RealtimeDebateRoom realtimeDebateRoom = debateRoomService.findRoomById(1L);
+            ReflectionTestUtils.setField(realtimeDebateRoom, "factor", 600000);
+
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // assert
+            Assertions.assertEquals(7, ReflectionTestUtils.getField(realtimeDebateRoom, "currentDebateStep"));
+        }
+
+        @Test
+        void errorWhenSummarize() {
+            // assert throw
+            ChatGPTService chatGptService = mock(ChatGPTService.class);
+            ReflectionTestUtils.setField(debateRoomService, "chatGPTService", chatGptService);
+            when(chatGptService.summarizeOpinions(any())).thenReturn(
+                    List.of(new String[]{"summary1", "summary2"})
+            );
+
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+
+            RealtimeDebateRoom realtimeDebateRoom = debateRoomService.findRoomById(1L);
+            ReflectionTestUtils.setField(realtimeDebateRoom, "factor", 600000);
+
+
+
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+            // DELETE DebateRoom from repository
+            when(debateRoomRepository.findById(1L)).thenReturn(Optional.ofNullable(null));
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            verify(debateRoomRepository, times(2)).save(any());
+        }
+
+        @Test
+        void userChat() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            debateRoomService.chatMessageReceived(virtualSession1, "message1");
+
+            verify(virtualSession2, times(4)).sendMessage(any(WebSocketMessage.class));
+        }
+
+        @Test
+        void userChatButInvalidSession() {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            // assert throw
+            Assertions.assertThrows(IllegalArgumentException.class, () -> {
+                debateRoomService.chatMessageReceived(mock(WebSocketSession.class), "message1");
+            });
+        }
+
+        @Test
+        void handleErrorWhenChatAndSendMessage() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+            WebSocketSession virtualSession1 = mock(WebSocketSession.class);
+            WebSocketSession virtualSession2 = mock(WebSocketSession.class);
+
+            debateRoomService.userEnter(virtualSession1, 1L, "user1");
+            debateRoomService.userEnter(virtualSession2, 1L, "user2");
+
+            // throw error when sendMessage
+            Mockito.doThrow(new IOException()).when(virtualSession1).sendMessage(any(WebSocketMessage.class));
+            Mockito.doThrow(new IOException()).when(virtualSession2).sendMessage(any(WebSocketMessage.class));
+
+            // assert not throw
+            Assertions.assertDoesNotThrow(() -> {
+                debateRoomService.chatMessageReceived(virtualSession1, "message1");
+            });
+        }
     }
 
 
-    @Test
-    void startDebate() {
-    }
 
-    @Test
-    void userEnter() {
-    }
-
-    @Test
-    void userLeave() {
-    }
-
-    @Test
-    void chatMessageReceived() {
-    }
 
     @Nested
     class RestApiTest {
@@ -140,7 +425,6 @@ class DebateRoomServiceTest {
 
             chat1 = Chat.createTest(1L, "message1", ChatType.AGREE, now, 1L);
             chat2 = Chat.createTest(2L, "message2", ChatType.DISAGREE, now, 1L);
-
         }
 
         @Test
