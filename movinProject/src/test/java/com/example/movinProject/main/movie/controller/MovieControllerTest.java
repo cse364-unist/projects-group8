@@ -26,7 +26,7 @@ class MovieControllerTest {
 
     @Test
     @DisplayName("Get main page movies test")
-    void testGetMainPageMovies() {
+    void testGetMainPageMovies(){
 
         ResponseEntity<Map<String, List<Movie>>> response = movieController.getMainPageMovies();
         Map<String, List<Movie>> movies = response.getBody();
