@@ -461,3 +461,62 @@ response body: (token is **jwt**)
   } 
 </code>
 </pre>
+
+
+# Feature2 : ChatGptModerator
+GPT moderator summarize agree opinions & disagree opinions and then notice on debateRoom.
+For each stage, moderator will collect all chats in agree & disagree side.
+At that time, GPT API is used for summarizing. 
+So feature 1 & feature 2 is related. \
+For your stateless testing, we provide simple testing REST API for testing feature 2. These API will be work on real-time debateRoom(feature1) in same way(same method called).\
+I don't explain expected response because it is explained above already.
+1. login by using : **register** & **login**
+- register
+<pre>
+<code>
+curl -X POST http://localhost:8080/users/register -H 'Content-type:application/json' -d '{"userName": "string", "password": "string", "email": "string"}'
+</code>
+</pre>
+- login
+<pre>
+<code>
+curl -X POST http://localhost:8080/auth/v1/login -H 'Content-type:application/json' -d '{"userName": "string", "password": "string"}'
+</code>
+</pre>
+After login, you should copy the jwt token and paste it into the "Authorize" button in swagger.
+![img_2.png](img_2.png) Then, you will be authenticated by server(more opportunity for requesting other API).
+2. make debateRoom by using : (movieId should be existing id)
+<pre>
+<code>
+curl -X POST http://localhost:8080/debateRooms/create -H 'Content-type:application/json' -d '{ "title": "string", "topic": "string", "startTime": "2024-04-25T16:00:02.646Z", "movieId": 1}'
+</code>
+</pre>
+and then newly created debateRoomId will be responded. You should remember this id for making chats.  
+3. make the chat by using : 
+<pre>
+<code>
+curl -X POST http://localhost:8080/chats/create -H 'Content-type:application/json' -d '{
+  "debateRoomId": 1,
+  "message": "string",
+  "chatType": "AGREE"
+}'
+</code>
+</pre>
+You should make chats at least 1 agree chat & disagree chat for testing.
+4. finally, summarize chats by using:
+<pre>
+<code>
+curl -X POST http://localhost:8080/chats/summarize -H 'Content-type:application/json' -d '{"debateRoomId": 1}'
+</code>
+</pre>
+This request will make server find all chats in specific debateRoom(id = 1) and then request twice(agree, disagree each) to GPT API by using RestTemplate to summarize chats. ("https://api.openai.com/v1/chat/completions").
+For this testing, you should insert the openai.api.key = "GPT API key"(it cannot be pushed into git).
+After this curl, you can get the list of two string : **agree summarize** & **disagree summarize** such as:
+<pre>
+<code>
+[
+"These opinions highlight the film's accurate depiction of the sinking of the Titanic, praising the meticulous recreation of",
+"The movie distorts historical facts and exaggerates the central love story between the main characters, overshadowing"
+]
+</code>
+</pre>
