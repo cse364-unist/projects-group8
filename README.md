@@ -1,10 +1,10 @@
 # Movin Project
-## features
-1. real-time **web socket chatting service** (debateRoom)
+## 1. Key Features
+1. real-time **web socket debating service** (debateRoom)
 2. **GPT moderator** who summarize opinions between agree and disagree (**need openai.api.key**)
 3. vote & game money distribution service (if agree win, people, who voted agree, will get more money)
 
-## Not features (but required for testing)
+## 2. Not Key Features, But Implemented for necessity
 1. login authentication
 2. swagger ui 
 3. web socket programming ui 
@@ -28,8 +28,8 @@ Before excute __run.sh__, please follow our steps.
 ***
 Then excute __run.sh__
 
-
-## user API
+# Not Key Feature APIs
+## 1. user API
 Firstly, user should register their ID into server and login. (swagger can help this stage)
 - **localhost:8080/users/register**\
 request : 
@@ -100,7 +100,7 @@ response :
 </pre>
 
 **you should authenticate by using this jwt. insert the jwt token into "Authorize" button.**
-## debateRoom API
+## 2. debateRoom API
 movie is preloaded when the server is built. (movieId = 1 or 2 is occupied by them)
 
 - **localhost:8080/debateRooms/{id}/vote**\
@@ -329,7 +329,7 @@ response body :
   }
 </code>
 </pre>
-## movie API
+## 3. movie API
 - **localhost:8080/movies/search**\
 request body:
 <pre>
@@ -423,7 +423,7 @@ response :
 </code>
 </pre>
 
-## chat-gpt API 
+## 4. chat-gpt API 
 - **localhost:8080/chats/summarize**\
 request body :
 <pre>
@@ -443,7 +443,7 @@ response body : list of string where first is agree summary & second is disagree
 </code>
 </pre>
 
-## chat API (just for testing)
+## 5. chat API (just for testing)
 - **localhost:8080/chats/create**\
 request body :
 <pre>
@@ -457,7 +457,7 @@ request body :
 </pre>
 response body : 1 (just long number which is newly created chat's id)
 
-## authentication API
+## 6. authentication API
 - **localhost:8080/auth/v1/login**\
 request body :
 <pre>
@@ -476,6 +476,126 @@ response body: (token is **jwt**)
   } 
 </code>
 </pre>
+
+# Feature1: Real-time debating
+I have used web socket communication to implement a feature for real-time debates. \
+Since multiple clients can connect simultaneously and must communicate according to a defined protocol, it is difficult to test this using Swagger or the command line.\
+Therefore, I created a simple front-end page to test the real-time web socket debating service. The following are instructions for running and testing the front-end web page.
+
+## 1. Download and run the test web page
+
+### Pre-requirements:
+node.js (https://nodejs.org/en/download), npm
+
+### 1-1. Downlaod the `movin-debate-tester` project 
+
+> link:
+https://drive.google.com/file/d/1-YcvnWym7dW1XXMF8ysJq0USb-TD-Dv0/view?usp=sharing
+
+### 1-2. Open the project
+```shell
+npm install
+npm start
+```
+
+### 1-3. The web page will look like: 
+
+![img_1.png](imgs/img_1.png)
+
+## 2. Run the server and call some apis for the setting
+We will register two users, and create a debateRoom for testing.
+Then, we will join two users into the debateRoom. After that, we can join into the real-time debating.
+
+First, run the server(back-end).
+Get into the swagger ui (http://localhost:8080/swagger-ui/index.html) and call the following APIs.
+
+**Note** : The database should be empty(initial) before following the steps.
+### 2-1. Register two users
+Create two users (`user1`, `user2`) by calling the following API.
+![img.png](imgs/swagger_create_user2.png)
+![img_1.png](imgs/swagger_create_user1.png)
+
+### 2-2. Login for User1
+Run /auth/v1/login API for user1. 
+![swagger_login_user1.png](imgs/swagger_login_user1.png)
+
+Then, you can get the jwt token.
+![img.png](imgs/swagger_login_jwt_user1.png)
+
+Click the "Authorize" button and paste the jwt token into the input box.
+And click the "Authorize" button.
+![img_1.png](imgs/swgger_authorize_user1.png)
+
+### 2-3. Create a debateRoom
+Call the /debateRooms/create API for creating a debateRoom.
+(**movieId is 1**)
+![swagger_create_debateroom.png](imgs/swagger_create_debateroom.png)
+
+Then, you can see the new debateRoomId in the response. **Which is `1`**.
+![swagger_create_debateroom_result.png](imgs/swagger_create_debateroom_result.png)
+
+### 2-4. Join User1 into the debateRoom 1
+Id is `1`, and agree is `true`.
+![swagger_join_user1.png](imgs/swagger_join_user1.png)
+
+### 2-5. Login for User2
+Run /auth/v1/login API for user2.
+![swagger_login_user2.png](imgs/swagger_login_user2.png)
+
+Then, you can get the jwt token.
+![swagger_login_jwt_user2.png](imgs/swagge_login_jwt_user2.png)
+
+Click the "Authorize" button and paste the jwt token into the input box.
+And click the "Authorize" button.
+![swagger_authorize_user2.png](imgs/swagger_authorize_user2.png)
+
+### 2-6. Join User2 into the debateRoom 1
+Id is `1`, and agree is `false`.
+![swagger_join_user2.png](imgs/swagger_join_user2.png)
+
+## 3. Run the front-end web page
+After setting the server, you can run the front-end web page.
+Then, you can see the real-time debating page.
+
+### 3-1. Run the front-end web page
+Run the front-end web page by using the following command.
+```shell
+npm start
+```
+
+### 3-2. Open the web page
+Open the web page by using the following URL.
+```
+http://localhost:3000
+```
+
+### 3-3. Join the debateRoom
+Set the `ws path` to `ws://localhost:8080/ws/chat` (default value).
+Set the `debateRoomId` to `1` (which is created above).
+
+And set Client1 name to `user1` and password to `user1`.
+And click the `로그인`(login) button of Client1.
+
+And set Client2 name to `user2` and password to `user2`.
+And click the `로그인`(login) button of Client2.
+
+Then, you can see the real-time debating page.
+
+![img.png](imgs/realtime_chatting.png)
+
+### 3-4. Debating
+Once every user is participated in the debateRoom, the debate will be automatically started.
+In the above case, two users are joined in the debateRoom, and the debate will be started.
+
+The debate will automatically change step by step. (agree -> disagree -> agree -> disagree -> ...)
+After the debate is finished, the AI moderator will summarize the debate.
+
+**Note:** There is a bug in the front-end page. There is count down timer, and you can ignore the prefix '540:' in the timer.
+
+If you enter the chat, the chat will be sent to the server, and the server will broadcast the chat to all users in the debateRoom.
+
+The two side are the distinct web socket channels, so this is the demonstration of real-time chatting.
+
 
 
 # Feature2 : ChatGptModerator
@@ -499,7 +619,7 @@ curl -X POST http://localhost:8080/auth/v1/login -H 'Content-type:application/js
 </code>
 </pre>
 After login, you should copy the jwt token and paste it into the "Authorize" button in swagger.
-![img_2.png](img_2.png) Then, you will be authenticated by server(more opportunity for requesting other API).
+![img_2.png](imgs/img_2.png) Then, you will be authenticated by server(more opportunity for requesting other API).
 2. make debateRoom by using : (movieId should be existing id)
 <pre>
 <code>
