@@ -45,15 +45,15 @@ class MovieControllerTest {
     @DisplayName("Get movie by ID test")
     void testGetMovieById() {
 
-        Movie movie1 = Movie.createTest(1L,"title","genre", 4.2, "thumb", "des");
+        Movie movie1 = Movie.create("title","genre", 4.2, "thumb", "des");
 
-        movieRepository.save(movie1);
+        Movie createdMovie = movieRepository.save(movie1);
 
-        ResponseEntity<Movie> response = movieController.getMovieById(1L);
+        ResponseEntity<Movie> response = movieController.getMovieById(createdMovie.getId());
         Movie movie = response.getBody();
 
         assertNotNull(movie, "The movie should not be null");
-        assertEquals(1L, movie.getId(), "The movie ID should match the request");
+        assertEquals(createdMovie.getId(), movie.getId(), "The movie ID should match the request");
     }
 
     @Test

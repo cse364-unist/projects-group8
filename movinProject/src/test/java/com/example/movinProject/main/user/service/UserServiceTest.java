@@ -79,6 +79,25 @@ class UserServiceTest {
             assertEquals(request.getUserName(), result.get().getName());
     }
 
+    void registerUser2() {
+        UserRegisterRequest request =UserRegisterRequest.create("newUser", "password123", "user@example.com");
+        when(userRepository.existsByUserName(request.getUserName())).thenReturn(false);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+
+        User user = User.create(request.getUserName(),
+                "encodedPassword",
+                request.getEmail());
+
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        // Act
+        Optional<UserDto> result = userService.registerUser(request);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(request.getUserName(), result.get().getName());
+    }
+
     @Test
     void getUserDetailsWhenUserExists() {
         // Arrange

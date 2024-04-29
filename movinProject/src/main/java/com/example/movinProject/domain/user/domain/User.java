@@ -69,6 +69,20 @@ public class User {
         return user;
     }
 
+    public static User createTi(
+            String userName,
+            String password,
+            String email,
+            int money
+
+    ) {
+        User user = new User();
+        user.userName = userName;
+        user.password = password;
+        user.email = email;
+        user.money = money;
+        return user;
+    }
 
     public void adjustMoney(int amount) {
         this.money += amount;  // money 필드에 직접 접근

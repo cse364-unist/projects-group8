@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.socket.TextMessage;
@@ -594,6 +595,8 @@ class DebateRoomServiceTest {
             when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(debateJoinedUser5));
             when(chatRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(chat1, chat2));
             DebateRoomChatDto resultDto = debateRoomService.getDebateRoomDetails(debateRoomId, userName);
+            // assertion
+            Assertions.assertEquals(resultDto.getMovie().getId(), 1L);
             // make expectation
             // DebateRoomChatDto expectedDto = new DebateRoomChatDto();
             // expectedDto.setTitle(debateRoom1.getTitle());
@@ -653,7 +656,7 @@ class DebateRoomServiceTest {
             DebateRoomChatDto resultDto = debateRoomService.getDebateRoomDetails(debateRoomId, userName);
 
             // assertion
-            //  Assertions.assertEquals(resultDto, null);
+              Assertions.assertEquals(resultDto.getMovie().getId(), 1L);
 
         }
         @Test
@@ -1116,11 +1119,6 @@ class DebateRoomServiceTest {
 
     }
 
-    @Test
-    void setJoinedUserNumberToDTO_Test() {
-
-    }
-    private DebateRoomRepository debateRoomRepository1;
 
     @Test
     void create() {
@@ -1135,11 +1133,32 @@ class DebateRoomServiceTest {
            DebateRoom debateRoom = DebateRoom.initTest(1L, dto.getTitle(), dto.getTopic(), StateType.OPEN, dto.getStartTime(), dto.getMovieId());
             // debateRoomRepository.save(debateRoom);
            Assertions.assertEquals(1L, debateRoom.getId());
-           when(debateRoomRepository.save(any(DebateRoom.class))).then(AdditionalAnswers.returnsFirstArg());
+           when(debateRoomRepository.save(any())).thenReturn(debateRoom);
 
            Long result = debateRoomService.create(dto);
 
            assertEquals(1L, result);
+    }
+
+    @Test
+    void create1() {
+        LocalDateTime now = LocalDateTime.now();
+        Long movieId = 2L;
+        Long debateRoomId = 2L;
+
+        DebateRoomCreateDto dto = new DebateRoomCreateDto();
+        dto.setTitle("title2");
+        dto.setTopic("topic2");
+        dto.setStartTime(now);
+        dto.setMovieId(movieId);
+        DebateRoom debateRoom = DebateRoom.initTest(debateRoomId, dto.getTitle(), dto.getTopic(), StateType.OPEN, dto.getStartTime(), dto.getMovieId());
+        // debateRoomRepository.save(debateRoom);
+        Assertions.assertEquals(debateRoomId, debateRoom.getId());
+        when(debateRoomRepository.save(any())).thenReturn(debateRoom);
+
+        Long result = debateRoomService.create(dto);
+
+        assertEquals(debateRoomId, result);
     }
 }
 

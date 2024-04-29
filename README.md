@@ -170,7 +170,7 @@ So feature 1 & feature 2 is related. \
 For your stateless testing, we provide simple testing REST API for testing feature 2. These API will be work on real-time debateRoom(feature1) in same way(same method called).\
 I don't explain expected response because it is explained above already.
 
-1. login by using : **register** & **login**
+## 1. login by using : **register** & **login**
 - register
 <pre>
 <code>
@@ -186,7 +186,7 @@ curl -X POST http://localhost:8080/auth/v1/login -H 'Content-type:application/js
 After login, you should copy the jwt token and paste it into the "Authorize" button in swagger.
 ![img_2.png](imgs/img_2.png) Then, you will be authenticated by server(more opportunity for requesting other API).
 
-2. make debateRoom by using : (movieId should be existing id)
+## 2. make debateRoom by using : (movieId should be existing id)
 <pre>
 <code>
 curl -X POST http://localhost:8080/debateRooms/create -H 'Content-type:application/json' -d '{ "title": "string", "topic": "string", "startTime": "2024-04-25T16:00:02.646Z", "movieId": 1}'
@@ -194,19 +194,28 @@ curl -X POST http://localhost:8080/debateRooms/create -H 'Content-type:applicati
 </pre>
 and then newly created debateRoomId will be responded. You should remember this id for making chats.  
 
-3. make the chat by using : 
+## 3. make the chat by using : 
 <pre>
 <code>
 curl -X POST http://localhost:8080/chats/create -H 'Content-type:application/json' -d '{
   "debateRoomId": 1,
-  "message": "string",
+  "message": "The film meticulously recreates the sinking of the Titanic, delivering a vivid depiction of the event to the audience",
   "chatType": "AGREE"
+}'
+</code>
+</pre>
+<pre>
+<code>
+curl -X POST http://localhost:8080/chats/create -H 'Content-type:application/json' -d '{
+  "debateRoomId": 1,
+  "message": "The movie exaggerates or alters several historical facts, especially as the central love story between the main characters overshadows more significant aspects of the actual events.",
+  "chatType": "DISAGREE"
 }'
 </code>
 </pre>
 You should make chats at least 1 agree chat & disagree chat for testing.
 
-4. finally, summarize chats by using:
+## 4. finally, summarize chats by using:
 <pre>
 <code>
 curl -X POST http://localhost:8080/chats/summarize -H 'Content-type:application/json' -d '{"debateRoomId": 1}'

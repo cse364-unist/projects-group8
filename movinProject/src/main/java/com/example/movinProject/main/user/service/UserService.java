@@ -54,13 +54,13 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        User newUser = User.create(request.getUserName(), encodedPassword,request.getEmail());
+        User newUser = User.createTi(request.getUserName(), encodedPassword,request.getEmail(), 500);
         userRepository.save(newUser);
 
         UserDto userDto = new UserDto();
         userDto.setId(newUser.getId());
         userDto.setName(newUser.getUserName());
-        userDto.setMoney(500);
+        userDto.setMoney(newUser.getMoney());
         userDto.setLastAttendance(LocalDateTime.of(2024, 4, 1, 0, 0));
 
         return Optional.of(userDto);
