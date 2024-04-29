@@ -1,16 +1,16 @@
 # Movin Project
 ## 1. Key Features
-1. real-time **web socket debating service** (debateRoom)
+1. Real-time **web socket debating service** (debateRoom)
 2. **GPT moderator** who summarize opinions between agree and disagree (**need openai.api.key**)
-3. vote & game money distribution service (if agree win, people, who voted agree, will get more money)
+3. Vote & Game money distribution service (if agree win, people, who voted agree, will get more money)
 
 ## 2. Not Key Features, But Implemented for necessity
-1. login authentication
-2. swagger ui 
-3. web socket programming ui 
+1. Login authentication
+2. Swagger ui 
+3. Front-end webpage for testing web socket related features (real-time chatting for debating)
 
 - you can test the server in swagger (http://localhost:8080/swagger-ui/index.html)
-- you can test the websocket programming in the react-prototype (..)
+- you can test the websocket related service in the `movin-debate-tester` project. (Details are explained below)
 
 our project is Movie based discussion service. Additionally, vote & game money service will be provided by server. 
 
