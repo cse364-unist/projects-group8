@@ -174,22 +174,58 @@ I don't explain expected response because it is explained above already.
 - register
 <pre>
 <code>
-curl -X POST http://localhost:8080/users/register -H 'Content-type:application/json' -d '{"userName": "string", "password": "string", "email": "string"}'
+curl -X 'POST' \
+  'http://localhost:8080/users/register' \
+  -H 'accept: */*' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmcyIiwiaWF0IjoxNzE0NDA4NTM2LCJleHAiOjE3MTQ0MTIxMzZ9.s8p2AGzOE7A8Vl33YFU9A9Ggl7SOQs1lEb_aF5FNcTg' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "userName": "string",
+  "password": "string",
+  "email": "string"
+}'
 </code>
 </pre>
 - login
 <pre>
 <code>
-curl -X POST http://localhost:8080/auth/v1/login -H 'Content-type:application/json' -d '{"userName": "string", "password": "string"}'
+curl -X 'POST' \
+  'http://localhost:8080/auth/v1/login' \
+  -H 'accept: */*' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmcyIiwiaWF0IjoxNzE0NDA4NTM2LCJleHAiOjE3MTQ0MTIxMzZ9.s8p2AGzOE7A8Vl33YFU9A9Ggl7SOQs1lEb_aF5FNcTg' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "userName": "string",
+  "password": "string"
+}'
 </code>
 </pre>
+> Example Response: 
+> <pre>
+> <code>
+> {
+>   "token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmciLCJpYXQiOjE3MTQ0MTA0NDIsImV4cCI6MTcxNDQxNDA0Mn0.3vVC7J4LM1eRJgvyUvRF76bNNGkMRwNn8xLTHVTavkM"
+> }
+> </code>
+> </pre>
 After login, you should copy the jwt token and paste it into the "Authorize" button in swagger.
 ![img_2.png](imgs/img_2.png) Then, you will be authenticated by server(more opportunity for requesting other API).
 
 ## 2. make debateRoom by using : (movieId should be existing id)
+**Note**: You should put the jwt token into the "Authorization" header in curl command.
 <pre>
 <code>
-curl -X POST http://localhost:8080/debateRooms/create -H 'Content-type:application/json' -d '{ "title": "string", "topic": "string", "startTime": "2024-04-25T16:00:02.646Z", "movieId": 1}'
+curl -X 'POST' \
+  'http://localhost:8080/debateRooms/create' \
+  -H 'accept: */*' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmciLCJpYXQiOjE3MTQ0MTA0NDIsImV4cCI6MTcxNDQxNDA0Mn0.3vVC7J4LM1eRJgvyUvRF76bNNGkMRwNn8xLTHVTavkM' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "title": "string",
+  "topic": "string",
+  "startTime": "2024-04-29T17:08:31.751Z",
+  "movieId": 1
+}'
 </code>
 </pre>
 and then newly created debateRoomId will be responded. You should remember this id for making chats.  
@@ -218,7 +254,13 @@ You should make chats at least 1 agree chat & disagree chat for testing.
 ## 4. finally, summarize chats by using:
 <pre>
 <code>
-curl -X POST http://localhost:8080/chats/summarize -H 'Content-type:application/json' -d '{"debateRoomId": 1}'
+curl -X 'POST' \
+  'http://localhost:8080/chats/summarize' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "debateRoomId": 1
+  }'
 </code>
 </pre>
 This request will make server find all chats in specific debateRoom(id = 1) and then request twice(agree, disagree each) to GPT API by using RestTemplate to summarize chats. ("https://api.openai.com/v1/chat/completions").
