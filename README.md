@@ -28,8 +28,6 @@ Before excute __run.sh__, please follow our steps.
 ***
 Then excute __run.sh__
 
-
-## user API
 # Not Key Feature APIs
 ## 1. user API
 Firstly, user should register their ID into server and login. (swagger can help this stage)
@@ -480,10 +478,9 @@ response body: (token is **jwt**)
 </pre>
 
 # Feature1: Real-time debating
-실시간으로 진행되는 토론 기능 구현을 위해 web socket 통신을 사용하였습니다.
-여러 client가 동시에 접속하여 정의한 프로토콜에 따라 통신을 해야하기에, swagger나 command line으로 테스트하기 어렵습니다.
-따라서, real-time web socket debating service를 테스트하기 위한 간단한 front-end 페이지를 제작했습니다.
-다음은 프론트엔드 웹페이지를 실행하고, 테스트 하는 instruction입니다.
+I have used web socket communication to implement a feature for real-time debates. \
+Since multiple clients can connect simultaneously and must communicate according to a defined protocol, it is difficult to test this using Swagger or the command line.\
+Therefore, I created a simple front-end page to test the real-time web socket debating service. The following are instructions for running and testing the front-end web page.
 
 ## 1. Download and run the test web page
 
