@@ -1139,10 +1139,7 @@ class DebateRoomServiceTest {
 
            Long result = debateRoomService.create(dto);
 
-
-
-
-           Assertions.assertEquals(result, null);
+           assertEquals(1L, result);
     }
 }
 

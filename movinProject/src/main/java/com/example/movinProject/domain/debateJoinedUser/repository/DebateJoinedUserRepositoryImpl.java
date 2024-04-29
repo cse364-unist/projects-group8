@@ -36,10 +36,10 @@ public class DebateJoinedUserRepositoryImpl implements DebateJoinedUserRepositor
     }
 
     @Override
-    public List<Long> findIdsByUserName(String userName) {
+    public List<Long> findDebateRoomIdsByUserName(String userName) {
         QDebateJoinedUser qDebateJoinedUser = QDebateJoinedUser.debateJoinedUser;
         return queryFactory
-                .select(qDebateJoinedUser.id)
+                .select(qDebateJoinedUser.debateRoomId)
                 .from(qDebateJoinedUser)
                 .where(qDebateJoinedUser.userName.eq(userName))
                 .fetch();

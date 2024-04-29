@@ -11,7 +11,6 @@ import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
-import com.example.movinProject.main.movie.service.MovieService;
 import com.example.movinProject.main.user.dto.UserDto;
 import com.example.movinProject.main.user.dto.UserRegisterRequest;
 import java.time.LocalDateTime;
@@ -26,7 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 class UserServiceTest {
@@ -91,7 +89,7 @@ class UserServiceTest {
         Movie movie = new Movie();
 
         when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
-        when(debateJoinedUserRepository.findIdsByUserName(username)).thenReturn(debateRoomIds);
+        when(debateJoinedUserRepository.findDebateRoomIdsByUserName(username)).thenReturn(debateRoomIds);
         when(debateRoomRepository.findAllById(debateRoomIds)).thenReturn(List.of(debateRoom));
         when(movieRepository.findById(any())).thenReturn(Optional.of(movie));
         when(debateVoteRepository.findByUserNameAndDebateRoomId(username, 1L)).thenReturn(new DebateVote());
@@ -115,7 +113,7 @@ class UserServiceTest {
         Movie movie = new Movie();
 
         when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
-        when(debateJoinedUserRepository.findIdsByUserName(username)).thenReturn(debateRoomIds);
+        when(debateJoinedUserRepository.findDebateRoomIdsByUserName(username)).thenReturn(debateRoomIds);
         when(debateRoomRepository.findAllById(debateRoomIds)).thenReturn(List.of(debateRoom));
         when(movieRepository.findById(any())).thenReturn(Optional.of(movie));
         DebateVote debateVote = DebateVote.create(1L, "existingUser", true, LocalDateTime.of(2024,1,1,1,1));
@@ -145,7 +143,7 @@ class UserServiceTest {
         Movie movie = new Movie();
 
         when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
-        when(debateJoinedUserRepository.findIdsByUserName(username)).thenReturn(debateRoomIds);
+        when(debateJoinedUserRepository.findDebateRoomIdsByUserName(username)).thenReturn(debateRoomIds);
         when(debateRoomRepository.findAllById(debateRoomIds)).thenReturn(List.of(debateRoom));
         when(movieRepository.findById(any())).thenReturn(Optional.of(movie));
         DebateVote debateVote = DebateVote.create(1L, "existingUser", false, LocalDateTime.of(2024,1,1,1,1));
@@ -185,7 +183,7 @@ class UserServiceTest {
         List<DebateJoinedUser> joinedUsers = List.of(disagreeUser1, disagreeUser2);
 
         when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
-        when(debateJoinedUserRepository.findIdsByUserName(username)).thenReturn(List.of(debateRoomId));
+        when(debateJoinedUserRepository.findDebateRoomIdsByUserName(username)).thenReturn(List.of(debateRoomId));
         when(debateRoomRepository.findAllById(List.of(debateRoomId))).thenReturn(List.of(debateRoom));
         when(movieRepository.findById(any())).thenReturn(Optional.of(movie));
         when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(joinedUsers);

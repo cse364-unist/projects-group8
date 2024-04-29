@@ -17,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class MovieControllerTest {
-
-
     @Autowired
     private MovieController movieController;
 
@@ -56,5 +54,20 @@ class MovieControllerTest {
 
         assertNotNull(movie, "The movie should not be null");
         assertEquals(1L, movie.getId(), "The movie ID should match the request");
+    }
+
+    @Test
+    @DisplayName("Get movie by ID test2")
+    void testGetMovieById2() {
+
+        Movie movie1 = Movie.create("title","genre", 4.2, "thumb", "des");
+
+        Movie createdMovie = movieRepository.save(movie1);
+
+        ResponseEntity<Movie> response = movieController.getMovieById(createdMovie.getId());
+        Movie movie = response.getBody();
+
+        assertEquals(createdMovie.getGenre(), movie.getGenre());
+
     }
 }

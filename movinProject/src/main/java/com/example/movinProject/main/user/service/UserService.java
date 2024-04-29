@@ -78,7 +78,7 @@ public class UserService {
 
     public UserDto getUserDetails(String username) {
         User user = userRepository.findByUserName(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        List<Long> debateRoomIds = debateJoinedUserRepository.findIdsByUserName(username);
+        List<Long> debateRoomIds = debateJoinedUserRepository.findDebateRoomIdsByUserName(username);
         List<DebateRoom> debateRooms = debateRoomRepository.findAllById(debateRoomIds);
 
         List<DebateRoomVoteDto> debateRoomVoteDtos = debateRooms.stream().map(debateRoom -> {
@@ -121,6 +121,7 @@ public class UserService {
 
             return dto;
         }).toList();
+        System.out.println("debateRoomVoteDtos = " + debateRoomVoteDtos.size());
 
         UserDto userDto = new UserDto();
 
