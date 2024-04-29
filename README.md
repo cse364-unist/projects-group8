@@ -17,6 +17,10 @@ our project is Movie based discussion service. Additionally, vote & game money s
 ## How to start our project
 Before excute __run.sh__, please follow our steps. 
 ***
+```xml
+$ docker build -t image_name /path/to/Dockerfile
+$ docker run -it image_name
+```
 0. add your __openai api__ key in __application.properties__ ( openai.api.key={ your api key } )
 1. sudo service mysql start
 2. mysql -u root -p
@@ -27,6 +31,9 @@ Before excute __run.sh__, please follow our steps.
 7. flush privileges;
 ***
 Then excute __run.sh__
+```xml
+root@containerID$ sh run.sh
+```
 
 # Not Key Feature APIs
 ## 1. user API
