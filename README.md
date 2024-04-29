@@ -536,22 +536,22 @@ Then, you can see the new debateRoomId in the response. **Which is `1`**.
 
 ### 2-4. Join User1 into the debateRoom 1
 Id is `1`, and agree is `true`.
-![swagger_join_user1.png](swagger_join_user1.png)
+![swagger_join_user1.png](imgs/swagger_join_user1.png)
 
 ### 2-5. Login for User2
 Run /auth/v1/login API for user2.
-![swagger_login_user2.png](swagger_login_user2.png)
+![swagger_login_user2.png](imgs/swagger_login_user2.png)
 
 Then, you can get the jwt token.
-![swagger_login_jwt_user2.png](swagge_login_jwt_user2.png)
+![swagger_login_jwt_user2.png](imgs/swagge_login_jwt_user2.png)
 
 Click the "Authorize" button and paste the jwt token into the input box.
 And click the "Authorize" button.
-![swagger_authorize_user2.png](swagger_authorize_user2.png)
+![swagger_authorize_user2.png](imgs/swagger_authorize_user2.png)
 
 ### 2-6. Join User2 into the debateRoom 1
 Id is `1`, and agree is `false`.
-![swagger_join_user2.png](swagger_join_user2.png)
+![swagger_join_user2.png](imgs/swagger_join_user2.png)
 
 ## 3. Run the front-end web page
 After setting the server, you can run the front-end web page.
@@ -581,7 +581,7 @@ And click the `로그인`(login) button of Client2.
 
 Then, you can see the real-time debating page.
 
-![img.png](realtime_chatting.png)
+![img.png](imgs/realtime_chatting.png)
 
 ### 3-4. Debating
 Once every user is participated in the debateRoom, the debate will be automatically started.
