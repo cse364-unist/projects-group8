@@ -19,16 +19,19 @@ Before excute __run.sh__, please follow our steps.
 ***
 ```xml
 $ docker build -t image_name /path/to/Dockerfile
-$ docker run -it image_name
+$ docker run -p 8080:8080 -it image_name
 ```
-0. add your __openai api__ key in __application.properties__ ( openai.api.key={ your api key } )
+In docker
+```git
+git clone https://github.com/cse364-unist/projects-group8.git
+```
+0. add your __openai api__ key in __/root/project/projects-group8/movinProject/src/main/resources/application.properties__ ( openai.api.key={ your api key } )
 1. sudo service mysql start
 2. mysql -u root -p
 3. 4860
 4. CREATE DATABASE movin;
-5. USE movin;
-6. alter user 'root'@'localhost' identified with mysql_native_password by '4860';
-7. flush privileges;
+5. alter user 'root'@'localhost' identified with mysql_native_password by '4860';
+6. flush privileges;
 ***
 Then excute __run.sh__
 ```xml
