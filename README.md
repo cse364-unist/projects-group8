@@ -7,13 +7,29 @@
 ## 2. Not Key Features, But Implemented for necessity
 1. login authentication
 2. swagger ui 
-3. front-end webpage for testing web socket related features (real-time chatting for debating) 
+3. web socket programming ui 
 
 - you can test the server in swagger (http://localhost:8080/swagger-ui/index.html)
-- you can test the websocket programming in the react-prototype
+- you can test the websocket programming in the react-prototype (..)
 
 our project is Movie based discussion service. Additionally, vote & game money service will be provided by server. 
 
+## How to start our project
+Before excute __run.sh__, please follow our steps. 
+***
+0. add your __openai api__ key in __application.properties__ ( openai.api.key={ your api key } )
+1. sudo service mysql start
+2. mysql -u root -p
+3. 4860
+4. CREATE DATABASE movin;
+5. USE movin;
+6. alter user 'root'@'localhost' identified with mysql_native_password by '4860';
+7. flush privileges;
+***
+Then excute __run.sh__
+
+
+## user API
 # Not Key Feature APIs
 ## 1. user API
 Firstly, user should register their ID into server and login. (swagger can help this stage)
