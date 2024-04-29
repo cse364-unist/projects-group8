@@ -7,6 +7,8 @@ import com.example.movinProject.main.user.dto.UserDto;
 import com.example.movinProject.main.user.dto.UserRegisterRequest;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,12 @@ class UserControllerTest {
     void setup() {
         userRepository.deleteAll();
     }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+    }
+
     @Test
     @DisplayName("Register a new user successfully")
     void testRegister() {

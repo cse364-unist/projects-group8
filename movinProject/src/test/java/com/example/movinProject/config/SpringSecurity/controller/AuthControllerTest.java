@@ -4,6 +4,7 @@ import com.example.movinProject.config.SpringSecurity.dto.UserLoginRequest;
 import com.example.movinProject.config.SpringSecurity.service.JwtService;
 import com.example.movinProject.domain.user.domain.User;
 import com.example.movinProject.domain.user.repository.UserRepository;
+import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,11 @@ class AuthControllerTest {
         userRepository.deleteAll();
 
 
+    }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
     }
 
     void generateToken() {
@@ -201,8 +207,5 @@ class AuthControllerTest {
         );
         System.out.println(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-    @AfterEach
-    void tearDown() {
     }
 }

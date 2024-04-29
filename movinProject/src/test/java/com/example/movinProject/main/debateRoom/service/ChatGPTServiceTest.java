@@ -7,6 +7,7 @@ import com.example.movinProject.main.debateRoom.controller.ChatGPTController;
 import com.example.movinProject.main.debateRoom.model.ChatGPTRequest;
 import com.example.movinProject.main.debateRoom.model.Message;
 import com.example.movinProject.main.debateRoom.response.ChatGPTResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,11 @@ class ChatGPTServiceTest {
         List<Chat> chats = List.of(agreeChat1, agreeChat2, disagreeChat1, disagreeChat2);
 
         chatRepository.saveAll(chats);
+    }
+
+    @AfterEach
+    void tearDown() {
+        chatRepository.deleteAll();
     }
 
     @Test

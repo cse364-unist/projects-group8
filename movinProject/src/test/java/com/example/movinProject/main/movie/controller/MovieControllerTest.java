@@ -2,6 +2,7 @@ package com.example.movinProject.main.movie.controller;
 
 import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,11 @@ class MovieControllerTest {
         assertNotNull(movies, "The response body should not be null");
         assertTrue(movies.containsKey("debateMovies"), "Should return debate movies");
         assertTrue(movies.containsKey("popularMovies"), "Should return popular movies");
+    }
+
+    @AfterEach
+    void tearDown() {
+        movieRepository.deleteAll();
     }
 
 

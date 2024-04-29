@@ -596,7 +596,8 @@ If you enter the chat, the chat will be sent to the server, and the server will 
 
 The two side are the distinct web socket channels, so this is the demonstration of real-time chatting.
 
-
+The example of the moderator's summary is as follows:
+![realtime_debate_summary_moderator.png](imgs/realtime_debate_summary_moderator.png)
 
 # Feature2 : ChatGptModerator
 GPT moderator summarize agree opinions & disagree opinions and then notice on debateRoom.
