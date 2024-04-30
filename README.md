@@ -465,13 +465,11 @@ GET /users/my
 ![Untitled (30).png](imgs%2FUntitled%20%2830%29.png)
 
 
+# 4. Jacoco Test Coverage report
+![jacoco_test.png](imgs/jacoco_test.png)
 
 
-
-
-
-
-# 4. Not Key Feature APIs (API Specifications)
+# 5. Not Key Feature APIs (API Specifications)
 ## 1. user API
 Firstly, user should register their ID into server and login. (swagger can help this stage)
 - **localhost:8080/users/register**\
