@@ -167,6 +167,19 @@ The example of the moderator's summary is as follows:
 ![realtime_debate_summary_moderator.png](imgs/realtime_debate_summary_moderator.png)
 
 # Feature2 : ChatGptModerator
+> **Important Note** 
+> You should reset all the database and server before testing this feature.
+> You can follow the following steps:
+> 
+> 1. Close the server
+> 2. `mysql -u root -p`
+> 3. `4860`
+> 4. `DROP DATABASE movin;`
+> 5. `CREATE DATABASE movin;`
+> 6. `exit`
+> 7. `rm -rf ./projects-group8`
+> 8. `sh run.sh`
+
 GPT moderator summarize agree opinions & disagree opinions and then notice on debateRoom.
 For each stage, moderator will collect all chats in agree & disagree side.
 At that time, GPT API is used for summarizing. 
@@ -280,6 +293,18 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 </pre>
 
 # Feature3: Game Money System
+> **Important Note**
+> You should reset all the database and server before testing this feature.
+> You can follow the following steps:
+>
+> 1. Close the server
+> 2. `mysql -u root -p`
+> 3. `4860`
+> 4. `DROP DATABASE movin;`
+> 5. `CREATE DATABASE movin;`
+> 6. `exit`
+> 7. `rm -rf ./projects-group8`
+> 8. `sh run.sh`
 
 user1 to user 6 as userName, password and email each of (user$n, user$n, user$n)
 
