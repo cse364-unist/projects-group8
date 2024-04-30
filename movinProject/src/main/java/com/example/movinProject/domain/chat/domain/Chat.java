@@ -1,6 +1,6 @@
 package com.example.movinProject.domain.chat.domain;
 
-import com.example.movinProject.domain.chat.model.ChatType;
+import  com.example.movinProject.domain.chat.model.ChatType;
 import com.example.movinProject.main.chat.dto.ChatCreateDto;
 import com.example.movinProject.main.chatApiProxy.RealtimeMessage;
 import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
