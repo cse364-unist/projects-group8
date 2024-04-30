@@ -17,31 +17,11 @@ our project is Movie based discussion service. Additionally, vote & game money s
 ## How to start our project
 Before excute __run.sh__, please follow our steps. 
 ***
-```xml
+```shell
 $ docker build -t image_name /path/to/Dockerfile
 $ docker run -p 8080:8080 -it image_name
 ```
-In docker
-```git
-git clone https://github.com/cse364-unist/projects-group8.git
-cd projects-group8
-git checkout milestone2
-cd ../
-```
-**NOTE** : We have to put openapi key into the properties file, so we have to manually clone the repository and checkout the milestone2 branch.
-1. add your __openai api__ key in __/root/project/projects-group8/movinProject/src/main/resources/application.properties__ ( openai.api.key={YOUR_API_KEY} )
-> **Note**: We will provide the key in the submission file.
-> You should add the key in the application.properties file like the following image.
-![docker_add_apikey.png](imgs/docker_add_apikey.png)
-2. sudo service mysql start
-3. mysql -u root -p
-4. 4860
-5. CREATE DATABASE movin;
-6. alter user 'root'@'localhost' identified with mysql_native_password by '4860';
-7. flush privileges;
-***
-Then excute __run.sh__
-```xml
+```shell
 root@containerID$ sh run.sh
 ```
 # Feature1: Real-time debating
