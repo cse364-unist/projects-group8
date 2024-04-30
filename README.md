@@ -856,7 +856,6 @@ response body:
   }
 </code>
 </pre>
-
 ## 4. chat-gpt API
 - **localhost:8080/chats/summarize**\
   request body :

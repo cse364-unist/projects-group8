@@ -12,6 +12,9 @@ import org.mockito.MockitoAnnotations;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 @ExtendWith(MockitoExtension.class)
 public class ChatServiceTest {
 
@@ -36,6 +39,19 @@ public class ChatServiceTest {
                 .build();
 
         Chat chat = Chat.cr(1L);
-        assert(true);
+        assertNull(chat.getId());
+    }
+
+    @Test
+    void testCreateChat2() {
+        // Given
+        ChatCreateDto chatCreateDto = ChatCreateDto.builder()
+                .debateRoomId(2L)
+                .message("Hello World")
+                .chatType(ChatType.AGREE)
+                .build();
+
+        Chat chat = Chat.init(chatCreateDto);
+        assertNull(chat.getId());
     }
 }

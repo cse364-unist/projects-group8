@@ -88,4 +88,13 @@ class ChatGPTServiceTest {
         Assertions.assertNotNull(summarizedOpinions.get(DISAGREE));
 
     }
+    @Test
+    void summarizeOpinions2() {
+        Long debateRoomId = 1L;
+        int AGREE = 1;
+        int DISAGREE = 0;
+        List<String> summarizedOpinions = chatGPTService.summarizeOpinions(debateRoomId);
+        Assertions.assertEquals(summarizedOpinions.size(), 2);
+
+    }
 }

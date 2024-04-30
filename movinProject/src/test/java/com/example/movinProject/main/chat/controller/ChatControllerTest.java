@@ -27,23 +27,35 @@ class ChatControllerTest {
     @Test
     @DisplayName("Test chat creation")
     void chatCreateTest() {
-//        ChatCreateDto chatCreateDto = ChatCreateDto.builder()
-//                .debateRoomId(1L)
-//                .message("Hello World!")
-//                .chatType(ChatType.AGREE)
-//                .build();
-//
-//        ResponseEntity<Long> response = chatController.create(chatCreateDto);
-//
-//        // Assert
-//        assertNotNull(response);
-//        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-//        assertNotNull(response.getBody());
-//
-//        // Validate that the chat was saved correctly
-//        Optional<Chat> savedChat = chatRepository.findById(1L);
-//        assertNotNull(savedChat);
-//        assertEquals("Hello World!", savedChat.get().getMessage());
-//        assertEquals(ChatType.AGREE, savedChat.get().getChatType());
+        ChatCreateDto chatCreateDto = ChatCreateDto.builder()
+                .debateRoomId(1L)
+                .message("Hello World!")
+                .chatType(ChatType.AGREE)
+                .build();
+
+        ResponseEntity<Long> response = chatController.create(chatCreateDto);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
     }
+
+    @Test
+    @DisplayName("Test chat creation")
+    void chatCreateTest2() {
+        ChatCreateDto chatCreateDto = ChatCreateDto.builder()
+                .debateRoomId(2L)
+                .message("Hello World2!")
+                .chatType(ChatType.DISAGREE)
+                .build();
+
+        ResponseEntity<Long> response = chatController.create(chatCreateDto);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
 }

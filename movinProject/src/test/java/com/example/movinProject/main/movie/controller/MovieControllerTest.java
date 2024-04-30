@@ -2,6 +2,8 @@ package com.example.movinProject.main.movie.controller;
 
 import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
+import com.example.movinProject.main.movie.dto.MovieDto;
+import com.example.movinProject.main.movie.dto.MovieSearchDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,14 @@ class MovieControllerTest {
         assertNotNull(movies, "The response body should not be null");
         assertTrue(movies.containsKey("debateMovies"), "Should return debate movies");
         assertTrue(movies.containsKey("popularMovies"), "Should return popular movies");
+    }
+
+    @Test
+    @DisplayName("Get main page movies test2")
+    void testGetMainPageMovies2(){
+        ResponseEntity<Map<String, List<Movie>>> response = movieController.getMainPageMovies();
+        Map<String, List<Movie>> movies = response.getBody();
+        assertNotNull(movies.get("debateMovies"));
     }
 
     @AfterEach
@@ -68,6 +78,39 @@ class MovieControllerTest {
         Movie movie = response.getBody();
 
         assertEquals(createdMovie.getGenre(), movie.getGenre());
+    }
 
+    @Test
+    @DisplayName("test search movies1")
+    void testSearchMovies(){
+        Movie movie1 = Movie.create("title","genre", 4.2, "thumb", "des");
+
+        Movie createdMovie = movieRepository.save(movie1);
+
+        MovieSearchDto dto = MovieSearchDto.builder()
+                .page(1)
+                .keyword("title")
+                .build();
+
+        ResponseEntity<Map<String, List<MovieDto>>> response = movieController.searchMovies(dto);
+
+        assertNotNull(response);
+    }
+
+    @Test
+    @DisplayName("test search movies1")
+    void testSearchMovies2(){
+        Movie movie1 = Movie.create("title","genre", 4.2, "thumb", "des");
+
+        Movie createdMovie = movieRepository.save(movie1);
+
+        MovieSearchDto dto = MovieSearchDto.builder()
+                .page(1)
+                .keyword("fldi")
+                .build();
+
+        ResponseEntity<Map<String, List<MovieDto>>> response = movieController.searchMovies(dto);
+
+        assertEquals(response.getBody().size(),1);
     }
 }
