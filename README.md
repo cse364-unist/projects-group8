@@ -275,6 +275,192 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 </code>
 </pre>
 
+# Feature3: Game Money System
+
+user1 to user 6 as userName, password and email each of (user$n, user$n, user$n)
+
+example for user 5 : userName: user5, password: user5, email: user5
+
+Register user1
+![Untitled.png](imgs%2FUntitled.png)
+![Untitled (1).png](imgs%2FUntitled%20%281%29.png)
+
+register user2
+![Untitled (2).png](imgs%2FUntitled%20%282%29.png)
+
+register user3
+![Untitled (3).png](imgs%2FUntitled%20%283%29.png)
+
+register user4
+![Untitled (4).png](imgs%2FUntitled%20%284%29.png)
+
+register user5
+![Untitled (5).png](imgs%2FUntitled%20%285%29.png)
+
+register user6
+![Untitled (6).png](imgs%2FUntitled%20%286%29.png)
+
+login user1
+POST /auth/v1/login
+![Untitled (7).png](imgs%2FUntitled%20%287%29.png)
+
+authorize user1 by jwt token above.
+
+POST /debateRooms/create
+![Untitled (8).png](imgs%2FUntitled%20%288%29.png)
+
+And user1 joins debateroom1 as agreejoineduser
+
+POST /debateRooms/{id}/join
+
+{
+"agree": true
+}
+![Untitled (9).png](imgs%2FUntitled%20%289%29.png)
+By user/my we can see joined debateroom and money decreased by 100.
+GET /users/my
+![Untitled (10).png](imgs%2FUntitled%20%2810%29.png)
+
+Log out from user1 and each login with jwt token.
+
+And so on, user2 joins debateroom1 in agreejoined user and user3 joins in disagreejoined user.
+
+user2 login and user2 joins the debateroom1 as agreejoined user
+
+POST /auth/v1/login
+
+POST /debateRooms/{id}/join
+
+{
+"agree": true
+}
+![Untitled (12).png](imgs%2FUntitled%20%2812%29.png)
+![Untitled (13).png](imgs%2FUntitled%20%2813%29.png)
+
+user3 login and user3 joins the debateroom1 as disagreejoined user
+
+POST /auth/v1/login
+
+POST /debateRooms/{id}/join
+
+In this case
+
+{
+"agree": false
+}
+![Untitled (14).png](imgs%2FUntitled%20%2814%29.png)
+![Untitled (15).png](imgs%2FUntitled%20%2815%29.png)
+
+Now user4, user5, user6 vote for the debateroom1.
+
+user4, user5, agrees and user6 disagree for this debate.
+
+user4 login and vote for debateroom1 as agree vote.
+
+POST /auth/v1/login
+
+POST /debateRooms/{id}/vote
+
+{
+
+“vote”:true
+
+}
+![Untitled (16).png](imgs%2FUntitled%20%2816%29.png)
+![Untitled (17).png](imgs%2FUntitled%20%2817%29.png)
+
+user5 login and vote for debateroom1 as agree vote.
+
+POST /auth/v1/login
+
+POST /debateRooms/{id}/vote
+
+{
+
+“vote”:true
+
+}
+![Untitled (18).png](imgs%2FUntitled%20%2818%29.png)
+![Untitled (19).png](imgs%2FUntitled%20%2819%29.png)
+By the way we can see user/my when user5 votes for the debateroom, usermoney decrease by 100
+![Untitled (20).png](imgs%2FUntitled%20%2820%29.png)
+
+now, the user6
+
+user6 login and vote for debateroom1 as disagree vote.
+
+POST /auth/v1/login
+
+POST /debateRooms/{id}/vote
+
+{
+
+“vote”:false
+
+}
+![Untitled (21).png](imgs%2FUntitled%20%2821%29.png)
+![Untitled (22).png](imgs%2FUntitled%20%2822%29.png)
+
+Now end the debateroom
+This is test, So, just user6 end the debateRoom1
+
+POST /debateRooms/{id}/end
+![Untitled (23).png](imgs%2FUntitled%20%2823%29.png)
+
+⇒ So, the result will agree team wins ⇒ 6 users collects debate room for  total 600 money
+
+⇒ when we end this debateroom 600 money is given to user1,user2, user4, user5 as much as
+
+600/4 so, Each of them’s money will be
+
+user1: 550
+
+user2: 550
+
+user3: 400
+
+user4: 550
+
+user5: 550
+
+user6: 400
+
+user1
+GET /users/my
+
+![Untitled (24).png](imgs%2FUntitled%20%2824%29.png)
+
+user2
+
+GET /users/my
+![Untitled (25).png](imgs%2FUntitled%20%2825%29.png)
+
+user3
+
+GET /users/my
+![Untitled (26).png](imgs%2FUntitled%20%2826%29.png)
+
+user4
+
+GET /users/my
+![Untitled (28).png](imgs%2FUntitled%20%2828%29.png)
+
+user5
+
+GET /users/my
+![Untitled (29).png](imgs%2FUntitled%20%2829%29.png)
+
+user6
+
+GET /users/my
+![Untitled (30).png](imgs%2FUntitled%20%2830%29.png)
+
+
+
+
+
+
+
 
 # 4. Not Key Feature APIs (API Specifications)
 ## 1. user API
