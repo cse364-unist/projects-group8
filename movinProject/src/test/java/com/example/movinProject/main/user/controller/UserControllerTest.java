@@ -35,10 +35,6 @@ class UserControllerTest {
         userRepository.deleteAll();
     }
 
-    @AfterEach
-    void tearDown() {
-        userRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("Register a new user successfully")

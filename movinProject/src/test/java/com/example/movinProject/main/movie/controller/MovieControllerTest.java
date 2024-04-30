@@ -45,10 +45,7 @@ class MovieControllerTest {
         assertNotNull(movies.get("debateMovies"));
     }
 
-    @AfterEach
-    void tearDown() {
-        movieRepository.deleteAll();
-    }
+
 
 
     @Test

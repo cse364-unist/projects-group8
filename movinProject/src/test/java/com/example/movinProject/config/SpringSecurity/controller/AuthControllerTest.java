@@ -69,10 +69,6 @@ class AuthControllerTest {
 
     }
 
-    @AfterEach
-    void tearDown() {
-        userRepository.deleteAll();
-    }
 
     void generateToken() {
         User user1 = User.create("admin2",passwordEncoder.encode("admin2"), "admin2");

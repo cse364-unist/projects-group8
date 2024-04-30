@@ -68,11 +68,6 @@ class ChatGPTServiceTest {
         chatRepository.saveAll(chats);
     }
 
-    @AfterEach
-    void tearDown() {
-        chatRepository.deleteAll();
-    }
-
     @Test
     void getChatGPTResponse() {
 

@@ -24,7 +24,11 @@ $ docker run -p 8080:8080 -it image_name
 In docker
 ```git
 git clone https://github.com/cse364-unist/projects-group8.git
+cd projects-group8
+git checkout milestone2
+cd ../
 ```
+**NOTE** : We have to put openapi key into the properties file, so we have to manually clone the repository and checkout the milestone2 branch.
 1. add your __openai api__ key in __/root/project/projects-group8/movinProject/src/main/resources/application.properties__ ( openai.api.key={YOUR_API_KEY} )
 > **Note**: We will provide the key in the submission file.
 > You should add the key in the application.properties file like the following image.
