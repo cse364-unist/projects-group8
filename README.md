@@ -149,7 +149,6 @@ The example of the moderator's summary is as follows:
 # Feature2 : ChatGptModerator
 > **Important Note** 
 > You should reset all the database and server before testing this feature.
-> due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command)
 > You can follow the following steps:
 > 
 > 1. Close the server
@@ -160,7 +159,8 @@ The example of the moderator's summary is as follows:
 > 6. `exit`
 > 7. `rm -rf ./projects-group8`
 > 8. `sh run.sh`
-
+> + Due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command).
+> 
 GPT moderator summarize agree opinions & disagree opinions and then notice on debateRoom.
 For each stage, moderator will collect all chats in agree & disagree side.
 At that time, GPT API is used for summarizing. 
@@ -201,7 +201,7 @@ and then newly created debateRoomId will be responded. You should remember this 
 > you don't need to login user1 & user2 each. you can just create chats statelessly.
 > this testing API is not working at real service. It is just illusion of feature2. 
 > just feel free about making chats :)
-> 
+
 => http://localhost:8080/chats/create with 
 <pre>
 <code>
@@ -240,7 +240,6 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 # Feature3: Game Money System
 > **Important Note**
 > You should reset all the database and server before testing this feature.
-> due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command)
 > You can follow the following steps:
 >
 > 1. Close the server
@@ -251,7 +250,8 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 > 6. `exit`
 > 7. `rm -rf ./projects-group8`
 > 8. `sh run.sh`
-
+> + due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command)
+>
 user1 to user 6 as userName, password and email each of (user$n, user$n, user$n)
 
 example for user 5 : userName: user5, password: user5, email: user5
