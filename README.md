@@ -226,7 +226,7 @@ You should make chats at least 1 agree chat & disagree chat for testing.
 "debateRoomId": 1
 }</code></pre>
 This request will make server find all chats in specific debateRoom(id = 1) and then request twice(agree, disagree each) to GPT API by using RestTemplate to summarize chats. ("https://api.openai.com/v1/chat/completions").
-For this testing, you should insert the openai.api.key = "GPT API key"(it cannot be pushed into git).
+For this testing, you should insert the openai.api.key = "GPT API key"(it cannot be pushed into git, we already make the inserting commands into run.sh for your convenience).
 After this curl, you can get the list of two string : **agree summarize** & **disagree summarize** such as:
 <pre>
 <code>
