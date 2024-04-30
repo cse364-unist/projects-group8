@@ -159,7 +159,8 @@ The example of the moderator's summary is as follows:
 > 6. `exit`
 > 7. `rm -rf ./projects-group8`
 > 8. `sh run.sh`
-
+> + Due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command).
+> 
 GPT moderator summarize agree opinions & disagree opinions and then notice on debateRoom.
 For each stage, moderator will collect all chats in agree & disagree side.
 At that time, GPT API is used for summarizing. 
@@ -168,100 +169,64 @@ For your stateless testing, we provide simple testing REST API for testing featu
 I don't explain expected response because it is explained above already.
 
 ## 1. login by using : **register** & **login**
-- register
-<pre>
-<code>
-curl -X 'POST' \
-  'http://localhost:8080/users/register' \
-  -H 'accept: */*' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmcyIiwiaWF0IjoxNzE0NDA4NTM2LCJleHAiOjE3MTQ0MTIxMzZ9.s8p2AGzOE7A8Vl33YFU9A9Ggl7SOQs1lEb_aF5FNcTg' \
-  -H 'Content-Type: application/json' \
-  -d '{
+- register => http://localhost:8080/users/register with <pre><code>{
   "userName": "string",
   "password": "string",
   "email": "string"
-}'
-</code>
-</pre>
-- login
-<pre>
-<code>
-curl -X 'POST' \
-  'http://localhost:8080/auth/v1/login' \
-  -H 'accept: */*' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmcyIiwiaWF0IjoxNzE0NDA4NTM2LCJleHAiOjE3MTQ0MTIxMzZ9.s8p2AGzOE7A8Vl33YFU9A9Ggl7SOQs1lEb_aF5FNcTg' \
-  -H 'Content-Type: application/json' \
-  -d '{
+  }</code></pre>\
+expected result:![feature2_img1.png](imgs/feature2_img1.png)
+- login => http://localhost:8080/auth/v1/login with <pre><code>{
   "userName": "string",
   "password": "string"
-}'
-</code>
-</pre>
-> Example Response: 
-> <pre>
-> <code>
-> {
->   "token": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmciLCJpYXQiOjE3MTQ0MTA0NDIsImV4cCI6MTcxNDQxNDA0Mn0.3vVC7J4LM1eRJgvyUvRF76bNNGkMRwNn8xLTHVTavkM"
-> }
-> </code>
-> </pre>
+  }</code></pre>\
+expected result:
+![feature2_img2.png](imgs/feature2_img2.png)
 After login, you should copy the jwt token and paste it into the "Authorize" button in swagger.
 ![img_2.png](imgs/img_2.png) Then, you will be authenticated by server(more opportunity for requesting other API).
 
 ## 2. make debateRoom by using : (movieId should be existing id)
 **Note**: You should put the jwt token into the "Authorization" header in curl command.
-<pre>
-<code>
-curl -X 'POST' \
-  'http://localhost:8080/debateRooms/create' \
-  -H 'accept: */*' \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJVU0VSIn1dLCJzdWIiOiJzdHJpbmciLCJpYXQiOjE3MTQ0MTA0NDIsImV4cCI6MTcxNDQxNDA0Mn0.3vVC7J4LM1eRJgvyUvRF76bNNGkMRwNn8xLTHVTavkM' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "title": "string",
-  "topic": "string",
-  "startTime": "2024-04-29T17:08:31.751Z",
-  "movieId": 1
-}'
-</code>
-</pre>
+=> http://localhost:8080/debateRooms/create with 
+<pre><code>{
+"title": "string",
+"topic": "string",
+"startTime": "2024-04-29T17:08:31.751Z",
+"movieId": 1
+}</code></pre>
+expected result : ![feature2_img3.png](imgs/feature2_img3.png)
 and then newly created debateRoomId will be responded. You should remember this id for making chats.  
 
 ## 3. make the chat by using : 
+> important note : chat will be made with null user id, because it is just for testing feature2.
+> you don't need to login user1 & user2 each. you can just create chats statelessly.
+> this testing API is not working at real service. It is just illusion of feature2. 
+> just feel free about making chats :)
+
+=> http://localhost:8080/chats/create with 
 <pre>
 <code>
-curl -X POST http://localhost:8080/chats/create -H 'Content-type:application/json' -d '{
-  "debateRoomId": 1,
-  "message": "The film meticulously recreates the sinking of the Titanic, delivering a vivid depiction of the event to the audience",
-  "chatType": "AGREE"
-}'
-</code>
-</pre>
-<pre>
-<code>
-curl -X POST http://localhost:8080/chats/create -H 'Content-type:application/json' -d '{
-  "debateRoomId": 1,
-  "message": "The movie exaggerates or alters several historical facts, especially as the central love story between the main characters overshadows more significant aspects of the actual events.",
-  "chatType": "DISAGREE"
-}'
-</code>
-</pre>
+{
+"debateRoomId": 1,
+"message": "The film meticulously recreates the sinking of the Titanic, delivering a vivid depiction of the event to the audience",
+"chatType": "AGREE"
+} </code></pre>
+
+expected result: ![img.png](imgs/feature2_img4.png)
+=> http://localhost:8080/chats/create with <pre><code>{
+"debateRoomId": 1,
+"message": "The movie exaggerates or alters several historical facts, especially as the central love story between the main characters overshadows more significant aspects of the actual events.",
+"chatType": "DISAGREE"
+}</code></pre>
+expected result: ![feature2_img5.png](imgs/feature2_img5.png)
 You should make chats at least 1 agree chat & disagree chat for testing.
 
 ## 4. finally, summarize chats by using:
-<pre>
-<code>
-curl -X 'POST' \
-  'http://localhost:8080/chats/summarize' \
-  -H 'accept: */*' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "debateRoomId": 1
-  }'
-</code>
-</pre>
+=> http://localhost:8080/chats/summarize with 
+<pre><code>{
+"debateRoomId": 1
+}</code></pre>
 This request will make server find all chats in specific debateRoom(id = 1) and then request twice(agree, disagree each) to GPT API by using RestTemplate to summarize chats. ("https://api.openai.com/v1/chat/completions").
-For this testing, you should insert the openai.api.key = "GPT API key"(it cannot be pushed into git).
+For this testing, you should insert the openai.api.key = "GPT API key"(it cannot be pushed into git, we already make the inserting commands into run.sh for your convenience).
 After this curl, you can get the list of two string : **agree summarize** & **disagree summarize** such as:
 <pre>
 <code>
@@ -285,7 +250,8 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 > 6. `exit`
 > 7. `rm -rf ./projects-group8`
 > 8. `sh run.sh`
-
+> + due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command)
+>
 user1 to user 6 as userName, password and email each of (user$n, user$n, user$n)
 
 example for user 5 : userName: user5, password: user5, email: user5
