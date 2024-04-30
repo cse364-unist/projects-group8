@@ -28,7 +28,7 @@ public class CsvLoader {
             String line;
             List<Movie> movies = new ArrayList<>();
             double[] avg = new double[3953];
-            long[] cnt = new long[3953];
+            int[] cnt = new int[3953];
             boolean a1 = false, a2 = false;
 
             while ((line = br.readLine()) != null) {
@@ -49,8 +49,8 @@ public class CsvLoader {
                 }
             }
             if (a2) {
-                for (long i = 1L; i <= 3952L; i++) {
-                    Optional<Movie> movie = movieRepository.findById((Long) i);
+                for (int i = 1; i <= 3952; i++) {
+                    Optional<Movie> movie = movieRepository.findById((long)i);
                     if (movie.isPresent() && cnt[i] != 0L) {
                         // System.out.println(avg[i]);
                         Movie newMovie = Movie.create(movie.get().getTitle(), movie.get().getGenre(), (Double) avg[i] / cnt[i], movie.get().getThumbnailUrl(), movie.get().getDescription());

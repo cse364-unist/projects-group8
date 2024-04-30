@@ -14,8 +14,9 @@ public class MovinProjectApplication {
 	@Bean
     public CommandLineRunner loadMovieData(CsvLoader csvLoader) {
         return args -> {
-            csvLoader.loadCsvDataToDB("/root/project/projects-group8/movinProject/data/movies.csv");
-            csvLoader.loadCsvDataToDB("/root/project/projects-group8/movinProject/data/ratings.csv");
+            System.out.println("Working Directory = " + System.getProperty("user.dir"));
+            csvLoader.loadCsvDataToDB("./movinProject/data/movies.csv");
+            csvLoader.loadCsvDataToDB("./movinProject/data/ratings.csv");
         };
     }
 }
