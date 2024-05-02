@@ -150,6 +150,7 @@ The example of the moderator's summary is as follows:
 # Feature2 : ChatGptModerator
 > **Important Note** 
 > You should reset all the database and server before testing this feature.
+> (Please understand that although testing features 1, 2, and 3 together works well, for a more streamlined testing scenario, we initialize the database for each feature and test them separately. Thank you for your understanding.)
 > You can follow the following steps:
 >
 > 1. Close the server (8080 port should be closed)
@@ -242,6 +243,7 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 # Feature3: Game Money System
 > **Important Note**
 > You should reset all the database and server before testing this feature.
+> (Please understand that although testing features 1, 2, and 3 together works well, for a more streamlined testing scenario, we initialize the database for each feature and test them separately. Thank you for your understanding.)
 > You can follow the following steps:
 >
 > 1. Close the server (8080 port should be closed)
