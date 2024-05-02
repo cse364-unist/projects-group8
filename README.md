@@ -151,8 +151,8 @@ The example of the moderator's summary is as follows:
 > **Important Note** 
 > You should reset all the database and server before testing this feature.
 > You can follow the following steps:
-> 
-> 1. Close the server
+>
+> 1. Close the server (8080 port should be closed)
 > 2. `mysql -u root -p`
 > 3. `4860`
 > 4. `DROP DATABASE movin;`
@@ -160,6 +160,7 @@ The example of the moderator's summary is as follows:
 > 6. `exit`
 > 7. `rm -rf ./projects-group8`
 > 8. `sh run.sh`
+> 9. Refresh the swagger ui (http://localhost:8080/swagger-ui/index.html)
 > + Due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command).
 > 
 GPT moderator summarize agree opinions & disagree opinions and then notice on debateRoom.
@@ -243,7 +244,7 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 > You should reset all the database and server before testing this feature.
 > You can follow the following steps:
 >
-> 1. Close the server
+> 1. Close the server (8080 port should be closed)
 > 2. `mysql -u root -p`
 > 3. `4860`
 > 4. `DROP DATABASE movin;`
@@ -251,6 +252,7 @@ After this curl, you can get the list of two string : **agree summarize** & **di
 > 6. `exit`
 > 7. `rm -rf ./projects-group8`
 > 8. `sh run.sh`
+> 9. Refresh the swagger ui (http://localhost:8080/swagger-ui/index.html)
 > + due to the testing (such as report jacoco), our database will make testing entity. So the testing response id can vary. (shifted by testing command)
 >
 user1 to user 6 as userName, password and email each of (user$n, user$n, user$n)
