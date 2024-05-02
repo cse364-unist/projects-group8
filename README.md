@@ -40,6 +40,7 @@ node.js (https://nodejs.org/en/download), npm
 https://drive.google.com/file/d/1-YcvnWym7dW1XXMF8ysJq0USb-TD-Dv0/view?usp=sharing
 
 ### 1-2. Open the project
+> **Tip** : Unzip the downloaded file and open the project in the terminal. Then, run the following commands inside the project folder. 
 ```shell
 npm install
 npm start
