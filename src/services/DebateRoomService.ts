@@ -10,7 +10,7 @@ import {
   DebateRoomChatDto,
   DebateRoomDto,
   DebateRoomVoteDto,
-} from '../models/dto/DebateRoomVoteDto';
+} from '../models/dto/DebateRoomDto';
 import { simpleMovieDtoToSimpleMovie } from './MovieService';
 
 export async function getDebateRoomsByMovieId(movieId: number): Promise<{
