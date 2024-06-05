@@ -75,9 +75,9 @@ class WebSocketChatHandlerTest {
         RealtimeMessage realtimeMessage = new RealtimeMessage();
 
 
-        realtimeMessage.setDebateRoomId(1L);
         realtimeMessage.setType(RealtimeMessage.MessageType.TALK);
-
+        realtimeMessage.setDebateRoomId(1L);
+        
         TextMessage fakeMessage = mock(TextMessage.class);
         when(fakeMessage.getPayload()).thenReturn("fakePayload");
         when(objectMapper.readValue("fakePayload", RealtimeMessage.class)).thenReturn(realtimeMessage);
