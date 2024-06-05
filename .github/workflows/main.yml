@@ -27,16 +27,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y wget gnupg2 vim maven curl git mysql-server
 
-      - name: Start MySQL service
-        run: sudo service mysql start
-
-      - name: Set up MySQL
-        run: |
-          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '4860';"
-          sudo mysql -u root -p'4860' <<EOF
-          CREATE DATABASE movin;
-          FLUSH PRIVILEGES;
-          EOF
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: 'movin' 
+          mysql user: 'root'
+          mysql password: ${{ secrets.MYSQL_PASSWORD }}
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
