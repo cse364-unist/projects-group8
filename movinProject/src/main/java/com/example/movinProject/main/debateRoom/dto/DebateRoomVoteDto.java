@@ -17,6 +17,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Setter
 @NoArgsConstructor
 public class DebateRoomVoteDto {
+    private Long id;
     private boolean voted; // 투표했는가
     private boolean voteAgree; // 어디로 투표했는가
     private boolean joined; // 참여했는가
@@ -34,6 +35,5 @@ public class DebateRoomVoteDto {
     private int maxUserNumber;
     private int agreeJoinedUserNumber;
     private int disagreeJoinedUserNumber;
-    private String summarize;
-    private Chat chat;
+
 }

@@ -297,6 +297,7 @@ public class DebateRoomService {
                             .id(room.getId())
                             .title(room.getTitle())
                             .topic(room.getTopic())
+                            .state(room.getStateType())
                             .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
                             .startTime(room.getStartTime())
                             .duration(room.getDuration())
@@ -310,6 +311,7 @@ public class DebateRoomService {
                             .id(room.getId())
                             .title(room.getTitle())
                             .topic(room.getTopic())
+                            .state(room.getStateType())
                             .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
                             .startTime(room.getStartTime())
                             .duration(room.getDuration())
@@ -431,6 +433,7 @@ public class DebateRoomService {
         userRepository.save(user);
 
         DebateRoomVoteDto dto = new DebateRoomVoteDto();
+        dto.setId(debateRoom.getId());
         dto.setTitle(debateRoom.getTitle());
         dto.setTopic(debateRoom.getTopic());
         dto.setStateType(debateRoom.getStateType());
@@ -440,8 +443,6 @@ public class DebateRoomService {
         dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")));
 
         setJoinedUserNumberToDTO(dto, id);
-
-        dto.setSummarize(debateRoom.getSummarize());
 
         DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, id);
         if(debateVote != null) {
@@ -483,6 +484,7 @@ public class DebateRoomService {
         userRepository.save(user);
 
         DebateRoomVoteDto dto = new DebateRoomVoteDto();
+        dto.setId(debateRoom.getId());
         dto.setTitle(debateRoom.getTitle());
         dto.setTopic(debateRoom.getTopic());
         dto.setStateType(debateRoom.getStateType());
@@ -492,7 +494,6 @@ public class DebateRoomService {
         dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")));
 
         setJoinedUserNumberToDTO(dto, id);
-        dto.setSummarize(debateRoom.getSummarize());
 
         dto.setVoted(true);
         dto.setVoteAgree(agree);

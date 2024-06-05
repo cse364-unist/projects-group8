@@ -9,3 +9,4 @@ public class MovinProjectApplication {
 		SpringApplication.run(MovinProjectApplication.class, args);
 	}
 }
+
