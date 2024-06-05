@@ -55,7 +55,7 @@ jobs:
           git checkout milestone2
 
       - name: Add API key to application.properties
-        run: echo "openai.api.key=${{secrets.OPENAI_KEY}" >> ./projects-group8/movinProject/src/main/resources/application.properties
+        run: echo "openai.api.key=${{secrets.OPENAI_KEY}}" >> ./projects-group8/movinProject/src/main/resources/application.properties
 
       - name: Build and test project with Maven
         run: |
