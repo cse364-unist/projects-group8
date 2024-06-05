@@ -1,5 +1,6 @@
 package com.example.movinProject.main.debateRoom.dto;
 
+import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.main.movie.dto.MovieDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ public class DebateRoomDto {
     private Long id;
     private String title;
     private String topic;
-    private String state;
+    private StateType state;
     private MovieDto movie;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
