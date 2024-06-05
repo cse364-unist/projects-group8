@@ -15,6 +15,7 @@ export interface DebateRoomDto {
 }
 
 export interface DebateRoomVoteDto {
+  id: number;
   voted: boolean;
   voteAgree: boolean;
   joined: boolean;
@@ -28,11 +29,10 @@ export interface DebateRoomVoteDto {
   maxUserNumber: number;
   agreeJoinedUserNumber: number;
   disagreeJoinedUserNumber: number;
-  summarize: string | null;
-  chat: ChatDto | null;
 }
 
 export interface DebateRoomChatDto {
+  id: number;
   voted: boolean;
   voteAgree: boolean;
   joined: boolean;

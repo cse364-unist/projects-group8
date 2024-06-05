@@ -138,7 +138,7 @@ export function debateRoomVoteDtoToDebateRoomWithUserInformation(
   dto: DebateRoomVoteDto,
 ): DebateRoomWithUserInformation {
   return {
-    id: 0, // dto.id, // TODO: Fix Backend
+    id: dto.id,
     title: dto.title,
     topic: dto.topic,
     state: dto.stateType,
@@ -160,7 +160,7 @@ export function debateRoomChatDtoToDebateRoom(
   dto: DebateRoomChatDto,
 ): DebateRoom {
   return {
-    id: 0, // dto.id, // TODO: Fix Backend
+    id: dto.id,
     title: dto.title,
     topic: dto.topic,
     state: dto.stateType,
@@ -174,7 +174,6 @@ export function debateRoomChatDtoToDebateRoom(
     voteAgree: dto.voteAgree,
     joined: dto.joined,
     agree: dto.agree,
-    summarize: dto.summarize,
     chats: dto.chats.map(chatDtoToChat),
   };
 }

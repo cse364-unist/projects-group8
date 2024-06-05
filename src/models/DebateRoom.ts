@@ -22,7 +22,6 @@ export interface DebateRoomWithUserInformation extends SimpleDebateRoom {
 }
 
 export interface DebateRoom extends DebateRoomWithUserInformation {
-  summarize: string | null;
   chats: Chat[];
 }
 
@@ -45,6 +44,5 @@ export const emptyDebateRoom: DebateRoom = {
   voteAgree: false,
   joined: false,
   agree: false,
-  summarize: null,
   chats: [],
 };

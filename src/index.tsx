@@ -4,11 +4,44 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
+import HeaderLayout from './pages/HeaderLayout';
+import LoginPage from './pages/login/page';
+import RegisterPage from './pages/register/page';
+import MainPage from './pages/main/page';
+import MyPage from './pages/my/page';
+import VotePage from './pages/vote/page';
+import MoviePage from './pages/movie/page';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <div>Hello world!</div>,
+    element: <HeaderLayout />,
+    children: [
+      {
+        path: '/',
+        element: <MainPage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+      {
+        path: '/register',
+        element: <RegisterPage />,
+      },
+      {
+        path: '/my',
+        element: <MyPage />,
+      },
+      {
+        path: '/vote',
+        element: <VotePage />,
+      },
+      {
+        path: '/movie/:movieId',
+        element: <MoviePage />,
+      },
+    ],
   },
 ]);
 

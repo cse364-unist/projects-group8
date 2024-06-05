@@ -1,4 +1,4 @@
-import { DebateRoomVoteDto } from './DebateRoomVoteDto';
+import { DebateRoomVoteDto } from './DebateRoomDto';
 
 export default interface UserDto {
   id: number;
