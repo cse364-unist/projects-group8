@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - milestone2
+      - master
   pull_request:
     branches:
-      - milestone2
+      - master
 
 jobs:
   build-and-test:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: milestone2
+          ref: master
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -49,10 +49,10 @@ jobs:
       - name: Clone the project repository
         run: git clone https://github.com/cse364-unist/projects-group8.git
 
-      - name: Checkout milestone2
+      - name: Checkout master
         run: |
           cd projects-group8/movinProject
-          git checkout milestone2
+          git checkout master
 
       - name: Add API key to application.properties
         run: echo "openai.api.key=${{secrets.OPENAI_KEY}}" >> ./projects-group8/movinProject/src/main/resources/application.properties
