@@ -66,4 +66,4 @@ jobs:
       - name: Run the Spring Boot application
         run: |
           cd projects-group8/movinProject
-          java -jar target/movinProject-0.0.1-SANPSHOT-with-dependencies.jar
+          java -jar target/movinProject-0.0.1-SNAPSHOT-with-dependencies.jar
