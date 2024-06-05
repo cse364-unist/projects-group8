@@ -1,0 +1,959 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebateRoomServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.service</a> &gt; <span class="el_source">DebateRoomServiceTest.java</span></div><h1>DebateRoomServiceTest.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.service;
+
+import com.example.movinProject.config.exception.BadRequestType;
+import com.example.movinProject.domain.chat.domain.Chat;
+import com.example.movinProject.domain.chat.model.ChatType;
+import com.example.movinProject.domain.chat.repository.ChatRepository;
+import com.example.movinProject.domain.debateJoinedUser.domain.DebateJoinedUser;
+import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
+import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.debateRoom.model.StateType;
+import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
+import com.example.movinProject.domain.debateVote.domain.DebateVote;
+import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
+import com.example.movinProject.domain.movie.domain.Movie;
+import com.example.movinProject.domain.movie.repository.MovieRepository;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.chatApiProxy.chatRoom.RealtimeDebateRoom;
+import com.example.movinProject.main.debateRoom.dto.*;
+import com.example.movinProject.main.movie.dto.MovieDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+<span class="fc" id="L46">class DebateRoomServiceTest {</span>
+    @Mock
+    private DebateRoomRepository debateRoomRepository;
+    @Mock
+    private DebateJoinedUserRepository debateJoinedUserRepository;
+    @Mock
+    private ChatRepository chatRepository;
+    @Mock
+    private DebateVoteRepository debateVoteRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private MovieRepository movieRepository;
+    @Mock
+    private TextMessage textMessage;
+
+    @InjectMocks
+    private DebateRoomService debateRoomService;
+
+    @BeforeEach
+    void setUp() {
+<span class="fc" id="L67">        MockitoAnnotations.openMocks(this);</span>
+<span class="fc" id="L68">    }</span>
+
+    @Nested
+<span class="fc" id="L71">    class RealtimeRelatedTest {</span>
+
+        @BeforeEach
+        void setUp() throws JsonProcessingException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+            // 데이터베이스 가상 데이터
+            // 1. User 생성
+<span class="fc" id="L77">            User user1 = User.createTest(1L, &quot;user1&quot;, &quot;password1&quot;, &quot;email1&quot;);</span>
+<span class="fc" id="L78">            User user2 = User.createTest(2L, &quot;user2&quot;, &quot;password2&quot;, &quot;email2&quot;);</span>
+<span class="fc" id="L79">            when(userRepository.findByUserName(&quot;user1&quot;)).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L80">            when(userRepository.findByUserName(&quot;user2&quot;)).thenReturn(Optional.of(user2));</span>
+
+            // 2. DebateRoom 생성
+<span class="fc" id="L83">            DebateRoom debateRoom1 = DebateRoom.initTest(1L, &quot;title1&quot;, &quot;topic1&quot;, StateType.OPEN, LocalDateTime.now(), 1L);</span>
+<span class="fc" id="L84">            when(debateRoomRepository.findById(1L)).thenReturn(Optional.of(debateRoom1));</span>
+
+            // 3. DebateJoinedUser 생성 (2명)
+<span class="fc" id="L87">            DebateJoinedUser debateJoinedUser1 = DebateJoinedUser.create(1L, &quot;user1&quot;, true);</span>
+<span class="fc" id="L88">            DebateJoinedUser debateJoinedUser2 = DebateJoinedUser.create(2L, &quot;user2&quot;, false);</span>
+<span class="fc" id="L89">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(&quot;user1&quot;, 1L)).thenReturn(Optional.of(debateJoinedUser1));</span>
+<span class="fc" id="L90">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(&quot;user2&quot;, 1L)).thenReturn(Optional.of(debateJoinedUser2));</span>
+<span class="fc" id="L91">            when(debateJoinedUserRepository.findByDebateRoomId(1L)).thenReturn(List.of(debateJoinedUser1, debateJoinedUser2));</span>
+
+            // Set objectMapper to debateRoomService which is private field and objectMapper is Mocked
+<span class="fc" id="L94">            ObjectMapper virtualObjectMapper = mock(ObjectMapper.class);</span>
+            // if writeValueAsString is called, always return &quot;test&quot;
+<span class="fc" id="L96">            when(virtualObjectMapper.writeValueAsString(any())).thenReturn(&quot;test&quot;);</span>
+<span class="fc" id="L97">            ReflectionTestUtils.setField(debateRoomService, &quot;objectMapper&quot;, virtualObjectMapper);</span>
+
+            // call init method to debateRoomService which is private method
+<span class="fc" id="L100">            Method method = debateRoomService.getClass().getDeclaredMethod(&quot;init&quot;);</span>
+<span class="fc" id="L101">            method.setAccessible(true);</span>
+<span class="fc" id="L102">            method.invoke(debateRoomService);</span>
+<span class="fc" id="L103">        }</span>
+
+        @Test
+        void userEnter() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L108">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L109">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L111">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L112">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            // assert
+<span class="fc" id="L115">            HashMap&lt;WebSocketSession, Long&gt; sessionMap = (HashMap&lt;WebSocketSession, Long&gt;)ReflectionTestUtils.getField(debateRoomService, &quot;sessionToDebateRoomId&quot;);</span>
+<span class="fc" id="L116">            Assertions.assertEquals(sessionMap.size(), 2);</span>
+<span class="fc" id="L117">        }</span>
+
+        @Test
+        void userEnterButNotExistingRoom() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L123">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L124">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+
+            // assert throw
+<span class="fc" id="L127">            Assertions.assertThrows(IllegalArgumentException.class, () -&gt; {</span>
+<span class="nc" id="L128">                debateRoomService.userEnter(virtualSession1, 2L, &quot;user1&quot;);</span>
+<span class="nc" id="L129">            });</span>
+<span class="fc" id="L130">        }</span>
+
+        @Test
+        void userEnterButNotJoined() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L136">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L137">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L139">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L140">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            // Create third user
+<span class="fc" id="L143">            User user3 = User.createTest(3L, &quot;user3&quot;, &quot;password3&quot;, &quot;email3&quot;);</span>
+<span class="fc" id="L144">            when(userRepository.findByUserName(&quot;user3&quot;)).thenReturn(Optional.of(user3));</span>
+
+            // call userEnter method with user3
+<span class="fc" id="L147">            WebSocketSession virtualSession3 = mock(WebSocketSession.class);</span>
+
+            // assert throw
+<span class="fc" id="L150">            Assertions.assertThrows(IllegalArgumentException.class, () -&gt; {</span>
+<span class="nc" id="L151">                debateRoomService.userEnter(virtualSession3, 1L, &quot;user3&quot;);</span>
+<span class="nc" id="L152">            });</span>
+<span class="fc" id="L153">        }</span>
+
+        @Test
+        void userEnterButNotExistingUser() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L159">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L160">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L162">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L163">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            // call userEnter method with user3
+<span class="fc" id="L166">            WebSocketSession virtualSession3 = mock(WebSocketSession.class);</span>
+
+            // assert throw
+<span class="fc" id="L169">            Assertions.assertThrows(IllegalArgumentException.class, () -&gt; {</span>
+<span class="nc" id="L170">                debateRoomService.userEnter(virtualSession3, 1L, &quot;user3&quot;);</span>
+<span class="nc" id="L171">            });</span>
+<span class="fc" id="L172">        }</span>
+
+        @Test
+        void userLeave() {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L177">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L178">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L180">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L181">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            // 유저 퇴장
+<span class="fc" id="L184">            debateRoomService.userLeave(virtualSession1);</span>
+<span class="fc" id="L185">            debateRoomService.userLeave(virtualSession2);</span>
+
+            // assert
+<span class="fc" id="L188">            HashMap&lt;WebSocketSession, Long&gt; sessionMap = (HashMap&lt;WebSocketSession, Long&gt;)ReflectionTestUtils.getField(debateRoomService, &quot;sessionToDebateRoomId&quot;);</span>
+<span class="fc" id="L189">            Assertions.assertEquals(sessionMap.size(), 0);</span>
+<span class="fc" id="L190">        }</span>
+
+        @Test
+        void userLeaveTwice() {
+            // 가상 데이터
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L196">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L197">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L199">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+
+            // Delete debateRoom
+<span class="fc" id="L202">            when(debateRoomRepository.findById(1L)).thenReturn(Optional.ofNullable(null));</span>
+
+<span class="fc" id="L204">            debateRoomService.userLeave(virtualSession1);</span>
+
+            // assert throw
+<span class="fc" id="L207">            Assertions.assertThrows(IllegalArgumentException.class, () -&gt; {</span>
+                // 유저 퇴장
+<span class="nc" id="L209">                debateRoomService.userLeave(virtualSession1);</span>
+<span class="nc" id="L210">            });</span>
+<span class="fc" id="L211">        }</span>
+
+        @Test
+        void handleErrorWhenEnterAndSendMessage() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L216">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L217">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+            // throw error when sendMessage
+<span class="fc" id="L220">            Mockito.doThrow(new IOException()).when(virtualSession1).sendMessage(any(WebSocketMessage.class));</span>
+<span class="fc" id="L221">            Mockito.doThrow(new IOException()).when(virtualSession2).sendMessage(any(WebSocketMessage.class));</span>
+
+            // assert not throw
+<span class="fc" id="L224">            Assertions.assertDoesNotThrow(() -&gt; {</span>
+<span class="fc" id="L225">                debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L226">                debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+<span class="fc" id="L227">            });</span>
+<span class="fc" id="L228">        }</span>
+
+        @Test
+        void handleErrorWhenLeaveAndSendMessage() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L233">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L234">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L236">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L237">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            // throw error when sendMessage
+<span class="fc" id="L240">            Mockito.doThrow(new IOException()).when(virtualSession1).sendMessage(any(WebSocketMessage.class));</span>
+<span class="fc" id="L241">            Mockito.doThrow(new IOException()).when(virtualSession2).sendMessage(any(WebSocketMessage.class));</span>
+
+            // assert not throw
+<span class="fc" id="L244">            Assertions.assertDoesNotThrow(() -&gt; {</span>
+<span class="fc" id="L245">                debateRoomService.userLeave(virtualSession1);</span>
+<span class="fc" id="L246">                debateRoomService.userLeave(virtualSession2);</span>
+<span class="fc" id="L247">            });</span>
+<span class="fc" id="L248">        }</span>
+
+        @Test
+        void endDebateRoomByStepFinish() {
+            // mock ChatGptService
+<span class="fc" id="L253">            ChatGPTService chatGptService = mock(ChatGPTService.class);</span>
+<span class="fc" id="L254">            ReflectionTestUtils.setField(debateRoomService, &quot;chatGPTService&quot;, chatGptService);</span>
+<span class="fc" id="L255">            when(chatGptService.summarizeOpinions(any())).thenReturn(</span>
+<span class="fc" id="L256">                    List.of(new String[]{&quot;summary1&quot;, &quot;summary2&quot;})</span>
+            );
+
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L260">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L261">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L263">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+
+<span class="fc" id="L265">            RealtimeDebateRoom realtimeDebateRoom = debateRoomService.findRoomById(1L);</span>
+<span class="fc" id="L266">            ReflectionTestUtils.setField(realtimeDebateRoom, &quot;factor&quot;, 600000);</span>
+
+<span class="fc" id="L268">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            try {
+<span class="fc" id="L271">                Thread.sleep(1000);</span>
+<span class="nc" id="L272">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L273">                e.printStackTrace();</span>
+<span class="fc" id="L274">            }</span>
+
+            // assert
+<span class="fc" id="L277">            Assertions.assertEquals(7, ReflectionTestUtils.getField(realtimeDebateRoom, &quot;currentDebateStep&quot;));</span>
+<span class="fc" id="L278">        }</span>
+
+        @Test
+        void errorWhenSummarize() {
+            // assert throw
+<span class="fc" id="L283">            ChatGPTService chatGptService = mock(ChatGPTService.class);</span>
+<span class="fc" id="L284">            ReflectionTestUtils.setField(debateRoomService, &quot;chatGPTService&quot;, chatGptService);</span>
+<span class="fc" id="L285">            when(chatGptService.summarizeOpinions(any())).thenReturn(</span>
+<span class="fc" id="L286">                    List.of(new String[]{&quot;summary1&quot;, &quot;summary2&quot;})</span>
+            );
+
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L290">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L291">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L293">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+
+<span class="fc" id="L295">            RealtimeDebateRoom realtimeDebateRoom = debateRoomService.findRoomById(1L);</span>
+<span class="fc" id="L296">            ReflectionTestUtils.setField(realtimeDebateRoom, &quot;factor&quot;, 600000);</span>
+
+
+
+<span class="fc" id="L300">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+            // DELETE DebateRoom from repository
+<span class="fc" id="L302">            when(debateRoomRepository.findById(1L)).thenReturn(Optional.ofNullable(null));</span>
+
+            try {
+<span class="fc" id="L305">                Thread.sleep(1000);</span>
+<span class="nc" id="L306">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L307">                e.printStackTrace();</span>
+<span class="fc" id="L308">            }</span>
+
+<span class="fc" id="L310">            verify(debateRoomRepository, times(2)).save(any());</span>
+<span class="fc" id="L311">        }</span>
+
+        @Test
+        void userChat() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L316">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L317">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L319">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L320">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+<span class="fc" id="L322">            debateRoomService.chatMessageReceived(virtualSession1, &quot;message1&quot;);</span>
+
+<span class="fc" id="L324">            verify(virtualSession2, times(4)).sendMessage(any(WebSocketMessage.class));</span>
+<span class="fc" id="L325">        }</span>
+
+        @Test
+        void userChatButInvalidSession() {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L330">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L331">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L333">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L334">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            // assert throw
+<span class="fc" id="L337">            Assertions.assertThrows(IllegalArgumentException.class, () -&gt; {</span>
+<span class="nc" id="L338">                debateRoomService.chatMessageReceived(mock(WebSocketSession.class), &quot;message1&quot;);</span>
+<span class="nc" id="L339">            });</span>
+<span class="fc" id="L340">        }</span>
+
+        @Test
+        void handleErrorWhenChatAndSendMessage() throws IOException {
+            // 두 명의 유저가 방에 들어감 (Session 2개)
+<span class="fc" id="L345">            WebSocketSession virtualSession1 = mock(WebSocketSession.class);</span>
+<span class="fc" id="L346">            WebSocketSession virtualSession2 = mock(WebSocketSession.class);</span>
+
+<span class="fc" id="L348">            debateRoomService.userEnter(virtualSession1, 1L, &quot;user1&quot;);</span>
+<span class="fc" id="L349">            debateRoomService.userEnter(virtualSession2, 1L, &quot;user2&quot;);</span>
+
+            // throw error when sendMessage
+<span class="fc" id="L352">            Mockito.doThrow(new IOException()).when(virtualSession1).sendMessage(any(WebSocketMessage.class));</span>
+<span class="fc" id="L353">            Mockito.doThrow(new IOException()).when(virtualSession2).sendMessage(any(WebSocketMessage.class));</span>
+
+            // assert not throw
+<span class="fc" id="L356">            Assertions.assertDoesNotThrow(() -&gt; {</span>
+<span class="fc" id="L357">                debateRoomService.chatMessageReceived(virtualSession1, &quot;message1&quot;);</span>
+<span class="fc" id="L358">            });</span>
+<span class="fc" id="L359">        }</span>
+    }
+
+
+
+
+    @Nested
+<span class="fc" id="L366">    class RestApiTest {</span>
+
+        private Movie movie1;
+        private DebateRoom debateRoom1;
+        private DebateRoom debateRoom2;
+        private DebateRoom debateRoom3;
+        private DebateRoom debateRoom4;
+        private DebateRoom debateRoom5;
+        private DebateRoom debateRoom6;
+        private DebateRoom openDebateRoom;
+        private DebateRoom voteDebateRoom;
+
+        private DebateVote vote1;
+        private DebateVote vote2;
+        private DebateVote vote3;
+        private DebateVote vote4;
+
+        private User user1;
+        private User user2;
+        private User user3;
+        private User user4;
+
+        private DebateJoinedUser debateJoinedUser1;
+        private DebateJoinedUser debateJoinedUser2;
+        private DebateJoinedUser debateJoinedUser3;
+
+        private Chat chat1;
+        private Chat chat2;
+
+        @BeforeEach
+        void setUp() {
+<span class="fc" id="L397">            LocalDateTime now = LocalDateTime.now();</span>
+<span class="fc" id="L398">            movie1 = Movie.createTest(1L, &quot;title1&quot;, &quot;comic&quot;, 3.7, &quot;url1&quot;, &quot;description1&quot;);</span>
+
+<span class="fc" id="L400">            debateRoom1 = DebateRoom.initTest(1L, &quot;title1&quot;, &quot;topic1&quot;, StateType.OPEN, now, 1L);</span>
+<span class="fc" id="L401">            debateRoom2 = DebateRoom.initTest(2L, &quot;title1&quot;, &quot;topic2&quot;, StateType.CLOSE, now, 1L);</span>
+<span class="fc" id="L402">            debateRoom3 = DebateRoom.initTest(3L, &quot;title1&quot;, &quot;topic3&quot;, StateType.OPEN, now, 1L);</span>
+<span class="fc" id="L403">            debateRoom4 = DebateRoom.initTest(4L, &quot;title1&quot;, &quot;topic4&quot;, StateType.VOTE, now, 1L);</span>
+<span class="fc" id="L404">            debateRoom5 = DebateRoom.initTest(5L, &quot;title1&quot;, &quot;topic5&quot;, StateType.OPEN, now, 1L);</span>
+<span class="fc" id="L405">            debateRoom6 = DebateRoom.initTest(6L, &quot;title1&quot;, &quot;topic6&quot;, StateType.VOTE, now, 1L);</span>
+
+<span class="fc" id="L407">            openDebateRoom = DebateRoom.initTest(7L, &quot;title1&quot;, &quot;topic7&quot;, StateType.OPEN, now, 5L);</span>
+<span class="fc" id="L408">            voteDebateRoom = DebateRoom.initTest(8L, &quot;title1&quot;, &quot;topic8&quot;, StateType.VOTE, now, 7L);</span>
+
+
+<span class="fc" id="L411">            vote1 = DebateVote.createTest(1L, 1L, &quot;user1&quot;, true, now);</span>
+<span class="fc" id="L412">            vote2 = DebateVote.createTest(2L, 1L, &quot;user2&quot;, true, now);</span>
+<span class="fc" id="L413">            vote3 = DebateVote.createTest(3L, 1L, &quot;user3&quot;, false, now);</span>
+<span class="fc" id="L414">            vote4 = DebateVote.createTest(4L, 1L, &quot;user4&quot;, false, now);</span>
+
+<span class="fc" id="L416">            user1 = User.createTest(1L, &quot;user1&quot;, &quot;password1&quot;, &quot;email1&quot;);</span>
+<span class="fc" id="L417">            user2 = User.createTest(2L, &quot;user2&quot;, &quot;password2&quot;, &quot;email2&quot;);</span>
+
+<span class="fc" id="L419">            user3 = User.createTest(3L, &quot;user3&quot;, &quot;password3&quot;, &quot;email3&quot;);</span>
+<span class="fc" id="L420">            user4 = User.createTest(4L, &quot;user4&quot;, &quot;password4&quot;, &quot;email4&quot;);</span>
+
+<span class="fc" id="L422">            debateJoinedUser1 = DebateJoinedUser.create(1L, &quot;user1&quot;, true);</span>
+<span class="fc" id="L423">            debateJoinedUser2 = DebateJoinedUser.create(2L, &quot;user2&quot;, false);</span>
+<span class="fc" id="L424">            debateJoinedUser3 = DebateJoinedUser.create(1L, &quot;user3&quot;, true);</span>
+
+<span class="fc" id="L426">            chat1 = Chat.createTest(1L, &quot;message1&quot;, ChatType.AGREE, now, 1L);</span>
+<span class="fc" id="L427">            chat2 = Chat.createTest(2L, &quot;message2&quot;, ChatType.DISAGREE, now, 1L);</span>
+<span class="fc" id="L428">        }</span>
+
+        @Test
+        void getDebateRoomsGroupedByStateByMovieIdWithNoException() {
+            // debateRoomRepository.findByMovieId(movieId);
+            // movieRepository.findById(movieId).orElse(null);
+<span class="fc" id="L434">            Long movieId = 1L;</span>
+<span class="fc" id="L435">            String openDebateRoomString = &quot;openDebateRooms&quot;;</span>
+<span class="fc" id="L436">            String voteDebateRoomString = &quot;voteDebateRooms&quot;;</span>
+<span class="fc" id="L437">            when(debateRoomRepository.findByMovieId(movieId)).thenReturn(List.of(debateRoom1, debateRoom2, debateRoom3</span>
+                    , debateRoom4, debateRoom5, debateRoom6));
+<span class="fc" id="L439">            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));</span>
+<span class="fc" id="L440">            Map&lt;String, List&lt;DebateRoomDto&gt;&gt; result = debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId);</span>
+//            System.out.println(result.get(openDebateRoomString).get(0).getTopic());
+//            System.out.println(result.get(openDebateRoomString).get(1).getTopic());
+//            System.out.println(result.get(openDebateRoomString).get(2).getTopic());
+//
+//            System.out.println(result.get(voteDevateRoomString).get(0).getTopic());
+//            System.out.println(result.get(voteDevateRoomString).get(1).getTopic());
+
+
+            // assertions
+<span class="fc" id="L450">            List&lt;DebateRoomDto&gt; openDebateRoomDtos = Stream.of(debateRoom1, debateRoom3, debateRoom5)</span>
+<span class="fc" id="L451">                    .map(room -&gt; {</span>
+<span class="fc" id="L452">                        return DebateRoomDto.builder()</span>
+<span class="fc" id="L453">                                .id(room.getId())</span>
+<span class="fc" id="L454">                                .title(room.getTitle())</span>
+<span class="fc" id="L455">                                .topic(room.getTopic())</span>
+<span class="fc" id="L456">                                .movie(MovieDto.builder()</span>
+<span class="fc" id="L457">                                        .name(movie1.getTitle())</span>
+<span class="fc" id="L458">                                        .id(movie1.getId())</span>
+<span class="fc" id="L459">                                        .thumbnailUrl(movie1.getThumbnailUrl())</span>
+<span class="fc" id="L460">                                        .build())</span>
+<span class="fc" id="L461">                                .startTime(room.getStartTime())</span>
+<span class="fc" id="L462">                                .duration(room.getDuration())</span>
+<span class="fc" id="L463">                                .maxUserNumber(room.getMaxUserNumber())</span>
+<span class="fc" id="L464">                                .build();</span>
+                    })
+<span class="fc" id="L466">                    .toList();</span>
+<span class="fc" id="L467">            List&lt;DebateRoomDto&gt; voteDebateRoomDtos = Stream.of(debateRoom4, debateRoom6)</span>
+<span class="fc" id="L468">                    .map(room -&gt; {</span>
+<span class="fc" id="L469">                        return DebateRoomDto.builder()</span>
+<span class="fc" id="L470">                                .id(room.getId())</span>
+<span class="fc" id="L471">                                .title(room.getTitle())</span>
+<span class="fc" id="L472">                                .topic(room.getTopic())</span>
+<span class="fc" id="L473">                                .movie(MovieDto.builder()</span>
+<span class="fc" id="L474">                                        .name(movie1.getTitle())</span>
+<span class="fc" id="L475">                                        .id(movie1.getId())</span>
+<span class="fc" id="L476">                                        .thumbnailUrl(movie1.getThumbnailUrl())</span>
+<span class="fc" id="L477">                                        .build())</span>
+<span class="fc" id="L478">                                .startTime(room.getStartTime())</span>
+<span class="fc" id="L479">                                .duration(room.getDuration())</span>
+<span class="fc" id="L480">                                .maxUserNumber(room.getMaxUserNumber())</span>
+<span class="fc" id="L481">                                .build();</span>
+                    })
+<span class="fc" id="L483">                    .toList();</span>
+<span class="fc bfc" id="L484" title="All 2 branches covered.">            for (int i = 0; i &lt; openDebateRoomDtos.size(); i++) {</span>
+<span class="fc" id="L485">                assertAllFieldsInDebateRoomDto(result.get(openDebateRoomString).get(i), openDebateRoomDtos.get(i));</span>
+            }
+<span class="fc bfc" id="L487" title="All 2 branches covered.">            for (int i = 0; i &lt; voteDebateRoomDtos.size(); i++) {</span>
+<span class="fc" id="L488">                assertAllFieldsInDebateRoomDto(result.get(voteDebateRoomString).get(i), voteDebateRoomDtos.get(i));</span>
+            }
+
+<span class="fc" id="L491">        }</span>
+
+        @Test
+        void getDebateRoomsGroupedByStateByMovieIdWithExceptionOpen() {
+<span class="fc" id="L495">            Long movieId = 5L;</span>
+<span class="fc" id="L496">            when(debateRoomRepository.findByMovieId(movieId)).thenReturn(List.of(openDebateRoom));</span>
+<span class="fc" id="L497">            when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="pc" id="L498">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId));</span>
+<span class="fc" id="L499">        }</span>
+
+        @Test
+        void getDebateRoomsGroupedByStateByMovieIdWithExceptionVote() {
+<span class="fc" id="L503">            Long movieId = 7L;</span>
+<span class="fc" id="L504">            when(debateRoomRepository.findByMovieId(movieId)).thenReturn(List.of(voteDebateRoom));</span>
+<span class="fc" id="L505">            when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="pc" id="L506">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.getDebateRoomsGroupedByStateByMovieId(movieId));</span>
+
+<span class="fc" id="L508">        }</span>
+
+        void assertAllFieldsInDebateRoomDto(DebateRoomDto resultDto, DebateRoomDto expectedDto) {
+            // movieDto assertion
+<span class="fc" id="L512">            Assertions.assertEquals(resultDto.getMovie().getId(), expectedDto.getMovie().getId());</span>
+<span class="fc" id="L513">            Assertions.assertEquals(resultDto.getMovie().getThumbnailUrl(), expectedDto.getMovie().getThumbnailUrl());</span>
+<span class="fc" id="L514">            Assertions.assertEquals(resultDto.getMovie().getName(), expectedDto.getMovie().getName());</span>
+
+            //
+<span class="fc" id="L517">            Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());</span>
+<span class="fc" id="L518">            Assertions.assertEquals(resultDto.getId(), expectedDto.getId());</span>
+<span class="fc" id="L519">            Assertions.assertEquals(resultDto.getState(), expectedDto.getState());</span>
+<span class="fc" id="L520">            Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());</span>
+<span class="fc" id="L521">            Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());</span>
+<span class="fc" id="L522">            Assertions.assertEquals(resultDto.getAgreeJoinedUserNumber(), expectedDto.getAgreeJoinedUserNumber());</span>
+<span class="fc" id="L523">            Assertions.assertEquals(resultDto.getDisagreeJoinedUserNumber(), expectedDto.getDisagreeJoinedUserNumber());</span>
+<span class="fc" id="L524">            Assertions.assertEquals(resultDto.getMaxUserNumber(), expectedDto.getMaxUserNumber());</span>
+<span class="fc" id="L525">            Assertions.assertEquals(resultDto.getStartTime(), expectedDto.getStartTime());</span>
+
+
+<span class="fc" id="L528">        }</span>
+
+        @Test
+        void getDebateRoomDetails1() {
+            // debateRoomRepository.findById(id).orElse(null);
+            // debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, id);
+            // chatRepository.findByDebateRoomId(id);
+<span class="fc" id="L536">            Long movieId = 1L;</span>
+<span class="fc" id="L537">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L538">            String userName = &quot;user1&quot;;</span>
+<span class="fc" id="L539">            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));</span>
+<span class="fc" id="L540">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(this.debateRoom1));</span>
+<span class="fc" id="L541">            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(vote1);</span>
+<span class="fc" id="L542">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));</span>
+<span class="fc" id="L543">            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(debateJoinedUser1));</span>
+<span class="fc" id="L544">            when(chatRepository.findByDebateRoomId(debateRoomId)).thenReturn(List.of(chat1, chat2));</span>
+<span class="fc" id="L545">            DebateRoomChatDto resultDto = debateRoomService.getDebateRoomDetails(debateRoomId, userName);</span>
+            // make expectation
+<span class="fc" id="L547">            DebateRoomChatDto expectedDto = new DebateRoomChatDto();</span>
+<span class="fc" id="L548">            expectedDto.setTitle(debateRoom1.getTitle());</span>
+<span class="fc" id="L549">            expectedDto.setTopic(debateRoom1.getTopic());</span>
+<span class="fc" id="L550">            expectedDto.setStateType(debateRoom1.getStateType());</span>
+<span class="fc" id="L551">            expectedDto.setStartTime(debateRoom1.getStartTime());</span>
+<span class="fc" id="L552">            expectedDto.setDuration(debateRoom1.getDuration());</span>
+<span class="fc" id="L553">            expectedDto.setMaxUserNumber(debateRoom1.getMaxUserNumber());</span>
+<span class="fc" id="L554">            expectedDto.setMovie(MovieDto.builder()</span>
+<span class="fc" id="L555">                    .name(movie1.getTitle())</span>
+<span class="fc" id="L556">                    .id(movie1.getId())</span>
+<span class="fc" id="L557">                    .thumbnailUrl(movie1.getThumbnailUrl())</span>
+<span class="fc" id="L558">                    .build());</span>
+<span class="fc" id="L559">            expectedDto.setAgreeJoinedUserNumber(1);</span>
+<span class="fc" id="L560">            expectedDto.setDisagreeJoinedUserNumber(0);</span>
+<span class="fc" id="L561">            expectedDto.setChats(List.of(chat1, chat2));</span>
+            // user1은 debateRoom1에 참여 + agree를 했음.
+<span class="fc" id="L563">            expectedDto.setVoted(true);</span>
+<span class="fc" id="L564">            expectedDto.setVoteAgree(vote1.isAgree());</span>
+
+<span class="fc" id="L566">            expectedDto.setJoined(true);</span>
+<span class="fc" id="L567">            expectedDto.setAgree(debateJoinedUser1.isAgree());</span>
+
+            // assertion
+<span class="fc" id="L570">            assertDebateRoomChatDto(resultDto, expectedDto);</span>
+//            Assertions.assertThrows(BadRequestType.CANNOT_FIND_DEBATE_ROOM, debateRoomService.getDebateRoomDetails(debateRoomId, userName));
+<span class="fc" id="L572">        }</span>
+
+
+        void assertDebateRoomChatDto(DebateRoomChatDto resultDto, DebateRoomChatDto expectedDto) {
+<span class="fc" id="L576">            Assertions.assertEquals(resultDto.getAgreeJoinedUserNumber(), expectedDto.getAgreeJoinedUserNumber());</span>
+<span class="fc" id="L577">            Assertions.assertEquals(resultDto.getDisagreeJoinedUserNumber(), expectedDto.getDisagreeJoinedUserNumber());</span>
+<span class="fc" id="L578">            Assertions.assertEquals(resultDto.getMaxUserNumber(), expectedDto.getMaxUserNumber());</span>
+<span class="fc" id="L579">            Assertions.assertEquals(resultDto.getChats(), expectedDto.getChats());</span>
+<span class="fc" id="L580">            Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());</span>
+<span class="fc" id="L581">            Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());</span>
+<span class="fc" id="L582">            Assertions.assertEquals(resultDto.getStateType(), expectedDto.getStateType());</span>
+<span class="fc" id="L583">            Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());</span>
+<span class="fc" id="L584">            Assertions.assertEquals(resultDto.getStartTime(), expectedDto.getStartTime());</span>
+            // movieDto assertions
+<span class="fc" id="L586">            Assertions.assertEquals(resultDto.getMovie().getName(), expectedDto.getMovie().getName());</span>
+<span class="fc" id="L587">            Assertions.assertEquals(resultDto.getMovie().getId(), expectedDto.getMovie().getId());</span>
+<span class="fc" id="L588">            Assertions.assertEquals(resultDto.getMovie().getThumbnailUrl(), expectedDto.getMovie().getThumbnailUrl());</span>
+<span class="fc" id="L589">            Assertions.assertEquals(resultDto.isAgree(), expectedDto.isAgree());</span>
+<span class="fc" id="L590">            Assertions.assertEquals(resultDto.isVoteAgree(), expectedDto.isVoteAgree());</span>
+<span class="fc" id="L591">            Assertions.assertEquals(resultDto.isVoted(), expectedDto.isVoted());</span>
+<span class="fc" id="L592">            Assertions.assertEquals(resultDto.isJoined(), expectedDto.isJoined());</span>
+
+<span class="fc" id="L594">        }</span>
+
+        @Test
+        void castjoin() {
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+            // debateRoomRepository.findById(id).orElse(null);
+            // userRepository.findByUserName(username).orElse(null);
+            // debateVoteRepository.findByUserNameAndDebateRoomId(username, id);
+<span class="fc" id="L602">            String userName = &quot;user3&quot;;</span>
+<span class="fc" id="L603">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L604">            Long movieId = 1L;</span>
+<span class="fc" id="L605">            boolean agree = true;</span>
+<span class="fc" id="L606">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="fc" id="L607">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));</span>
+<span class="fc" id="L608">            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L609">            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(vote1);</span>
+<span class="fc" id="L610">            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));</span>
+
+            // then
+<span class="fc" id="L613">            DebateRoomVoteDto resultDto = debateRoomService.castjoin(debateRoomId, userName, agree);</span>
+
+            // expectation
+<span class="fc" id="L616">            DebateRoomVoteDto expectedDto = new DebateRoomVoteDto();</span>
+<span class="fc" id="L617">            expectedDto.setTitle(debateRoom1.getTitle());</span>
+<span class="fc" id="L618">            expectedDto.setTopic(debateRoom1.getTopic());</span>
+<span class="fc" id="L619">            expectedDto.setStateType(debateRoom1.getStateType());</span>
+<span class="fc" id="L620">            expectedDto.setStartTime(debateRoom1.getStartTime());</span>
+<span class="fc" id="L621">            expectedDto.setDuration(debateRoom1.getDuration());</span>
+<span class="fc" id="L622">            expectedDto.setMaxUserNumber(debateRoom1.getMaxUserNumber());</span>
+<span class="fc" id="L623">            expectedDto.setMovie(MovieDto.builder()</span>
+<span class="fc" id="L624">                    .thumbnailUrl(movie1.getThumbnailUrl())</span>
+<span class="fc" id="L625">                    .name(movie1.getTitle())</span>
+<span class="fc" id="L626">                    .id(movie1.getId())</span>
+<span class="fc" id="L627">                    .build());</span>
+            // 고정
+<span class="fc" id="L629">            expectedDto.setAgree(agree);</span>
+<span class="fc" id="L630">            expectedDto.setJoined(true);</span>
+
+            // 경우의 수마다 변동.
+//            expectedDto.setVoted(true);
+//            expectedDto.setVoteAgree();
+<span class="fc" id="L635">            assertDebateRoomVoteDto(resultDto, expectedDto);</span>
+<span class="fc" id="L636">        }</span>
+
+        @Test
+        void castjoinExistJoinedUserException() {
+<span class="fc" id="L640">            String userName = &quot;user3&quot;;</span>
+<span class="fc" id="L641">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L642">            Long movieId = 1L;</span>
+<span class="fc" id="L643">            boolean agree = true;</span>
+<span class="fc" id="L644">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(debateJoinedUser1));</span>
+<span class="pc" id="L645">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.castjoin(debateRoomId, userName, agree));</span>
+
+<span class="fc" id="L647">        }</span>
+
+        @Test
+        void castjoinDebateRoomException() {
+<span class="fc" id="L651">            String userName = &quot;user3&quot;;</span>
+<span class="fc" id="L652">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L653">            Long movieId = 1L;</span>
+<span class="fc" id="L654">            boolean agree = true;</span>
+<span class="fc" id="L655">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="fc" id="L656">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(null));</span>
+
+<span class="pc" id="L658">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.castjoin(debateRoomId, userName, agree));</span>
+
+<span class="fc" id="L660">        }</span>
+
+        @Test
+        void castjoinUserException() {
+<span class="fc" id="L664">            String userName = &quot;user3&quot;;</span>
+<span class="fc" id="L665">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L666">            Long movieId = 1L;</span>
+<span class="fc" id="L667">            boolean agree = true;</span>
+<span class="fc" id="L668">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="fc" id="L669">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));</span>
+<span class="fc" id="L670">            when(userRepository.findByUserName(userName)).thenReturn(Optional.ofNullable(null));</span>
+
+<span class="pc" id="L672">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.castjoin(debateRoomId, userName, agree));</span>
+<span class="fc" id="L673">        }</span>
+
+        @Test
+        void castjoinMovieException() {
+<span class="fc" id="L677">            String userName = &quot;user3&quot;;</span>
+<span class="fc" id="L678">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L679">            Long movieId = 1L;</span>
+<span class="fc" id="L680">            boolean agree = true;</span>
+<span class="fc" id="L681">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="fc" id="L682">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));</span>
+<span class="fc" id="L683">            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L684">            when(movieRepository.findById(movieId)).thenReturn(Optional.ofNullable(null));</span>
+
+<span class="pc" id="L686">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.castjoin(debateRoomId, userName, agree));</span>
+
+<span class="fc" id="L688">        }</span>
+
+        @Test
+        void castjoinDebateVoteNull() {
+<span class="fc" id="L692">            String userName = &quot;user3&quot;;</span>
+<span class="fc" id="L693">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L694">            Long movieId = 1L;</span>
+<span class="fc" id="L695">            boolean agree = true;</span>
+<span class="fc" id="L696">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="fc" id="L697">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.of(debateRoom1));</span>
+<span class="fc" id="L698">            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L699">            when(debateVoteRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(null);</span>
+<span class="fc" id="L700">            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));</span>
+
+<span class="fc" id="L702">            DebateRoomVoteDto resultDto = debateRoomService.castjoin(debateRoomId, userName, agree);</span>
+<span class="fc" id="L703">            Assertions.assertFalse(resultDto.isVoted());</span>
+<span class="fc" id="L704">            Assertions.assertFalse(resultDto.isVoteAgree());</span>
+<span class="fc" id="L705">        }</span>
+
+        void assertDebateRoomVoteDto(DebateRoomVoteDto resultDto, DebateRoomVoteDto expectedDto) {
+<span class="fc" id="L708">            Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());</span>
+<span class="fc" id="L709">            Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());</span>
+<span class="fc" id="L710">            Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());</span>
+<span class="fc" id="L711">            Assertions.assertEquals(resultDto.getStartTime(), expectedDto.getStartTime());</span>
+<span class="fc" id="L712">            Assertions.assertEquals(resultDto.getStateType(), expectedDto.getStateType());</span>
+<span class="fc" id="L713">            Assertions.assertEquals(resultDto.getMaxUserNumber(), expectedDto.getMaxUserNumber());</span>
+            // movie
+<span class="fc" id="L715">            Assertions.assertEquals(resultDto.getMovie().getId(), expectedDto.getMovie().getId());</span>
+<span class="fc" id="L716">            Assertions.assertEquals(resultDto.getMovie().getName(), expectedDto.getMovie().getName());</span>
+<span class="fc" id="L717">            Assertions.assertEquals(resultDto.getMovie().getThumbnailUrl(), expectedDto.getMovie().getThumbnailUrl());</span>
+
+<span class="fc" id="L719">        }</span>
+
+        @Test
+        void castVote() {
+            // debateRoomRepository.findById(id).orElse(null);
+            // userRepository.findByUserName(username).orElse(null);
+            // debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
+<span class="fc" id="L726">            Long movieId = 1L;</span>
+<span class="fc" id="L727">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L728">            String userName = &quot;user1&quot;;</span>
+<span class="fc" id="L729">            boolean agree = true;</span>
+
+<span class="fc" id="L731">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));</span>
+<span class="fc" id="L732">            when(userRepository.findByUserName(userName)).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L733">            when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, debateRoomId)).thenReturn(Optional.of(debateJoinedUser1));</span>
+<span class="fc" id="L734">            when(movieRepository.findById(movieId)).thenReturn(Optional.of(movie1));</span>
+<span class="fc" id="L735">            DebateRoomVoteDto resultDto = debateRoomService.castVote(debateRoomId, userName, agree);</span>
+            // expectation
+<span class="fc" id="L737">            DebateRoomVoteDto dto = new DebateRoomVoteDto();</span>
+<span class="fc" id="L738">            dto.setTitle(debateRoom1.getTitle());</span>
+<span class="fc" id="L739">            dto.setTopic(debateRoom1.getTopic());</span>
+<span class="fc" id="L740">            dto.setStateType(debateRoom1.getStateType());</span>
+<span class="fc" id="L741">            dto.setStartTime(debateRoom1.getStartTime());</span>
+<span class="fc" id="L742">            dto.setDuration(debateRoom1.getDuration());</span>
+<span class="fc" id="L743">            dto.setMaxUserNumber(debateRoom1.getMaxUserNumber());</span>
+<span class="fc" id="L744">            dto.setMovie(MovieDto.builder()</span>
+<span class="fc" id="L745">                    .name(movie1.getTitle())</span>
+<span class="fc" id="L746">                    .thumbnailUrl(movie1.getThumbnailUrl())</span>
+<span class="fc" id="L747">                    .id(movie1.getId())</span>
+<span class="fc" id="L748">                    .build());</span>
+
+            // 고정
+<span class="fc" id="L751">            dto.setVoted(true);</span>
+<span class="fc" id="L752">            dto.setVoteAgree(agree);</span>
+            // 변동
+<span class="fc" id="L754">            dto.setJoined(true);</span>
+<span class="fc" id="L755">            dto.setAgree(true);</span>
+<span class="fc" id="L756">            assertDebateRoomVoteDto(resultDto, dto);</span>
+
+<span class="fc" id="L758">        }</span>
+
+        @Test
+        void resultVoteInfo() {
+            // debateRoomRepository.findById(id).orElseThrow(() -&gt; new BadRequestException(BadRequestType.CANNOT_FIND_DEBATE_ROOM));
+            // debateVoteRepository.findByDebateRoomId(id);
+            // userRepository.findByUserName
+<span class="fc" id="L765">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L766">            List&lt;DebateVote&gt; votes = List.of(vote1, vote2);</span>
+<span class="fc" id="L767">            List&lt;DebateJoinedUser&gt; allDebateJoinedUser = List.of(debateJoinedUser1);</span>
+
+<span class="fc" id="L769">            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(allDebateJoinedUser);</span>
+<span class="fc" id="L770">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));</span>
+<span class="fc" id="L771">            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);</span>
+<span class="fc" id="L772">            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L773">            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));</span>
+
+<span class="fc" id="L775">            VoteDto resultDto = debateRoomService.resultVoteInfo(debateRoomId);</span>
+
+            // expectation
+<span class="fc" id="L778">            VoteDto expectedDto = VoteDto.builder()</span>
+<span class="fc" id="L779">                    .title(debateRoom1.getTitle())</span>
+<span class="fc" id="L780">                    .topic(debateRoom1.getTopic())</span>
+<span class="fc" id="L781">                    .state(debateRoom1.getStateType())</span>
+<span class="fc" id="L782">                    .startTime(debateRoom1.getStartTime())</span>
+<span class="fc" id="L783">                    .duration(debateRoom1.getDuration())</span>
+<span class="fc" id="L784">                    .build();</span>
+
+            // assertion
+<span class="fc" id="L787">            assertVoteDto(resultDto, expectedDto);</span>
+<span class="fc" id="L788">        }</span>
+
+        @Test
+        void resultVoteInfoDebateRoomException() {
+<span class="fc" id="L792">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L793">            List&lt;DebateVote&gt; votes = List.of(vote1, vote2);</span>
+<span class="fc" id="L794">            List&lt;DebateJoinedUser&gt; allDebateJoinedUser = List.of(debateJoinedUser1);</span>
+
+<span class="fc" id="L796">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(null));</span>
+<span class="pc" id="L797">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.resultVoteInfo(debateRoomId));</span>
+<span class="fc" id="L798">        }</span>
+
+        @Test
+        void resultVoteInfoDisagreeVote() {
+<span class="fc" id="L802">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L803">            List&lt;DebateVote&gt; votes = List.of(vote1, vote3, vote4);</span>
+<span class="fc" id="L804">            List&lt;DebateJoinedUser&gt; allDebateJoinedUser = List.of(debateJoinedUser1);</span>
+
+
+<span class="fc" id="L807">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));</span>
+<span class="fc" id="L808">            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);</span>
+<span class="fc" id="L809">            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(allDebateJoinedUser);</span>
+<span class="fc" id="L810">            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L811">            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));</span>
+<span class="fc" id="L812">            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.of(user3));</span>
+<span class="fc" id="L813">            when(userRepository.findByUserName(user4.getUserName())).thenReturn(Optional.of(user4));</span>
+
+
+<span class="fc" id="L816">            VoteDto resultDto = debateRoomService.resultVoteInfo(debateRoomId);</span>
+<span class="fc" id="L817">            Assertions.assertEquals(resultDto.getState(), debateRoom1.getStateType());</span>
+<span class="fc" id="L818">        }</span>
+
+        @Test
+        void resultVoteInfoUserExceptionInAgree() {
+<span class="fc" id="L822">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L823">            List&lt;DebateVote&gt; votes = List.of(vote1, vote2, vote3);</span>
+<span class="fc" id="L824">            List&lt;DebateJoinedUser&gt; allDebateJoinedUser = List.of(debateJoinedUser1);</span>
+
+
+<span class="fc" id="L827">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));</span>
+<span class="fc" id="L828">            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);</span>
+<span class="fc" id="L829">            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L830">            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.ofNullable(null));</span>
+<span class="fc" id="L831">            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.of(user3));</span>
+
+<span class="pc" id="L833">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.resultVoteInfo(debateRoomId));</span>
+<span class="fc" id="L834">        }</span>
+
+        @Test
+        void resultVoteInfoUserExceptionInDisagree() {
+<span class="fc" id="L838">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L839">            List&lt;DebateVote&gt; votes = List.of(vote1, vote2, vote3);</span>
+<span class="fc" id="L840">            List&lt;DebateJoinedUser&gt; allDebateJoinedUser = List.of(debateJoinedUser1);</span>
+
+
+<span class="fc" id="L843">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));</span>
+<span class="fc" id="L844">            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);</span>
+<span class="fc" id="L845">            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L846">            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));</span>
+<span class="fc" id="L847">            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.ofNullable(null));</span>
+
+<span class="pc" id="L849">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.resultVoteInfo(debateRoomId));</span>
+<span class="fc" id="L850">        }</span>
+
+        @Test
+        void resultVoteInfoJoinedUserException() {
+<span class="fc" id="L854">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L855">            List&lt;DebateVote&gt; votes = List.of(vote1, vote2);</span>
+<span class="fc" id="L856">            List&lt;DebateJoinedUser&gt; allDebateJoinedUser = List.of(debateJoinedUser1);</span>
+
+<span class="fc" id="L858">            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(null);</span>
+<span class="fc" id="L859">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));</span>
+<span class="fc" id="L860">            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);</span>
+<span class="fc" id="L861">            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.of(user1));</span>
+<span class="fc" id="L862">            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));</span>
+
+<span class="pc" id="L864">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.resultVoteInfo(debateRoomId));</span>
+<span class="fc" id="L865">        }</span>
+
+        @Test
+        void resultVoteInfoJoinedUserFilterBranchTest() {
+<span class="fc" id="L869">            DebateVote debateVote1 = DebateVote.createTest(1L, 1L, &quot;name1&quot;, true, LocalDateTime.now());</span>
+<span class="fc" id="L870">            DebateVote debateVote2 = DebateVote.createTest(2L, 1L, &quot;name2&quot;, false, LocalDateTime.now());</span>
+<span class="fc" id="L871">            DebateVote debateVote3 = DebateVote.createTest(3L, 1L, &quot;name3&quot;, true, LocalDateTime.now());</span>
+
+<span class="fc" id="L873">            DebateJoinedUser duser1 = DebateJoinedUser.createTest(1L, 1L, &quot;juser1&quot;, true);</span>
+<span class="fc" id="L874">            DebateJoinedUser duser2 = DebateJoinedUser.createTest(2L, 1L, &quot;juser2&quot;, false);</span>
+
+<span class="fc" id="L876">            User filterUser1 = User.createTest(1L, &quot;name1&quot;, &quot;1111&quot;, &quot;1@ex.com&quot;);</span>
+<span class="fc" id="L877">            User filterUser2 = User.createTest(2L, &quot;name2&quot;, &quot;1111&quot;, &quot;1@ex.com&quot;);</span>
+<span class="fc" id="L878">            User filterUser3 = User.createTest(3L, &quot;name3&quot;, &quot;1111&quot;, &quot;1@ex.com&quot;);</span>
+<span class="fc" id="L879">            User juser1 = User.createTest(3L, &quot;juser1&quot;, &quot;1111&quot;, &quot;1@ex.com&quot;);</span>
+<span class="fc" id="L880">            User juser2 = User.createTest(3L, &quot;juser2&quot;, &quot;1111&quot;, &quot;1@ex.com&quot;);</span>
+
+
+<span class="fc" id="L883">            Long testId = 1L;</span>
+<span class="fc" id="L884">            List&lt;DebateVote&gt; list = List.of(debateVote1, debateVote2, debateVote3);</span>
+<span class="fc" id="L885">            List&lt;DebateJoinedUser&gt; list2 = List.of(duser1, duser2);</span>
+<span class="fc" id="L886">            when(debateRoomRepository.findById(testId)).thenReturn(Optional.of(debateRoom1));</span>
+<span class="fc" id="L887">            when(debateVoteRepository.findByDebateRoomId(testId)).thenReturn(list);</span>
+<span class="fc" id="L888">            when(userRepository.findByUserName(&quot;name1&quot;)).thenReturn(Optional.of(filterUser1));</span>
+<span class="fc" id="L889">            when(userRepository.findByUserName(&quot;name2&quot;)).thenReturn(Optional.of(filterUser2));</span>
+<span class="fc" id="L890">            when(userRepository.findByUserName(&quot;name3&quot;)).thenReturn(Optional.of(filterUser3));</span>
+<span class="fc" id="L891">            when(userRepository.findByUserName(&quot;juser1&quot;)).thenReturn(Optional.of(juser1));</span>
+<span class="fc" id="L892">            when(userRepository.findByUserName(&quot;juser2&quot;)).thenReturn(Optional.of(juser2));</span>
+<span class="fc" id="L893">            when(debateJoinedUserRepository.findByDebateRoomId(testId)).thenReturn(list2);</span>
+<span class="fc" id="L894">            VoteDto voteInfo = debateRoomService.resultVoteInfo(testId);</span>
+
+            //testing
+<span class="fc" id="L897">            Assertions.assertEquals(debateRoom1.getTitle(), voteInfo.getTitle());</span>
+<span class="fc" id="L898">            Assertions.assertEquals(debateRoom1.getTopic(), voteInfo.getTopic());</span>
+<span class="fc" id="L899">            Assertions.assertEquals(StateType.CLOSE, voteInfo.getState());</span>
+<span class="fc" id="L900">            Assertions.assertEquals(debateRoom1.getStartTime(), voteInfo.getStartTime());</span>
+<span class="fc" id="L901">            Assertions.assertEquals(debateRoom1.getDuration(), voteInfo.getDuration());</span>
+<span class="fc" id="L902">            Assertions.assertEquals(debateRoom1.getMaxUserNumber(), voteInfo.getMaxUserNumber());</span>
+<span class="fc" id="L903">        }</span>
+
+        @Test
+        void resultVoteInfoUserCannotFindExceptionByJoinedUserRepo() {
+<span class="fc" id="L907">            Long debateRoomId = 1L;</span>
+<span class="fc" id="L908">            List&lt;DebateVote&gt; votes = List.of(vote1, vote2);</span>
+<span class="fc" id="L909">            List&lt;DebateJoinedUser&gt; allDebateJoinedUser = List.of(debateJoinedUser1, debateJoinedUser3);</span>
+
+<span class="fc" id="L911">            when(debateJoinedUserRepository.findByDebateRoomId(debateRoomId)).thenReturn(allDebateJoinedUser);</span>
+<span class="fc" id="L912">            when(debateRoomRepository.findById(debateRoomId)).thenReturn(Optional.ofNullable(debateRoom1));</span>
+<span class="fc" id="L913">            when(debateVoteRepository.findByDebateRoomId(debateRoomId)).thenReturn(votes);</span>
+<span class="fc" id="L914">            when(userRepository.findByUserName(user1.getUserName())).thenReturn(Optional.ofNullable(user1));</span>
+<span class="fc" id="L915">            when(userRepository.findByUserName(user2.getUserName())).thenReturn(Optional.of(user2));</span>
+<span class="fc" id="L916">            when(userRepository.findByUserName(user3.getUserName())).thenReturn(Optional.ofNullable(null));</span>
+
+<span class="pc" id="L918">            Assertions.assertThrows(RuntimeException.class, () -&gt; debateRoomService.resultVoteInfo(debateRoomId));</span>
+
+<span class="fc" id="L920">        }</span>
+
+
+    }
+
+    void assertVoteDto(VoteDto resultDto, VoteDto expectedDto) {
+<span class="fc" id="L926">        Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());</span>
+<span class="fc" id="L927">        Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());</span>
+<span class="fc" id="L928">        Assertions.assertEquals(resultDto.getState(), expectedDto.getState());</span>
+<span class="fc" id="L929">        Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());</span>
+<span class="fc" id="L930">        Assertions.assertEquals(resultDto.getStartTime(), expectedDto.getStartTime());</span>
+
+
+<span class="fc" id="L933">    }</span>
+
+    @Test
+    void create() {
+        // debateRoomRepository.save(debateRoom)
+//            LocalDateTime now = LocalDateTime.now();
+//            Long movieId = 1L;
+//
+//            DebateRoomCreateDto dto = new DebateRoomCreateDto();
+//            dto.setTitle(&quot;title1&quot;);
+//            dto.setTopic(&quot;topic1&quot;);
+//            dto.setStartTime(now);
+//            dto.setMovieId(movieId);
+//            DebateRoom debateRoom = DebateRoom.initTest(1L, dto.getTitle(), dto.getTopic(), StateType.OPEN, dto.getStartTime(), dto.getMovieId());
+//            when(debateRoomRepository.save(debateRoom)).thenReturn(debateRoom);
+//
+//            Long result = debateRoomService.create(dto);
+//
+//
+//
+//
+//            Assertions.assertEquals(result, debateRoom.getId());
+<span class="fc" id="L955">    }</span>
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Chat.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.domain.chat.domain</a> &gt; <span class="el_source">Chat.java</span></div><h1>Chat.java</h1><pre class="source lang-java linenums">package com.example.movinProject.domain.chat.domain;
+
+import com.example.movinProject.domain.chat.model.ChatType;
+import com.example.movinProject.main.chat.dto.ChatCreateDto;
+import com.example.movinProject.main.chatApiProxy.RealtimeMessage;
+import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
+
+@Entity
+<span class="fc" id="L16">@NoArgsConstructor</span>
+@Getter
+public class Chat {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="fc" id="L21">    private Long id;</span>
+
+<span class="nc" id="L23">    private Long debateRoomId;</span>
+<span class="nc" id="L24">    private Long userId;</span>
+<span class="nc" id="L25">    private String userName;</span>
+
+    @Column(columnDefinition = &quot;NVARCHAR(10000)&quot;)
+<span class="fc" id="L28">    private String message;</span>
+
+    @Enumerated(EnumType.STRING)
+<span class="fc" id="L31">    private ChatType chatType;</span>
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;, timezone = &quot;Asia/Seoul&quot;)
+<span class="nc" id="L35">    private LocalDateTime date;</span>
+
+    public static Chat createByRealtimeMessage(RealtimeMessageDto message){
+<span class="fc" id="L38">        Chat chat = new Chat();</span>
+<span class="fc" id="L39">        chat.message = message.getMessage();</span>
+<span class="fc" id="L40">        chat.date = message.getSendTime();</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if(message.getSenderUserId() == -1){</span>
+<span class="fc" id="L42">            chat.chatType = ChatType.MODERATE;</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        } else if(message.isSenderAgree()){</span>
+<span class="fc" id="L44">            chat.chatType = ChatType.AGREE;</span>
+        }else{
+<span class="nc" id="L46">            chat.chatType = ChatType.DISAGREE;</span>
+        }
+<span class="fc" id="L48">        chat.userId = message.getSenderUserId();</span>
+<span class="fc" id="L49">        chat.debateRoomId = message.getDebateRoomId();</span>
+<span class="fc" id="L50">        chat.userName = message.getSenderUserName();</span>
+<span class="fc" id="L51">        return chat;</span>
+    }
+    public static Chat init(ChatCreateDto dto){
+<span class="fc" id="L54">        Chat chat = new Chat();</span>
+<span class="fc" id="L55">        chat.message = dto.getMessage();</span>
+<span class="fc" id="L56">        chat.date = LocalDateTime.now();</span>
+<span class="fc" id="L57">        chat.chatType = dto.getChatType();</span>
+<span class="fc" id="L58">        chat.debateRoomId = dto.getDebateRoomId();</span>
+<span class="fc" id="L59">        return chat;</span>
+    }
+    public static Chat createTest(Long id, String message, ChatType chatType, LocalDateTime date, Long debateRoomId){
+<span class="fc" id="L62">        Chat chat = new Chat();</span>
+<span class="fc" id="L63">        chat.id = id;</span>
+<span class="fc" id="L64">        chat.message = message;</span>
+<span class="fc" id="L65">        chat.date = date;</span>
+<span class="fc" id="L66">        chat.chatType = chatType;</span>
+<span class="fc" id="L67">        chat.debateRoomId = debateRoomId;</span>
+<span class="fc" id="L68">        return chat;</span>
+    }
+
+    public static Chat cr(Long userId) {
+<span class="fc" id="L72">        Chat chat = new Chat();</span>
+<span class="fc" id="L73">        chat.userId = userId;</span>
+<span class="fc" id="L74">        return chat;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

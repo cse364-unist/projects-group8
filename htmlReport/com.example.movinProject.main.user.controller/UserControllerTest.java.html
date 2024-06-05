@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.user.controller</a> &gt; <span class="el_source">UserControllerTest.java</span></div><h1>UserControllerTest.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.user.controller;
+
+import com.example.movinProject.config.SpringSecurity.security.DatabaseUserDetailsService;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.user.dto.UserDto;
+import com.example.movinProject.main.user.dto.UserRegisterRequest;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+@SpringBootTest
+<span class="fc" id="L20">class UserControllerTest {</span>
+
+    @Autowired
+    private UserController userController;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private DatabaseUserDetailsService userDetailsService;
+
+    @BeforeEach
+    void setup() {
+<span class="fc" id="L33">        userRepository.deleteAll();</span>
+<span class="fc" id="L34">    }</span>
+    @Test
+    @DisplayName(&quot;Register a new user successfully&quot;)
+    void testRegister() {
+<span class="fc" id="L38">        UserRegisterRequest request = new UserRegisterRequest();</span>
+<span class="fc" id="L39">        request.setUserName(&quot;testUser&quot;);</span>
+<span class="fc" id="L40">        request.setPassword(&quot;testPassword&quot;);</span>
+<span class="fc" id="L41">        request.setEmail(&quot;test@example.com&quot;);</span>
+
+<span class="fc" id="L43">        ResponseEntity&lt;UserDto&gt; response = userController.register(request);</span>
+<span class="fc" id="L44">        assertEquals(200, response.getStatusCodeValue());</span>
+<span class="fc" id="L45">        assertNotNull(response.getBody());</span>
+<span class="fc" id="L46">        assertNotNull(response.getBody().getId());</span>
+<span class="fc" id="L47">        assertEquals(&quot;testUser&quot;, response.getBody().getName());</span>
+
+        // Verify user is saved in the repository
+<span class="fc" id="L50">        Optional&lt;User&gt; savedUser = userRepository.findByUserName(&quot;testUser&quot;);</span>
+<span class="fc" id="L51">        assertTrue(savedUser.isPresent());</span>
+<span class="fc" id="L52">        assertEquals(&quot;test@example.com&quot;, savedUser.get().getEmail());</span>
+<span class="fc" id="L53">    }</span>
+
+    @Test
+    @DisplayName(&quot;Attempt to register with existing username&quot;)
+    void testRegisterExistingUser() {
+        // First, create a user
+<span class="fc" id="L59">        User existingUser = User.create(&quot;testUser&quot;, &quot;password123&quot;, &quot;test@example.com&quot;);</span>
+<span class="fc" id="L60">        userRepository.save(existingUser);</span>
+
+        // Try to register the same username
+<span class="fc" id="L63">        UserRegisterRequest request = new UserRegisterRequest();</span>
+<span class="fc" id="L64">        request.setUserName(&quot;testUser&quot;);</span>
+<span class="fc" id="L65">        request.setPassword(&quot;newPassword123&quot;);</span>
+<span class="fc" id="L66">        request.setEmail(&quot;test2@example.com&quot;);</span>
+
+<span class="fc" id="L68">        ResponseEntity&lt;UserDto&gt; response = userController.register(request);</span>
+<span class="fc" id="L69">        assertEquals(400, response.getStatusCodeValue()); // Expect a Bad Request response</span>
+<span class="fc" id="L70">    }</span>
+
+    @Test
+    void testGetUserDetailsExistingUser() {
+
+<span class="fc" id="L75">        User newUser = User.create(&quot;testUser&quot;, &quot;password123&quot;, &quot;test@example.com&quot;);</span>
+<span class="fc" id="L76">        userRepository.save(newUser);</span>
+
+<span class="fc" id="L78">        UserDetails userDetails = userDetailsService.loadUserByUsername(&quot;testUser&quot;);</span>
+
+<span class="fc" id="L80">        ResponseEntity&lt;UserDto&gt; response = userController.getUserDetails(userDetails);</span>
+<span class="fc" id="L81">        assertEquals(200, response.getStatusCodeValue());</span>
+<span class="fc" id="L82">        assertNotNull(response.getBody());</span>
+<span class="fc" id="L83">        assertEquals(&quot;testUser&quot;, response.getBody().getName());</span>
+<span class="fc" id="L84">    }</span>
+
+    @Test
+    void testGetUserDetailsNonExistentUser() {
+
+<span class="fc" id="L89">        ResponseEntity&lt;UserDto&gt; response = userController.getUserDetails(null);</span>
+<span class="fc" id="L90">        assertEquals(403, response.getStatusCodeValue());</span>
+
+<span class="fc" id="L92">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

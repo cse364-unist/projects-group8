@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MovieController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.movie.controller</a> &gt; <span class="el_source">MovieController.java</span></div><h1>MovieController.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.movie.controller;
+
+import com.example.movinProject.domain.movie.domain.Movie;
+import com.example.movinProject.main.movie.dto.MovieDto;
+import com.example.movinProject.main.movie.dto.MovieSearchDto;
+import com.example.movinProject.main.movie.service.MovieService;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/movies&quot;)
+<span class="fc" id="L19">@RequiredArgsConstructor</span>
+public class MovieController {
+
+    private final MovieService movieService;
+
+    @GetMapping(&quot;/mainPage&quot;)
+    public ResponseEntity&lt;Map&lt;String, List&lt;Movie&gt;&gt;&gt; getMainPageMovies() {
+<span class="fc" id="L26">        List&lt;Movie&gt; debateMovies = movieService.findDebateMovies();</span>
+<span class="fc" id="L27">        List&lt;Movie&gt; popularMovies = movieService.findPopularMovies(4.3);</span>
+
+<span class="fc" id="L29">        Map&lt;String, List&lt;Movie&gt;&gt; response = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L30">        response.put(&quot;debateMovies&quot;, debateMovies);</span>
+<span class="fc" id="L31">        response.put(&quot;popularMovies&quot;, popularMovies);</span>
+
+<span class="fc" id="L33">        return ResponseEntity.ok(response);</span>
+    }
+
+    @PostMapping(&quot;/search&quot;)
+    public ResponseEntity&lt;Map&lt;String, List&lt;MovieDto&gt;&gt;&gt; searchMovies(@RequestBody MovieSearchDto movieSearchDto) {
+<span class="nc" id="L38">        List&lt;Movie&gt; movies = movieService.searchMoviesByKeyword(movieSearchDto.getKeyword(), movieSearchDto.getPage());</span>
+<span class="nc" id="L39">        List&lt;MovieDto&gt; movieDtos = movies.stream()</span>
+<span class="nc" id="L40">                .map(movie -&gt; MovieDto.builder()</span>
+<span class="nc" id="L41">                        .id(movie.getId())</span>
+<span class="nc" id="L42">                        .thumbnailUrl(movie.getThumbnailUrl())</span>
+<span class="nc" id="L43">                        .name(movie.getTitle())</span>
+<span class="nc" id="L44">                        .build())</span>
+<span class="nc" id="L45">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L47">        Map&lt;String, List&lt;MovieDto&gt;&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L48">        response.put(&quot;movies&quot;, movieDtos);</span>
+<span class="nc" id="L49">        return ResponseEntity.ok(response);</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Movie&gt; getMovieById(@PathVariable Long id) {
+<span class="fc" id="L54">        Movie movie = movieService.findById(id)</span>
+<span class="pc" id="L55">                .orElseThrow(() -&gt; new RuntimeException(&quot;Movie not found with id: &quot; + id));</span>
+
+<span class="fc" id="L57">        return ResponseEntity.ok(movie);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

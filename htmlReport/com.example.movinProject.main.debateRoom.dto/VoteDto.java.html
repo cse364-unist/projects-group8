@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VoteDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.dto</a> &gt; <span class="el_source">VoteDto.java</span></div><h1>VoteDto.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.dto;
+
+import com.example.movinProject.domain.chat.domain.Chat;
+import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.debateRoom.model.StateType;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.swing.plaf.nimbus.State;
+import java.time.LocalDateTime;
+import java.util.List;
+
+<span class="pc" id="L14">@Builder</span>
+public class VoteDto {
+    private boolean vote;
+    private boolean agree;
+    private String title;
+    private String topic;
+    private StateType state;
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;, timezone = &quot;Asia/Seoul&quot;)
+    private LocalDateTime startTime;
+
+    private int duration;
+    private int maxUserNumber;
+    private int agreeJoinedUserNumber;
+    private int disagreeJoinedUserNumber;
+    private String summarize;
+    private List&lt;Chat&gt; chats;
+
+    public boolean isVote() {
+<span class="nc" id="L34">        return vote;</span>
+    }
+
+    public void setVote(boolean vote) {
+<span class="nc" id="L38">        this.vote = vote;</span>
+<span class="nc" id="L39">    }</span>
+
+    public boolean isAgree() {
+<span class="nc" id="L42">        return agree;</span>
+    }
+    public void setAgree(boolean agree) {
+<span class="nc" id="L45">        this.agree = agree;</span>
+<span class="nc" id="L46">    }</span>
+
+    public String getTitle() {
+<span class="fc" id="L49">        return title;</span>
+    }
+    public void setTitle(String title) {
+<span class="nc" id="L52">        this.title = title;</span>
+<span class="nc" id="L53">    }</span>
+
+    public String getTopic() {
+<span class="fc" id="L56">        return topic;</span>
+    }
+    public void setTopic(String topic) {
+<span class="nc" id="L59">        this.topic = topic;</span>
+<span class="nc" id="L60">    }</span>
+
+    public StateType getState() {
+<span class="fc" id="L63">        return state;</span>
+    }
+    public void setState(StateType state) {
+<span class="fc" id="L66">        this.state = state;</span>
+<span class="fc" id="L67">    }</span>
+
+    public LocalDateTime getStartTime() {
+<span class="fc" id="L70">        return startTime;</span>
+    }
+    public void setStartTime(LocalDateTime startTime) {
+<span class="nc" id="L73">        this.startTime = startTime;</span>
+<span class="nc" id="L74">    }</span>
+
+    public int getDuration() {
+<span class="fc" id="L77">        return duration;</span>
+    }
+    public void setDuration(int duration) {
+<span class="nc" id="L80">        this.duration = duration;</span>
+<span class="nc" id="L81">    }</span>
+
+    public int getMaxUserNumber() {
+<span class="fc" id="L84">        return maxUserNumber;</span>
+    }
+    public void setMaxUserNumber(int maxUserNumber) {
+<span class="nc" id="L87">        this.maxUserNumber = maxUserNumber;</span>
+<span class="nc" id="L88">    }</span>
+
+    public int getAgreeJoinedUserNumber() {
+<span class="nc" id="L91">        return agreeJoinedUserNumber;</span>
+    }
+    public void setAgreeJoinedUserNumber(int agreeJoinedUserNumber) {
+<span class="fc" id="L94">        this.agreeJoinedUserNumber = agreeJoinedUserNumber;</span>
+<span class="fc" id="L95">    }</span>
+
+    public int getDisagreeJoinedUserNumber() {
+<span class="nc" id="L98">        return disagreeJoinedUserNumber;</span>
+    }
+    public void setDisagreeJoinedUserNumber(int disagreeJoinedUserNumber) {
+<span class="fc" id="L101">        this.disagreeJoinedUserNumber = disagreeJoinedUserNumber;</span>
+<span class="fc" id="L102">    }</span>
+
+    public String getSummarize() {
+<span class="nc" id="L105">        return summarize;</span>
+    }
+    public void setSummarize(String summarize) {
+<span class="nc" id="L108">        this.summarize = summarize;</span>
+<span class="nc" id="L109">    }</span>
+
+    public List&lt;Chat&gt; getChats() {
+<span class="nc" id="L112">        return chats;</span>
+    }
+    public void setChats(List&lt;Chat&gt; chats) {
+<span class="nc" id="L115">        this.chats = chats;</span>
+<span class="nc" id="L116">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

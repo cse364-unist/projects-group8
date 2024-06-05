@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatGPTResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.response</a> &gt; <span class="el_source">ChatGPTResponse.java</span></div><h1>ChatGPTResponse.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.response;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.List;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ChatGPTResponse {
+
+    public String id;
+    public String object;
+    public int created;
+    public List&lt;Choice&gt; choices;
+    public Usage usage;
+
+<span class="fc" id="L15">    public ChatGPTResponse() {</span>
+<span class="fc" id="L16">    }</span>
+
+    public String getId() {
+<span class="nc" id="L19">        return id;</span>
+    }
+
+    public void setId(String id) {
+<span class="fc" id="L23">        this.id = id;</span>
+<span class="fc" id="L24">    }</span>
+
+    public String getObject() {
+<span class="nc" id="L27">        return object;</span>
+    }
+
+    public void setObject(String object) {
+<span class="fc" id="L31">        this.object = object;</span>
+<span class="fc" id="L32">    }</span>
+
+    public int getCreated() {
+<span class="nc" id="L35">        return created;</span>
+    }
+
+    public void setCreated(int created) {
+<span class="fc" id="L39">        this.created = created;</span>
+<span class="fc" id="L40">    }</span>
+
+    public List&lt;Choice&gt; getChoices() {
+<span class="fc" id="L43">        return choices;</span>
+    }
+
+    public void setChoices(List&lt;Choice&gt; choices) {
+<span class="fc" id="L47">        this.choices = choices;</span>
+<span class="fc" id="L48">    }</span>
+
+    public Usage getUsage() {
+<span class="nc" id="L51">        return usage;</span>
+    }
+
+    public void setUsage(Usage usage) {
+<span class="fc" id="L55">        this.usage = usage;</span>
+<span class="fc" id="L56">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

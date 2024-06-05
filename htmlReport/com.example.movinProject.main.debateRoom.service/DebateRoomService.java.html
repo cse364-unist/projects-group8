@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebateRoomService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.service</a> &gt; <span class="el_source">DebateRoomService.java</span></div><h1>DebateRoomService.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.service;
+
+
+import com.example.movinProject.config.exception.BadRequestException;
+import com.example.movinProject.config.exception.BadRequestType;
+import com.example.movinProject.domain.chat.domain.Chat;
+import com.example.movinProject.domain.chat.repository.ChatRepository;
+import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
+import com.example.movinProject.domain.debateJoinedUser.domain.DebateJoinedUser;
+import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.debateRoom.model.StateType;
+import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import com.example.movinProject.domain.debateVote.domain.DebateVote;
+import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
+import com.example.movinProject.domain.movie.domain.Movie;
+import com.example.movinProject.domain.movie.repository.MovieRepository;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.debateRoom.dto.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.example.movinProject.main.chatApiProxy.chatRoom.RealtimeDebateRoom;
+import com.example.movinProject.main.chatApiProxy.dto.RealtimeMessageDto;
+import com.example.movinProject.main.movie.dto.MovieDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+<span class="fc" id="L40">@Slf4j</span>
+<span class="fc" id="L41">@RequiredArgsConstructor</span>
+@Service
+// @Transactional(readOnly = true)
+public class DebateRoomService {
+
+    private final DebateRoomRepository debateRoomRepository;
+    private final DebateJoinedUserRepository debateJoinedUserRepository;
+    private final ChatRepository chatRepository;
+    private final DebateVoteRepository debateVoteRepository;
+    private final UserRepository userRepository;
+    private final MovieRepository movieRepository;
+
+    private final ChatGPTService chatGPTService;
+
+    private final ObjectMapper objectMapper;
+    private Map&lt;Long, RealtimeDebateRoom&gt; chatRooms;
+
+<span class="fc" id="L58">    private HashMap&lt;WebSocketSession, Long&gt; sessionToDebateRoomId = new HashMap&lt;&gt;();</span>
+
+    @PostConstruct
+    private void init() {
+<span class="fc" id="L62">        chatRooms = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L63">    }</span>
+
+    public RealtimeDebateRoom findRoomById(Long roomId) {
+<span class="fc" id="L66">        return chatRooms.get(roomId);</span>
+    }
+
+
+    @Transactional
+    public Long create(DebateRoomCreateDto dto){
+<span class="nc" id="L72">        DebateRoom debateRoom = DebateRoom.init(</span>
+<span class="nc" id="L73">                dto.getTitle(),</span>
+<span class="nc" id="L74">                dto.getTopic(),</span>
+                StateType.OPEN,
+<span class="nc" id="L76">                dto.getStartTime(),</span>
+<span class="nc" id="L77">                dto.getMovieId()</span>
+        );
+<span class="nc" id="L79">        DebateRoom savedDebateRoom = debateRoomRepository.save(debateRoom);</span>
+<span class="nc" id="L80">        return savedDebateRoom.getId();</span>
+    }
+
+
+    //    @Transactional
+    public void startDebate(RealtimeDebateRoom room) {
+<span class="fc" id="L86">        System.out.println(&quot;토론 시작&quot;);</span>
+        // 토론방 상태 변경
+        {
+<span class="fc" id="L89">            DebateRoom changedDebateRoom = room.getDebateRoom();</span>
+<span class="fc" id="L90">            changedDebateRoom.setStateType(StateType.DISCUSS);</span>
+<span class="fc" id="L91">            debateRoomRepository.save(changedDebateRoom);</span>
+        }
+
+<span class="fc" id="L94">        room.addStepChangeListener(</span>
+                (step, stepEndTime, realtimeDebateRoom) -&gt; {
+<span class="fc" id="L96">                    RealtimeMessageDto stepChangeMessage = new RealtimeMessageDto();</span>
+<span class="fc" id="L97">                    stepChangeMessage.setMessageType(RealtimeMessageDto.MessageType.StepChange);</span>
+<span class="fc" id="L98">                    stepChangeMessage.setDebateRoomId(room.getDebateRoom().getId());</span>
+<span class="fc" id="L99">                    stepChangeMessage.setStep(step);</span>
+<span class="fc" id="L100">                    stepChangeMessage.setStepEndTime(stepEndTime);</span>
+<span class="fc" id="L101">                    stepChangeMessage.setSendTime(LocalDateTime.now());</span>
+
+<span class="fc" id="L103">                    realtimeDebateRoom.getSessions().parallelStream().forEach(s -&gt; {</span>
+                        try {
+<span class="fc" id="L105">                            s.sendMessage(new TextMessage(objectMapper.writeValueAsString(stepChangeMessage)));</span>
+<span class="fc" id="L106">                        } catch (IOException e) {</span>
+<span class="fc" id="L107">                            log.error(&quot;메시지 전송 중 오류가 발생했습니다.&quot;, e);</span>
+<span class="fc" id="L108">                        }</span>
+<span class="fc" id="L109">                    });</span>
+
+<span class="fc bfc" id="L111" title="All 2 branches covered.">                    if(step == 7) {</span>
+                        // 토론방 상태 변경 (토론 종료, 투표 시작)
+<span class="fc" id="L113">                        DebateRoom debateRoom = room.getDebateRoom();</span>
+<span class="fc" id="L114">                        debateRoom.setStateType(StateType.VOTE);</span>
+<span class="fc" id="L115">                        debateRoomRepository.save(debateRoom);</span>
+                    }
+<span class="fc" id="L117">                }</span>
+        );
+
+<span class="fc" id="L120">        room.addModeratorMessageListener(</span>
+                ((message, realtimeDebateRoom) -&gt; {
+<span class="fc" id="L122">                    RealtimeMessageDto moderatorMessage = RealtimeMessageDto.builder()</span>
+<span class="fc" id="L123">                            .messageType(RealtimeMessageDto.MessageType.TALK)</span>
+<span class="fc" id="L124">                            .debateRoomId(room.getDebateRoom().getId())</span>
+<span class="fc" id="L125">                            .senderUserId(-1L)</span>
+<span class="fc" id="L126">                            .senderUserName(&quot;사회자&quot;)</span>
+<span class="fc" id="L127">                            .message(message)</span>
+<span class="fc" id="L128">                            .sendTime(LocalDateTime.now())</span>
+<span class="fc" id="L129">                            .build();</span>
+<span class="fc" id="L130">                    Chat moderatorChat = Chat.createByRealtimeMessage(moderatorMessage);</span>
+
+                    // 채팅 내용 저장
+<span class="fc" id="L133">                    chatRepository.save(moderatorChat);</span>
+<span class="fc" id="L134">                    realtimeDebateRoom.getSessions().parallelStream().forEach(s -&gt; {</span>
+                        try {
+<span class="fc" id="L136">                            s.sendMessage(new TextMessage(objectMapper.writeValueAsString(moderatorMessage)));</span>
+<span class="fc" id="L137">                        } catch (IOException e) {</span>
+<span class="fc" id="L138">                            log.error(&quot;메시지 전송 중 오류가 발생했습니다.&quot;, e);</span>
+<span class="fc" id="L139">                        }</span>
+<span class="fc" id="L140">                    });</span>
+<span class="fc" id="L141">                })</span>
+        );
+
+<span class="fc" id="L144">        room.addSummarizeCreatedListener(new RealtimeDebateRoom.SummarizeCreatedListener() {</span>
+                                             @Override
+                                             @Transactional
+                                             public void onSummarizeCreated(String summarized, RealtimeDebateRoom realtimeDebateRoom) {
+                                                 // Load debate room
+<span class="fc" id="L149">                                                 DebateRoom debateRoom = debateRoomRepository.findById(realtimeDebateRoom.getDebateRoom().getId()).orElseThrow(() -&gt; new IllegalArgumentException(&quot;존재하지 않는 토론방입니다.&quot;));</span>
+<span class="fc" id="L150">                                                 debateRoom.setSummarize(summarized);</span>
+                                                 // Save summarize
+<span class="fc" id="L152">                                                 debateRoomRepository.save(debateRoom);</span>
+<span class="fc" id="L153">                                             }</span>
+                                         }
+
+        );
+
+        // 토론 시작
+<span class="fc" id="L159">        room.startDebate();</span>
+<span class="fc" id="L160">    }</span>
+
+
+    public void userEnter(WebSocketSession session, Long debateRoomId, String userName){
+<span class="fc" id="L164">        RealtimeDebateRoom room = findRoomById(debateRoomId);</span>
+
+        // if room is not exist, create new room
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if(room == null) {</span>
+<span class="fc" id="L168">            DebateRoom debateRoom = debateRoomRepository.findById(debateRoomId).orElseThrow(() -&gt; new IllegalArgumentException(&quot;존재하지 않는 토론방입니다.&quot;));</span>
+<span class="fc" id="L169">            room = new RealtimeDebateRoom(debateRoom, chatGPTService);</span>
+<span class="fc" id="L170">            chatRooms.put(debateRoomId, room);</span>
+        }
+
+<span class="fc" id="L173">        sessionToDebateRoomId.put(session, debateRoomId);</span>
+
+        // Get User from db
+<span class="fc" id="L176">        User user = userRepository.findByUserName(</span>
+                userName
+<span class="fc" id="L178">        ).orElseThrow(() -&gt; new IllegalArgumentException(&quot;존재하지 않는 사용자입니다.&quot;));</span>
+
+        // Get user's agree
+<span class="fc" id="L181">        Optional&lt;DebateJoinedUser&gt; debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(user.getUserName(), debateRoomId);</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        if(debateJoinedUser.isEmpty()) {</span>
+<span class="fc" id="L183">            throw new IllegalArgumentException(&quot;토론방에 참여하지 않은 사용자입니다.&quot;);</span>
+        }
+<span class="fc" id="L185">        boolean isAgree = debateJoinedUser.get().isAgree();</span>
+
+<span class="fc" id="L187">        RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder().</span>
+<span class="fc" id="L188">                messageType(RealtimeMessageDto.MessageType.ENTER).</span>
+<span class="fc" id="L189">                debateRoomId(debateRoomId).</span>
+<span class="fc" id="L190">                senderUserId(user.getId()).</span>
+<span class="fc" id="L191">                senderUserName(user.getUserName()).</span>
+<span class="fc" id="L192">                isSenderAgree(isAgree).</span>
+<span class="fc" id="L193">                sendTime(LocalDateTime.now()).</span>
+<span class="fc" id="L194">                build();</span>
+<span class="fc" id="L195">        room.addClient(session, user, isAgree);</span>
+
+        // 메시지 전송
+<span class="fc" id="L198">        room.getSessions().parallelStream().forEach(s -&gt; {</span>
+            try {
+<span class="fc" id="L200">                s.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));</span>
+<span class="fc" id="L201">            } catch (IOException e) {</span>
+<span class="fc" id="L202">                log.error(&quot;메시지 전송 중 오류가 발생했습니다.&quot;, e);</span>
+<span class="fc" id="L203">            }</span>
+<span class="fc" id="L204">        });</span>
+
+        // 만약 모든 사용자가 입장했다면, 토론 시작
+<span class="fc" id="L207">        List&lt;DebateJoinedUser&gt; userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if(room.getSessions().size() == userIds.size()) {</span>
+            // 토론 시작
+<span class="fc" id="L210">            startDebate(room);</span>
+        }
+<span class="fc" id="L212">    }</span>
+
+    public void userLeave(WebSocketSession session) {
+<span class="fc" id="L215">        Long debateRoomId = sessionToDebateRoomId.get(session);</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        if(debateRoomId == null) {</span>
+<span class="fc" id="L217">            throw new IllegalArgumentException(&quot;비정상적 접근입니다.&quot;);</span>
+        }
+
+<span class="fc" id="L220">        RealtimeDebateRoom room = findRoomById(debateRoomId);</span>
+<span class="fc" id="L221">        RealtimeDebateRoom.DebateRoomSessionInfo sessionInfo = room.findDebateRoomSessionInfoBySession(session);</span>
+
+<span class="fc" id="L223">        RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder().</span>
+<span class="fc" id="L224">                messageType(RealtimeMessageDto.MessageType.QUIT).</span>
+<span class="fc" id="L225">                debateRoomId(debateRoomId).</span>
+<span class="fc" id="L226">                senderUserId(sessionInfo.getUser().getId()).</span>
+<span class="fc" id="L227">                senderUserName(sessionInfo.getUser().getUserName()).</span>
+<span class="fc" id="L228">                isSenderAgree(sessionInfo.isAgree()).</span>
+<span class="fc" id="L229">                sendTime(LocalDateTime.now()).</span>
+<span class="fc" id="L230">                build();</span>
+
+<span class="fc" id="L232">        room.removeClient(session);</span>
+<span class="fc" id="L233">        sessionToDebateRoomId.remove(session);</span>
+
+        // 만약 모든 사용자가 퇴장했다면, 방 삭제
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if(room.getSessions().isEmpty()) {</span>
+<span class="fc" id="L237">            room.stopAll();</span>
+<span class="fc" id="L238">            chatRooms.remove(debateRoomId);</span>
+<span class="fc" id="L239">            return;</span>
+        }
+
+        // 메시지 전송
+<span class="fc" id="L243">        room.getSessions().parallelStream().forEach(s -&gt; {</span>
+            try {
+<span class="fc" id="L245">                s.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));</span>
+<span class="fc" id="L246">            } catch (IOException e) {</span>
+<span class="fc" id="L247">                log.error(&quot;메시지 전송 중 오류가 발생했습니다.&quot;, e);</span>
+<span class="fc" id="L248">            }</span>
+<span class="fc" id="L249">        });</span>
+<span class="fc" id="L250">    }</span>
+
+    //    @Transactional
+    public void chatMessageReceived(WebSocketSession session, String message) {
+        // 채팅방에 있는 모든 사용자에게 메시지 전송
+        // find the room that findDebateRoomSessionInfoBySession is not null
+<span class="fc" id="L256">        RealtimeDebateRoom room = findRoomById(sessionToDebateRoomId.get(session));</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">        if(room == null) {</span>
+<span class="fc" id="L258">            throw new IllegalArgumentException(&quot;오류가 발생했습니다.&quot;);</span>
+        }
+
+<span class="fc" id="L261">        RealtimeDebateRoom.DebateRoomSessionInfo sessionInfo = room.findDebateRoomSessionInfoBySession(session);</span>
+
+        // TODO: DebateRoom이 시작한 상태인지 확인하고, 시작하지 않은 상태라면 메시지를 보내지 않도록 수정
+
+<span class="fc" id="L265">        RealtimeMessageDto realtimeMessage = RealtimeMessageDto.builder()</span>
+<span class="fc" id="L266">                .messageType(RealtimeMessageDto.MessageType.TALK)</span>
+<span class="fc" id="L267">                .debateRoomId(room.getDebateRoom().getId())</span>
+<span class="fc" id="L268">                .senderUserId(sessionInfo.getUser().getId())</span>
+<span class="fc" id="L269">                .senderUserName(sessionInfo.getUser().getUserName())</span>
+<span class="fc" id="L270">                .message(message)</span>
+<span class="fc" id="L271">                .isSenderAgree(sessionInfo.isAgree())</span>
+<span class="fc" id="L272">                .sendTime(LocalDateTime.now())</span>
+<span class="fc" id="L273">                .build();</span>
+
+        // 메시지 전송
+<span class="fc" id="L276">        room.getSessions().parallelStream().forEach(ss -&gt; {</span>
+            try {
+<span class="fc" id="L278">                ss.sendMessage(new TextMessage(objectMapper.writeValueAsString(realtimeMessage)));</span>
+<span class="fc" id="L279">            } catch (IOException e) {</span>
+<span class="fc" id="L280">                log.error(&quot;메시지 전송 중 오류가 발생했습니다.&quot;, e);</span>
+<span class="fc" id="L281">            }</span>
+<span class="fc" id="L282">        });</span>
+
+        // 채팅 내용 저장
+<span class="fc" id="L285">        Chat createdChat = Chat.createByRealtimeMessage(realtimeMessage);</span>
+<span class="fc" id="L286">        chatRepository.save(createdChat);</span>
+<span class="fc" id="L287">    }</span>
+
+    // 여기 밑은 REST API
+
+    public Map&lt;String, List&lt;DebateRoomDto&gt;&gt; getDebateRoomsGroupedByStateByMovieId(Long movieId) {
+<span class="fc" id="L292">        List&lt;DebateRoom&gt; rooms = debateRoomRepository.findByMovieId(movieId);</span>
+<span class="fc" id="L293">        Map&lt;String, List&lt;DebateRoomDto&gt;&gt; groupedRooms = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L294">        groupedRooms.put(&quot;openDebateRooms&quot;, rooms.stream()</span>
+<span class="fc" id="L295">                .filter(room -&gt; StateType.OPEN.equals(room.getStateType()))</span>
+<span class="fc" id="L296">                .map( room -&gt;  DebateRoomDto.builder()</span>
+<span class="fc" id="L297">                            .id(room.getId())</span>
+<span class="fc" id="L298">                            .title(room.getTitle())</span>
+<span class="fc" id="L299">                            .topic(room.getTopic())</span>
+<span class="fc" id="L300">                            .movie(getMovieDto(room.getMovieId()).orElseThrow(() -&gt; new RuntimeException(&quot;영화 정보를 찾을 수 없습니다.&quot;)))</span>
+<span class="fc" id="L301">                            .startTime(room.getStartTime())</span>
+<span class="fc" id="L302">                            .duration(room.getDuration())</span>
+<span class="fc" id="L303">                            .maxUserNumber(room.getMaxUserNumber())</span>
+<span class="fc" id="L304">                            .build()</span>
+                )
+<span class="fc" id="L306">                .collect(Collectors.toList()));</span>
+<span class="fc" id="L307">        groupedRooms.put(&quot;voteDebateRooms&quot;, rooms.stream()</span>
+<span class="fc" id="L308">                .filter(room -&gt; StateType.VOTE.equals(room.getStateType()))</span>
+<span class="fc" id="L309">                .map( room -&gt;  DebateRoomDto.builder()</span>
+<span class="fc" id="L310">                            .id(room.getId())</span>
+<span class="fc" id="L311">                            .title(room.getTitle())</span>
+<span class="fc" id="L312">                            .topic(room.getTopic())</span>
+<span class="fc" id="L313">                            .movie(getMovieDto(room.getMovieId()).orElseThrow(() -&gt; new RuntimeException(&quot;영화 정보를 찾을 수 없습니다.&quot;)))</span>
+<span class="fc" id="L314">                            .startTime(room.getStartTime())</span>
+<span class="fc" id="L315">                            .duration(room.getDuration())</span>
+<span class="fc" id="L316">                            .maxUserNumber(room.getMaxUserNumber())</span>
+<span class="fc" id="L317">                            .build()</span>
+                )
+<span class="fc" id="L319">                .collect(Collectors.toList()));</span>
+
+
+<span class="fc" id="L322">        return groupedRooms;</span>
+    }
+
+    private void setJoinedUserNumberToDTO(DebateRoomChatDto debateRoomChatDTO, Long debateRoomId) {
+<span class="fc" id="L326">        List&lt;DebateJoinedUser&gt; allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);</span>
+<span class="fc" id="L327">        debateRoomChatDTO.setAgreeJoinedUserNumber(</span>
+<span class="fc" id="L328">                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()</span>
+        );
+<span class="fc" id="L330">        debateRoomChatDTO.setDisagreeJoinedUserNumber(</span>
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">                (int) allJoinedUsers.stream().filter(j -&gt; !j.isAgree()).count()</span>
+        );
+<span class="fc" id="L333">    }</span>
+
+    private void setJoinedUserNumberToDTO(DebateRoomVoteDto debateRoomVoteDTO, Long debateRoomId) {
+<span class="fc" id="L336">        List&lt;DebateJoinedUser&gt; allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);</span>
+<span class="fc" id="L337">        debateRoomVoteDTO.setAgreeJoinedUserNumber(</span>
+<span class="fc" id="L338">                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()</span>
+        );
+<span class="fc" id="L340">        debateRoomVoteDTO.setDisagreeJoinedUserNumber(</span>
+<span class="pc bnc" id="L341" title="All 2 branches missed.">                (int) allJoinedUsers.stream().filter(j -&gt; !j.isAgree()).count()</span>
+        );
+<span class="fc" id="L343">    }</span>
+
+    private void setJoinedUserNumberToDTO(VoteDto debateRoomVoteDTO, Long debateRoomId) {
+<span class="fc" id="L346">        List&lt;DebateJoinedUser&gt; allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);</span>
+<span class="fc" id="L347">        debateRoomVoteDTO.setAgreeJoinedUserNumber(</span>
+<span class="fc" id="L348">                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()</span>
+        );
+<span class="fc" id="L350">        debateRoomVoteDTO.setDisagreeJoinedUserNumber(</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">                (int) allJoinedUsers.stream().filter(j -&gt; !j.isAgree()).count()</span>
+        );
+<span class="fc" id="L353">    }</span>
+
+    private Optional&lt;MovieDto&gt; getMovieDto(Long movieId) {
+<span class="fc" id="L356">        Movie movie = movieRepository.findById(movieId).orElse(null);</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        if (movie == null) {</span>
+<span class="fc" id="L358">            return Optional.empty();</span>
+        }
+<span class="fc" id="L360">        return Optional.of(MovieDto.builder()</span>
+<span class="fc" id="L361">                .id(movie.getId())</span>
+<span class="fc" id="L362">                .name(movie.getTitle())</span>
+<span class="fc" id="L363">                .thumbnailUrl(movie.getThumbnailUrl())</span>
+<span class="fc" id="L364">                .build());</span>
+    }
+
+    public DebateRoomChatDto getDebateRoomDetails(Long id, String userName) {
+<span class="fc" id="L368">        DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L369" title="1 of 2 branches missed.">        if (debateRoom == null) {</span>
+<span class="nc" id="L370">            return null;</span>
+        }
+
+<span class="fc" id="L373">        DebateRoomChatDto dto = new DebateRoomChatDto();</span>
+<span class="fc" id="L374">        dto.setTitle(debateRoom.getTitle());</span>
+<span class="fc" id="L375">        dto.setTopic(debateRoom.getTopic());</span>
+<span class="fc" id="L376">        dto.setStateType(debateRoom.getStateType());</span>
+<span class="fc" id="L377">        dto.setStartTime(debateRoom.getStartTime());</span>
+<span class="fc" id="L378">        dto.setDuration(debateRoom.getDuration());</span>
+<span class="fc" id="L379">        dto.setMaxUserNumber(debateRoom.getMaxUserNumber());</span>
+<span class="pc" id="L380">        dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -&gt; new RuntimeException(&quot;영화 정보를 찾을 수 없습니다.&quot;)));</span>
+
+        // Get joined user number
+<span class="fc" id="L383">        setJoinedUserNumberToDTO(dto, id);</span>
+
+<span class="fc" id="L385">        dto.setSummarize(debateRoom.getSummarize());</span>
+
+<span class="fc" id="L387">        DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);</span>
+<span class="pc bpc" id="L388" title="1 of 2 branches missed.">        if(debateVote != null) {</span>
+<span class="fc" id="L389">            dto.setVoted(true);</span>
+<span class="fc" id="L390">            dto.setVoteAgree(debateVote.isAgree());</span>
+        }
+        else {
+<span class="nc" id="L393">            dto.setVoted(false);</span>
+<span class="nc" id="L394">            dto.setVoteAgree(false);</span>
+        }
+
+<span class="fc" id="L397">        Optional&lt;DebateJoinedUser&gt; debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, id);</span>
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">        if(debateJoinedUser.isPresent()){</span>
+<span class="fc" id="L399">            dto.setJoined(true);</span>
+<span class="fc" id="L400">            dto.setAgree(debateJoinedUser.get().isAgree());</span>
+        }
+        else {
+<span class="nc" id="L403">            dto.setJoined(false);</span>
+<span class="nc" id="L404">            dto.setAgree(false);</span>
+        }
+<span class="fc" id="L406">        List&lt;Chat&gt; chats = chatRepository.findByDebateRoomId(id);</span>
+
+<span class="fc" id="L408">        dto.setChats(chats);</span>
+<span class="fc" id="L409">        return dto;</span>
+    }
+
+    @Transactional
+    public DebateRoomVoteDto castjoin(Long id, String username, boolean agree) {
+<span class="fc" id="L414">        Optional&lt;DebateJoinedUser&gt; oriDebateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);</span>
+<span class="fc bfc" id="L415" title="All 2 branches covered.">        if(oriDebateJoinedUser.isPresent()) {</span>
+<span class="fc" id="L416">            throw new RuntimeException(&quot;이미 참여한 토론입니다.&quot;);</span>
+        }
+
+<span class="fc" id="L419">        DebateJoinedUser debateJoinedUser = DebateJoinedUser.create(</span>
+        id, username, agree);
+
+<span class="fc" id="L422">        debateJoinedUserRepository.save(debateJoinedUser);</span>
+
+<span class="fc" id="L424">        DebateRoom debateRoom = debateRoomRepository.findById(id).orElseThrow(() -&gt;new RuntimeException(&quot;cannot find debateRoom&quot;));</span>
+
+<span class="fc" id="L426">        debateRoom.addTotleMoney(100);</span>
+<span class="fc" id="L427">        debateRoomRepository.save(debateRoom);</span>
+<span class="fc" id="L428">        User user = userRepository.findByUserName(username).orElseThrow(()-&gt; new RuntimeException(&quot;cannot find user&quot;));</span>
+
+<span class="fc" id="L430">        user.subMoney(100);</span>
+<span class="fc" id="L431">        userRepository.save(user);</span>
+
+<span class="fc" id="L433">        DebateRoomVoteDto dto = new DebateRoomVoteDto();</span>
+<span class="fc" id="L434">        dto.setTitle(debateRoom.getTitle());</span>
+<span class="fc" id="L435">        dto.setTopic(debateRoom.getTopic());</span>
+<span class="fc" id="L436">        dto.setStateType(debateRoom.getStateType());</span>
+<span class="fc" id="L437">        dto.setStartTime(debateRoom.getStartTime());</span>
+<span class="fc" id="L438">        dto.setDuration(debateRoom.getDuration());</span>
+<span class="fc" id="L439">        dto.setMaxUserNumber(debateRoom.getMaxUserNumber());</span>
+<span class="fc" id="L440">        dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -&gt; new RuntimeException(&quot;영화 정보를 찾을 수 없습니다.&quot;)));</span>
+
+<span class="fc" id="L442">        setJoinedUserNumberToDTO(dto, id);</span>
+
+<span class="fc" id="L444">        dto.setSummarize(debateRoom.getSummarize());</span>
+
+<span class="fc" id="L446">        DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, id);</span>
+<span class="fc bfc" id="L447" title="All 2 branches covered.">        if(debateVote != null) {</span>
+<span class="fc" id="L448">            dto.setVoted(true);</span>
+<span class="fc" id="L449">            dto.setVoteAgree(debateVote.isAgree());</span>
+        }
+        else {
+<span class="fc" id="L452">            dto.setVoted(false);</span>
+<span class="fc" id="L453">            dto.setVoteAgree(false);</span>
+        }
+
+
+<span class="fc" id="L457">        dto.setJoined(true);</span>
+<span class="fc" id="L458">        dto.setAgree(agree);</span>
+
+
+<span class="fc" id="L461">        return dto;</span>
+
+    }
+
+    @Transactional
+    public DebateRoomVoteDto castVote(Long id, String username, boolean agree) {
+
+<span class="fc" id="L468">        DebateVote vote = DebateVote.create(</span>
+<span class="fc" id="L469">            id, username, agree, LocalDateTime.of(2024,4,1,0,0));</span>
+
+<span class="fc" id="L471">        debateVoteRepository.save(vote);</span>
+<span class="fc" id="L472">        DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);</span>
+<span class="pc bpc" id="L473" title="1 of 2 branches missed.">        if (debateRoom == null) {</span>
+<span class="nc" id="L474">            return null;</span>
+        }
+<span class="fc" id="L476">        debateRoom.addTotleMoney(100);</span>
+<span class="fc" id="L477">        debateRoomRepository.save(debateRoom);</span>
+<span class="fc" id="L478">        User user = userRepository.findByUserName(username).orElse(null);</span>
+<span class="pc bpc" id="L479" title="1 of 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L480">            return null;</span>
+        }
+<span class="fc" id="L482">        user.subMoney(100);</span>
+<span class="fc" id="L483">        userRepository.save(user);</span>
+
+<span class="fc" id="L485">        DebateRoomVoteDto dto = new DebateRoomVoteDto();</span>
+<span class="fc" id="L486">        dto.setTitle(debateRoom.getTitle());</span>
+<span class="fc" id="L487">        dto.setTopic(debateRoom.getTopic());</span>
+<span class="fc" id="L488">        dto.setStateType(debateRoom.getStateType());</span>
+<span class="fc" id="L489">        dto.setStartTime(debateRoom.getStartTime());</span>
+<span class="fc" id="L490">        dto.setDuration(debateRoom.getDuration());</span>
+<span class="fc" id="L491">        dto.setMaxUserNumber(debateRoom.getMaxUserNumber());</span>
+<span class="pc" id="L492">        dto.setMovie(getMovieDto(debateRoom.getMovieId()).orElseThrow(() -&gt; new RuntimeException(&quot;영화 정보를 찾을 수 없습니다.&quot;)));</span>
+
+<span class="fc" id="L494">        setJoinedUserNumberToDTO(dto, id);</span>
+<span class="fc" id="L495">        dto.setSummarize(debateRoom.getSummarize());</span>
+
+<span class="fc" id="L497">        dto.setVoted(true);</span>
+<span class="fc" id="L498">        dto.setVoteAgree(agree);</span>
+
+<span class="fc" id="L500">        Optional&lt;DebateJoinedUser&gt; debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);</span>
+<span class="pc bpc" id="L501" title="1 of 2 branches missed.">        if(debateJoinedUser.isPresent()) {</span>
+<span class="fc" id="L502">            dto.setJoined(true);</span>
+<span class="fc" id="L503">            dto.setAgree(debateJoinedUser.get().isAgree());</span>
+        }else {
+<span class="nc" id="L505">            dto.setJoined(false);</span>
+<span class="nc" id="L506">            dto.setAgree(false);</span>
+        }
+
+<span class="fc" id="L509">        return dto;</span>
+    }
+
+    @Transactional
+    public VoteDto resultVoteInfo(Long id) {
+<span class="fc" id="L514">        DebateRoom endRoom = debateRoomRepository.findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;cannnot find debateRoom&quot;));</span>
+
+<span class="fc" id="L516">        List&lt;DebateVote&gt; list = debateVoteRepository.findByDebateRoomId(id);</span>
+<span class="fc" id="L517">        VoteDto voteInfo = VoteDto.builder()</span>
+<span class="fc" id="L518">                .title(endRoom.getTitle())</span>
+<span class="fc" id="L519">                .topic(endRoom.getTopic())</span>
+<span class="fc" id="L520">                .state(endRoom.getStateType())</span>
+<span class="fc" id="L521">                .startTime(endRoom.getStartTime())</span>
+<span class="fc" id="L522">                .duration(endRoom.getDuration())</span>
+<span class="fc" id="L523">                .maxUserNumber(endRoom.getMaxUserNumber())</span>
+<span class="fc" id="L524">                .build();</span>
+<span class="fc" id="L525">        setJoinedUserNumberToDTO(voteInfo, id);</span>
+
+<span class="fc" id="L527">        int agreeNum = 0;</span>
+<span class="fc" id="L528">        int disagreeNum = 0;</span>
+
+<span class="fc" id="L530">        List&lt;User&gt; agreeUser = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L531">        List&lt;User&gt; disagreeUser = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L532" title="All 2 branches covered.">        for (DebateVote v : list) {</span>
+<span class="fc bfc" id="L533" title="All 2 branches covered.">            if (v.isAgree()) {</span>
+<span class="fc" id="L534">                agreeNum++;</span>
+
+<span class="fc" id="L536">                User foundUser = userRepository.findByUserName(v.getUserName())</span>
+<span class="fc" id="L537">                        .orElseThrow(()-&gt; new RuntimeException(&quot;cannot find user&quot;));</span>
+<span class="fc" id="L538">                agreeUser.add(foundUser);</span>
+<span class="fc" id="L539">            }</span>
+            else {
+<span class="fc" id="L541">                disagreeNum++;</span>
+<span class="fc" id="L542">                User foundUser = userRepository.findByUserName(v.getUserName())</span>
+<span class="fc" id="L543">                        .orElseThrow(()-&gt; new RuntimeException(&quot;cannot find user&quot;));</span>
+<span class="fc" id="L544">                disagreeUser.add(foundUser);</span>
+            }
+<span class="fc" id="L546">        }</span>
+
+<span class="fc" id="L548">        List&lt;DebateJoinedUser&gt; allDebateJoinedUser = debateJoinedUserRepository.findByDebateRoomId(id);</span>
+
+<span class="fc" id="L550">        List&lt;User&gt; allUsers = allDebateJoinedUser.stream()</span>
+<span class="fc" id="L551">                .map(j -&gt; userRepository.findByUserName(j.getUserName()).orElseThrow(()-&gt; new RuntimeException(&quot;cannot find user&quot;)))</span>
+<span class="fc" id="L552">                .toList();</span>
+<span class="fc" id="L553">        List&lt;User&gt; notVotedUsers = allUsers.stream()</span>
+<span class="fc" id="L554">                .filter(u -&gt; list.stream().noneMatch(v -&gt; v.getUserName().equals(u.getUserName())))</span>
+<span class="fc" id="L555">                .toList();</span>
+<span class="fc" id="L556">        List&lt;User&gt; notVotedAgreeUsers = notVotedUsers.stream()</span>
+<span class="fc bfc" id="L557" title="All 4 branches covered.">                .filter(u -&gt; allDebateJoinedUser.stream().anyMatch(j -&gt; j.getUserName().equals(u.getUserName()) &amp;&amp; j.isAgree()))</span>
+<span class="fc" id="L558">                .toList();</span>
+<span class="fc" id="L559">        List&lt;User&gt; notVotedDisagreeUsers = notVotedUsers.stream()</span>
+<span class="fc bfc" id="L560" title="All 4 branches covered.">                .filter(u -&gt; allDebateJoinedUser.stream().anyMatch(j -&gt; j.getUserName().equals(u.getUserName()) &amp;&amp; !j.isAgree()))</span>
+<span class="fc" id="L561">                .toList();</span>
+
+<span class="fc" id="L563">        int totalMoney = endRoom.getTotalMoney();</span>
+<span class="fc bfc" id="L564" title="All 2 branches covered.">        List&lt;User&gt; winners = agreeNum &gt; disagreeNum ?</span>
+<span class="fc" id="L565">                Stream.concat(agreeUser.stream(), notVotedAgreeUsers.stream()).toList() :</span>
+<span class="fc" id="L566">                Stream.concat(disagreeUser.stream(), notVotedDisagreeUsers.stream()).toList();</span>
+
+<span class="fc" id="L568">        int winnerCount = winners.size();</span>
+<span class="fc" id="L569">        int moneyPerUser = totalMoney / winnerCount;</span>
+
+<span class="fc bfc" id="L571" title="All 2 branches covered.">        for (User user : winners) {</span>
+<span class="fc" id="L572">            user.adjustMoney(moneyPerUser);</span>
+<span class="fc" id="L573">        }</span>
+
+<span class="fc" id="L575">        userRepository.saveAll(winners);</span>
+
+<span class="fc" id="L577">        endRoom.setTotalMoney(0);</span>
+<span class="fc" id="L578">        debateRoomRepository.save(endRoom);</span>
+
+<span class="fc" id="L580">        endRoom.setStateType(StateType.CLOSE);</span>
+<span class="fc" id="L581">        voteInfo.setState(endRoom.getStateType());</span>
+<span class="fc" id="L582">        return voteInfo;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebateVote.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.domain.debateVote.domain</a> &gt; <span class="el_source">DebateVote.java</span></div><h1>DebateVote.java</h1><pre class="source lang-java linenums">package com.example.movinProject.domain.debateVote.domain;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import java.time.LocalDate;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import net.bytebuddy.asm.Advice;
+import org.springframework.format.annotation.DateTimeFormat;
+
+@Entity
+<span class="fc" id="L17">@NoArgsConstructor</span>
+@Getter
+public class DebateVote {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="nc" id="L22">    private Long id;</span>
+
+<span class="nc" id="L24">    private Long debateRoomId;</span>
+
+<span class="fc" id="L26">    private String userName;</span>
+
+<span class="fc" id="L28">    private boolean agree;</span>
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;, timezone = &quot;Asia/Seoul&quot;)
+<span class="nc" id="L32">    private LocalDateTime date;</span>
+
+    public static DebateVote create(
+            Long debateRoomId,
+            String userName,
+            boolean agree,
+            LocalDateTime date
+    ) {
+<span class="fc" id="L40">        DebateVote debateVote = new DebateVote();</span>
+<span class="fc" id="L41">        debateVote.debateRoomId = debateRoomId;</span>
+<span class="fc" id="L42">        debateVote.userName = userName;</span>
+<span class="fc" id="L43">        debateVote.agree = agree;</span>
+<span class="fc" id="L44">        debateVote.date = date;</span>
+
+<span class="fc" id="L46">        return debateVote;</span>
+    }
+
+    public static DebateVote createTest(
+            Long id,
+            Long debateRoomId,
+            String userName,
+            boolean agree,
+            LocalDateTime date
+    ) {
+<span class="fc" id="L56">        DebateVote debateVote = new DebateVote();</span>
+<span class="fc" id="L57">        debateVote.id = id;</span>
+<span class="fc" id="L58">        debateVote.debateRoomId = debateRoomId;</span>
+<span class="fc" id="L59">        debateVote.userName = userName;</span>
+<span class="fc" id="L60">        debateVote.agree = agree;</span>
+<span class="fc" id="L61">        debateVote.date = date;</span>
+
+<span class="fc" id="L63">        return debateVote;</span>
+    }
+
+
+    public String getUserId() {
+<span class="nc" id="L68">        return userName;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

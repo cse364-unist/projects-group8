@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.user.service</a> &gt; <span class="el_source">UserServiceTest.java</span></div><h1>UserServiceTest.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.user.service;
+
+import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
+import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
+import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
+import com.example.movinProject.domain.movie.repository.MovieRepository;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.movie.service.MovieService;
+import com.example.movinProject.main.user.dto.UserDto;
+import com.example.movinProject.main.user.dto.UserRegisterRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+<span class="fc" id="L27">class UserServiceTest {</span>
+
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private DebateRoomRepository debateRoomRepository;
+
+    @Mock
+    private DebateJoinedUserRepository debateJoinedUserRepository;
+
+
+
+    @Mock
+    private DebateVoteRepository debateVoteRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private MovieRepository movieRepository;
+
+
+    @InjectMocks
+    private UserService userService;
+
+    @BeforeEach
+    public void setUp() {
+<span class="fc" id="L55">        MockitoAnnotations.openMocks(this);</span>
+<span class="fc" id="L56">    }</span>
+
+
+        @Test
+    void registerUser() {
+<span class="fc" id="L61">            UserRegisterRequest request =UserRegisterRequest.create(&quot;newUser&quot;, &quot;password123&quot;, &quot;user@example.com&quot;);</span>
+<span class="fc" id="L62">            when(userRepository.existsByUserName(request.getUserName())).thenReturn(false);</span>
+<span class="fc" id="L63">            when(passwordEncoder.encode(request.getPassword())).thenReturn(&quot;encodedPassword&quot;);</span>
+
+<span class="fc" id="L65">            User user = User.create(request.getUserName(),</span>
+            &quot;encodedPassword&quot;,
+<span class="fc" id="L67">            request.getEmail());</span>
+
+<span class="fc" id="L69">            when(userRepository.save(any(User.class))).thenReturn(user);</span>
+
+            // Act
+<span class="fc" id="L72">            Optional&lt;UserDto&gt; result = userService.registerUser(request);</span>
+
+            // Assert
+<span class="fc" id="L75">            assertTrue(result.isPresent());</span>
+<span class="fc" id="L76">            assertEquals(request.getUserName(), result.get().getName());</span>
+<span class="fc" id="L77">    }</span>
+
+    @Test
+    void getUserDetails() {
+        // TODO: 오류 발생
+//        String username = &quot;existingUser&quot;;
+//        User user = User.create( username, &quot;hi&quot;, &quot;hi2&quot;);
+//        List&lt;Long&gt; debateRoomIds = List.of(1L, 2L);
+//
+//        when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
+//        when(debateJoinedUserRepository.findIdsByUserName(username)).thenReturn(debateRoomIds);
+//        when(debateRoomRepository.findAllById(debateRoomIds)).thenReturn(List.of(new DebateRoom()));
+//
+//        // Act
+//        UserDto result = userService.getUserDetails(username);
+//
+//        // Assert
+//        assertEquals(username, result.getName());
+//        assertNotNull(result.getJoinedDebateRooms());
+<span class="fc" id="L96">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

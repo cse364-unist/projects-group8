@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatGPTService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.service</a> &gt; <span class="el_source">ChatGPTService.java</span></div><h1>ChatGPTService.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.service;
+
+import com.example.movinProject.domain.chat.domain.Chat;
+import com.example.movinProject.domain.chat.model.ChatType;
+import com.example.movinProject.domain.chat.repository.ChatRepository;
+import com.example.movinProject.main.debateRoom.model.ChatGPTRequest;
+import com.example.movinProject.main.debateRoom.model.Message;
+import com.example.movinProject.main.debateRoom.response.ChatGPTResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+
+@Service
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+public class ChatGPTService {
+    @Value(&quot;${openai.api.key}&quot;)
+    private String apiKey;
+
+    private static final String OPEN_AI_CHAT_ENDPOINT = &quot;https://api.openai.com/v1/chat/completions&quot;;
+
+    private final RestTemplate restTemplate;
+    private final ChatRepository chatRepository;
+
+    public ChatGPTResponse getChatGPTResponse(String prompt) {
+
+<span class="fc" id="L32">        HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L33">        headers.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="fc" id="L34">        headers.set(&quot;Authorization&quot;, &quot;Bearer &quot; + this.apiKey);</span>
+
+<span class="fc" id="L36">        ChatGPTRequest chatGPTRequest = new ChatGPTRequest();</span>
+<span class="fc" id="L37">        chatGPTRequest.setModel(&quot;gpt-3.5-turbo&quot;);</span>
+<span class="fc" id="L38">        chatGPTRequest.setMessages(List.of(new Message(&quot;user&quot;, prompt)));</span>
+<span class="fc" id="L39">        chatGPTRequest.setMax_tokens(20);</span>
+
+<span class="fc" id="L41">        RestTemplate restTemplate = new RestTemplate();</span>
+<span class="fc" id="L42">        HttpEntity&lt;ChatGPTRequest&gt; request = new HttpEntity&lt;&gt;(chatGPTRequest, headers);</span>
+
+<span class="fc" id="L44">        return restTemplate.postForObject(OPEN_AI_CHAT_ENDPOINT, request, ChatGPTResponse.class);</span>
+    }
+
+    public List&lt;String&gt; summarizeOpinions(Long debateRoomId) {
+        // find all chats in debateRoom
+<span class="fc" id="L49">        List&lt;Chat&gt; chats = chatRepository.findByDebateRoomId(debateRoomId);</span>
+
+        // separate message between agree and disagree
+<span class="fc" id="L52">        List&lt;String&gt; agreeStrings = chats.stream()</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">                .filter(chat -&gt; chat.getChatType() == ChatType.AGREE)</span>
+<span class="fc" id="L54">                .map(Chat::getMessage)</span>
+<span class="fc" id="L55">                .toList();</span>
+<span class="fc" id="L56">        List&lt;String&gt; disagreeStrings = chats.stream()</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">                .filter(chat -&gt; chat.getChatType() == ChatType.DISAGREE)</span>
+<span class="fc" id="L58">                .map(Chat::getMessage)</span>
+<span class="fc" id="L59">                .toList();</span>
+
+        // chat serialize
+<span class="fc" id="L62">        String agreeSuffix = &quot;can you summarize these agree opinions?: &quot;;</span>
+<span class="fc" id="L63">        String serializedAgreeStrings = String.join(&quot;, &quot;, agreeStrings);</span>
+
+<span class="fc" id="L65">        String disagreeSuffix = &quot;can you summarize these disagree opinions?: &quot;;</span>
+<span class="fc" id="L66">        String serializedDisagreeStrings = String.join(&quot;, &quot;, disagreeStrings);</span>
+
+
+<span class="fc" id="L69">        String agreeSummary = this.getChatGPTResponse(agreeSuffix + serializedAgreeStrings)</span>
+<span class="fc" id="L70">                .getChoices()</span>
+<span class="fc" id="L71">                .get(0)</span>
+                .message
+<span class="fc" id="L73">                .getContent();</span>
+<span class="fc" id="L74">        String disagreeSummary = this.getChatGPTResponse(disagreeSuffix + serializedDisagreeStrings)</span>
+<span class="fc" id="L75">                .getChoices()</span>
+<span class="fc" id="L76">                .get(0)</span>
+                .message
+<span class="fc" id="L78">                .getContent();</span>
+<span class="fc" id="L79">        return List.of(agreeSummary, disagreeSummary);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

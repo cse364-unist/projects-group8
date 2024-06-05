@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RealtimeDebateRoom.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.chatApiProxy.chatRoom</a> &gt; <span class="el_source">RealtimeDebateRoom.java</span></div><h1>RealtimeDebateRoom.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.chatApiProxy.chatRoom;
+
+import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.main.debateRoom.service.ChatGPTService;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+import lombok.Getter;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.lang.reflect.Array;
+import java.time.LocalDateTime;
+import java.util.*;
+
+
+@Getter
+public class RealtimeDebateRoom {
+    public interface StepChangeListener {
+        void onStepChange(int step, LocalDateTime stepEndTime, RealtimeDebateRoom realtimeDebateRoom);
+    }
+
+    public interface ModeratorMessageListener {
+        void onModeratorMessage(String message, RealtimeDebateRoom realtimeDebateRoom);
+    }
+
+    public interface SummarizeCreatedListener {
+        void onSummarizeCreated(String summarized, RealtimeDebateRoom realtimeDebateRoom);
+    }
+
+    private static class DebateStep {
+        private final int step;
+        private final int duration;
+        private final String description;
+
+<span class="fc" id="L36">        public DebateStep(int step, int duration, String description) {</span>
+<span class="fc" id="L37">            this.step = step;</span>
+<span class="fc" id="L38">            this.duration = duration;</span>
+<span class="fc" id="L39">            this.description = description;</span>
+<span class="fc" id="L40">        }</span>
+    }
+
+<span class="fc" id="L43">    private static final DebateStep[] debateSteps = {</span>
+            new DebateStep(0, 0, &quot;토론 시작 전&quot;),
+            new DebateStep(1, 5, &quot;긍정측 입론&quot;),
+            new DebateStep(2, 2, &quot;부정측 질의 및 긍정측 답변&quot;),
+            new DebateStep(3, 5, &quot;부정측 입론&quot;),
+            new DebateStep(4, 2, &quot;긍정측 질의 및 부정측 답변&quot;),
+            new DebateStep(5, 3, &quot;긍정측 반박&quot;),
+            new DebateStep(6, 3, &quot;부정측 반박&quot;),
+            new DebateStep(7, 0, &quot;토론 종료&quot;)
+    };
+
+    @Getter
+    public class DebateRoomSessionInfo {
+<span class="fc" id="L56">        User user;</span>
+<span class="fc" id="L57">        boolean isAgree;</span>
+<span class="nc" id="L58">        WebSocketSession session;</span>
+
+<span class="fc" id="L60">        public DebateRoomSessionInfo(User user, boolean isAgree, WebSocketSession session) {</span>
+<span class="fc" id="L61">            this.user = user;</span>
+<span class="fc" id="L62">            this.isAgree = isAgree;</span>
+<span class="fc" id="L63">            this.session = session;</span>
+<span class="fc" id="L64">        }</span>
+
+<span class="fc" id="L66">        public DebateRoomSessionInfo(User user, boolean isAgree) {</span>
+<span class="fc" id="L67">            this.user = user;</span>
+<span class="fc" id="L68">            this.isAgree = isAgree;</span>
+<span class="fc" id="L69">        }</span>
+    }
+
+
+<span class="fc" id="L73">    private DebateRoom debateRoom;</span>
+<span class="fc" id="L74">    private Set&lt;WebSocketSession&gt; sessions = new HashSet&lt;&gt;();</span>
+
+<span class="pc" id="L76">    private ArrayList&lt;DebateRoomSessionInfo&gt; sessionInfos = new ArrayList&lt;&gt;();</span>
+
+    // step change listener
+<span class="pc" id="L79">    private ArrayList&lt;StepChangeListener&gt; stepChangeListeners = new ArrayList&lt;&gt;();</span>
+
+    // moderator message listener
+<span class="pc" id="L82">    private ArrayList&lt;ModeratorMessageListener&gt; moderatorMessageListeners = new ArrayList&lt;&gt;();</span>
+
+    // summarize created listener
+<span class="pc" id="L85">    private ArrayList&lt;SummarizeCreatedListener&gt; summarizeCreatedListeners = new ArrayList&lt;&gt;();</span>
+
+    // 0: 토론 시작 전, 1: 긍정측 입론 (5분), 2: 부정측 질의 및 긍정측 답변(2분), 3: 부정측 입론 (5분), 4: 긍정측 질의 및 부정측 답변(2분), 5: 긍정측 반박 (3분), 6: 부정측 반박 (3분), 7: 토론 종료
+<span class="pc" id="L88">    private int currentDebateStep = 0;</span>
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;, timezone = &quot;Asia/Seoul&quot;)
+<span class="nc" id="L92">    private LocalDateTime stepEndTime;</span>
+
+<span class="nc" id="L94">    private ChatGPTService chatGPTService;</span>
+
+<span class="pc" id="L96">    private Timer stepTimer = null;</span>
+
+
+    // moderator summarize constant
+
+
+<span class="nc" id="L102">    @Builder</span>
+<span class="fc" id="L103">    public RealtimeDebateRoom(DebateRoom debateRoom, ChatGPTService chatGPTService) {</span>
+<span class="fc" id="L104">        this.debateRoom = debateRoom;</span>
+<span class="fc" id="L105">        this.chatGPTService = chatGPTService;</span>
+<span class="fc" id="L106">    }</span>
+
+    public void addClient(WebSocketSession session, User user, boolean isAgree) {
+<span class="fc" id="L109">        sessions.add(session);</span>
+<span class="fc" id="L110">        sessionInfos.add(new DebateRoomSessionInfo(user, isAgree, session));</span>
+<span class="fc" id="L111">    }</span>
+
+    public DebateRoomSessionInfo removeClient(WebSocketSession session) {
+<span class="fc" id="L114">        sessions.remove(session);</span>
+        // pop sessionInfo
+<span class="fc" id="L116">        DebateRoomSessionInfo sessionInfo = sessionInfos.stream()</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                .filter(info -&gt; info.session == session)</span>
+<span class="fc" id="L118">                .findFirst()</span>
+<span class="fc" id="L119">                .orElse(null);</span>
+
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if(sessionInfo == null) {</span>
+<span class="nc" id="L122">            return null;</span>
+        }else{
+<span class="fc" id="L124">            sessionInfos.remove(sessionInfo);</span>
+        }
+
+
+<span class="fc" id="L128">        return new DebateRoomSessionInfo(sessionInfo.user, sessionInfo.isAgree);</span>
+    }
+
+    public void addStepChangeListener(StepChangeListener listener) {
+<span class="fc" id="L132">        stepChangeListeners.add(listener);</span>
+<span class="fc" id="L133">    }</span>
+
+    public void removeStepChangeListener(StepChangeListener listener) {
+<span class="nc" id="L136">        stepChangeListeners.remove(listener);</span>
+<span class="nc" id="L137">    }</span>
+
+    public void addModeratorMessageListener(ModeratorMessageListener listener) {
+<span class="fc" id="L140">        moderatorMessageListeners.add(listener);</span>
+<span class="fc" id="L141">    }</span>
+
+    public void addSummarizeCreatedListener(SummarizeCreatedListener listener) {
+<span class="fc" id="L144">        summarizeCreatedListeners.add(listener);</span>
+<span class="fc" id="L145">    }</span>
+
+    public void removeModeratorMessageListener(ModeratorMessageListener listener) {
+<span class="nc" id="L148">        moderatorMessageListeners.remove(listener);</span>
+<span class="nc" id="L149">    }</span>
+
+
+    public void notifyStepChange() {
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        for (StepChangeListener listener : stepChangeListeners) {</span>
+<span class="fc" id="L154">            listener.onStepChange(currentDebateStep, stepEndTime, this);</span>
+<span class="fc" id="L155">        }</span>
+<span class="fc" id="L156">    }</span>
+
+    public void startDebate() {
+<span class="fc" id="L159">        nextStep();</span>
+<span class="fc" id="L160">    }</span>
+
+
+<span class="pc" id="L163">    private double factor = 20.0;</span>
+    
+    private void nextStep() {
+<span class="fc" id="L166">        currentDebateStep++;</span>
+<span class="fc" id="L167">        int AGREE = 0;</span>
+<span class="fc" id="L168">        int DISAGREE = 1;</span>
+<span class="fc" id="L169">        stepEndTime = LocalDateTime.now().plusSeconds((long) (debateSteps[currentDebateStep].duration / factor * 60));</span>
+<span class="fc" id="L170">        notifyStepChange();</span>
+
+<span class="pc bpc" id="L172" title="1 of 4 branches missed.">        if(currentDebateStep &gt;= 1 &amp;&amp; currentDebateStep &lt;= 6) {</span>
+<span class="fc" id="L173">            notifyModeratorMessage(debateSteps[currentDebateStep].description + &quot;을 시작합니다.&quot;);</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        }else if(currentDebateStep == 7) {</span>
+            // 지피티 요약 받기
+<span class="fc" id="L176">            List&lt;String&gt; summarized = chatGPTService.summarizeOpinions(debateRoom.getId());</span>
+
+<span class="fc" id="L178">            StringBuilder sb = new StringBuilder();</span>
+
+<span class="fc" id="L180">            sb.append(&quot;토론이 종료되었습니다.\n&quot;);</span>
+<span class="fc" id="L181">            sb.append(&quot;요약 내용:\n\n&quot;);</span>
+<span class="fc" id="L182">            sb.append(&quot;찬성 측:\n&quot;);</span>
+<span class="fc" id="L183">            sb.append(summarized.get(AGREE) + &quot;\n&quot;);</span>
+<span class="fc" id="L184">            sb.append(&quot;반대 측:\n&quot;);</span>
+<span class="fc" id="L185">            sb.append(summarized.get(DISAGREE) + &quot;\n&quot;);</span>
+<span class="fc" id="L186">            notifyModeratorMessage(sb.toString());</span>
+
+<span class="fc bfc" id="L188" title="All 2 branches covered.">            for (SummarizeCreatedListener listener : summarizeCreatedListeners) {</span>
+<span class="fc" id="L189">                listener.onSummarizeCreated(</span>
+<span class="fc" id="L190">                        &quot;찬성 측:\n&quot; + summarized.get(AGREE) + &quot;\n반대 측:\n&quot; + summarized.get(DISAGREE) + &quot;\n&quot;</span>
+                        , this);
+<span class="fc" id="L192">            }</span>
+        }
+
+        // TimerTask를 사용하여 다음 step으로 넘어가도록 구현
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if(currentDebateStep == 7) {</span>
+            // 토론 종료
+<span class="fc" id="L198">            return;</span>
+        }
+
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if(stepTimer != null)</span>
+<span class="fc" id="L202">            stepTimer.cancel();</span>
+<span class="fc" id="L203">        stepTimer = new Timer();</span>
+<span class="fc" id="L204">        stepTimer.schedule(new TimerTask() {</span>
+            @Override
+            public void run() {
+<span class="fc" id="L207">                nextStep();</span>
+<span class="fc" id="L208">            }</span>
+        }, (long) ((long) debateSteps[currentDebateStep].duration * 60 * 1000 / factor));
+<span class="fc" id="L210">    }</span>
+
+    private void notifyModeratorMessage(String message) {
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        for (ModeratorMessageListener listener : moderatorMessageListeners) {</span>
+<span class="fc" id="L214">            listener.onModeratorMessage(message, this);</span>
+<span class="fc" id="L215">        }</span>
+<span class="fc" id="L216">    }</span>
+
+    public DebateRoomSessionInfo findDebateRoomSessionInfoBySession(WebSocketSession session) {
+<span class="fc" id="L219">        return sessionInfos.stream()</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">                .filter(info -&gt; info.session == session)</span>
+<span class="fc" id="L221">                .findFirst()</span>
+<span class="fc" id="L222">                .orElse(null);</span>
+    }
+
+    public void stopAll() {
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        if(stepTimer != null)</span>
+<span class="fc" id="L227">            stepTimer.cancel();</span>
+
+        // close all sessions
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">        for (WebSocketSession session : sessions) {</span>
+            try {
+<span class="nc" id="L232">                session.close();</span>
+<span class="nc" id="L233">            } catch (Exception e) {</span>
+<span class="nc" id="L234">                e.printStackTrace();</span>
+<span class="nc" id="L235">            }</span>
+<span class="nc" id="L236">        }</span>
+
+<span class="fc" id="L238">        sessions.clear();</span>
+
+        // clear all sessionInfos
+<span class="fc" id="L241">        sessionInfos.clear();</span>
+<span class="fc" id="L242">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
