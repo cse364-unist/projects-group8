@@ -16,6 +16,7 @@ import com.example.movinProject.main.user.dto.UserDto;
 import com.example.movinProject.main.user.dto.UserRegisterRequest;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +62,7 @@ public class UserService {
         userDto.setId(newUser.getId());
         userDto.setName(newUser.getUserName());
         userDto.setMoney(newUser.getMoney());
+        userDto.setJoinedDebateRooms(new ArrayList<>());
         userDto.setLastAttendance(LocalDateTime.of(2024, 4, 1, 0, 0));
 
         return Optional.of(userDto);
@@ -91,6 +93,7 @@ public class UserService {
 
 
             DebateRoomVoteDto dto = new DebateRoomVoteDto();
+            dto.setId(debateRoom.getId());
             dto.setTitle(debateRoom.getTitle());
             dto.setTopic(debateRoom.getTopic());
             dto.setStateType(debateRoom.getStateType());
@@ -98,7 +101,6 @@ public class UserService {
             dto.setDuration(debateRoom.getDuration());
             dto.setMaxUserNumber(debateRoom.getMaxUserNumber());
             setJoinedUserNumberToDTO(dto, debateRoom.getId());
-            dto.setSummarize(debateRoom.getSummarize());
             dto.setMovie(movieDto);
             Long debateRoomId = debateRoom.getId();
             DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, debateRoomId);
@@ -106,6 +108,7 @@ public class UserService {
                 dto.setVoted(true);
                 dto.setVoteAgree(debateVote.isAgree());
             }else{
+                dto.setVoted(false);
                 dto.setVoted(false);
                 dto.setVoteAgree(false);
             }

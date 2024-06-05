@@ -73,6 +73,8 @@ class WebSocketChatHandlerTest {
         when(userDetails.getUsername()).thenReturn("fakeUserId");
 
         RealtimeMessage realtimeMessage = new RealtimeMessage();
+
+
         realtimeMessage.setType(RealtimeMessage.MessageType.TALK);
         realtimeMessage.setDebateRoomId(1L);
 
