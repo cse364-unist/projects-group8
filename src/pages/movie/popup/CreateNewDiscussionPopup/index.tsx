@@ -3,7 +3,7 @@ import './style.css';
 
 interface CreateNewDiscussionPopupProps {
   onClose: () => void;
-  onCreate: (title: string, points: string, startTime: string) => void;
+  onCreate: (title: string, points: string, startTime: Date) => void;
 }
 
 const CreateNewDiscussionPopup: React.FC<CreateNewDiscussionPopupProps> = ({ onClose, onCreate }) => {
@@ -12,7 +12,9 @@ const CreateNewDiscussionPopup: React.FC<CreateNewDiscussionPopupProps> = ({ onC
   const [startTime, setStartTime] = useState('');
 
   const handleSubmit = () => {
-    onCreate(title, points, startTime);
+    const date = new Date(startTime);
+    console.log('handleSubmit:', title, points, date); // 디버깅을 위해 로그 추가
+    onCreate(title, points, date);
     onClose();
   };
 

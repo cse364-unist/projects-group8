@@ -9,7 +9,6 @@ const mainPageDisplayMoviesSelector = selector<{
   key: 'mainPageDisplayMovie',
   get: async () => {
     const result = await getMoviesForMainPage();
-
     return {
       debatingMovies: result.debatingMovies,
       popularMovies: result.popularMovies,
@@ -17,14 +16,14 @@ const mainPageDisplayMoviesSelector = selector<{
   },
 });
 
-export const mainPageDebatingMoviesSelector = selector<SimpleMovie[]>({
+export const mainPageDebatingMoviesSelector = selector<Movie[]>({
   key: 'mainPageDebatingMovies',
-  get: async ({ get }) => get(mainPageDisplayMoviesSelector).debatingMovies,
+  get: ({ get }) => get(mainPageDisplayMoviesSelector).debatingMovies,
 });
 
-export const mainPagePopularMoviesSelector = selector<SimpleMovie[]>({
+export const mainPagePopularMoviesSelector = selector<Movie[]>({
   key: 'mainPagePopularMovies',
-  get: async ({ get }) => get(mainPageDisplayMoviesSelector).popularMovies,
+  get: ({ get }) => get(mainPageDisplayMoviesSelector).popularMovies,
 });
 
 interface IMainPageState {
@@ -41,7 +40,7 @@ const initialState: IMainPageState = {
   searchResult: [],
 };
 
-const mainPageState = atom<IMainPageState>({
+export const mainPageState = atom<IMainPageState>({
   key: 'mainPageState',
   default: initialState,
 });
@@ -49,46 +48,28 @@ const mainPageState = atom<IMainPageState>({
 export const mainPageSearchKeywordSelector = selector<string>({
   key: 'mainPageSearchKeyword',
   get: ({ get }) => get(mainPageState).searchKeyword,
-  set: async ({ set, get }, newKeyword) => {
-    const { searchKeyword } = get(mainPageState);
-
-    if (searchKeyword === newKeyword) {
-      return;
+  set: ({ set, get }, newKeyword) => {
+    const state = get(mainPageState);
+    if (typeof newKeyword === 'string') {
+      set(mainPageState, {
+        ...state,
+        searchKeyword: newKeyword,
+        searchPage: 1,
+        searchReachedEnd: false,
+        searchResult: [],
+      });
     }
-
-    if (typeof newKeyword !== 'string') {
-      throw new Error('Invalid search keyword');
-    }
-
-    const firstResult = await searchMovies(searchKeyword, 1);
-
-    set(mainPageState, {
-      searchKeyword: newKeyword,
-      searchPage: 1,
-      searchReachedEnd: firstResult.length === 0,
-      searchResult: firstResult,
-    });
   },
 });
 
 export const mainPageSearchTriggerSelector = selector<undefined>({
   key: 'mainPageSearchTrigger',
   get: () => undefined,
-  set: async ({ set, get }) => {
-    const { searchKeyword, searchPage, searchReachedEnd, searchResult } =
-      get(mainPageState);
-
-    if (searchReachedEnd) {
-      return;
-    }
-
-    const newResult = await searchMovies(searchKeyword, searchPage + 1);
-
+  set: ({ set, get }) => {
+    const state = get(mainPageState);
     set(mainPageState, {
-      searchKeyword: searchKeyword,
-      searchPage: searchPage + 1,
-      searchReachedEnd: newResult.length === 0,
-      searchResult: [...searchResult, ...newResult],
+      ...state,
+      searchPage: state.searchPage + 1,
     });
   },
 });
