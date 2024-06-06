@@ -1,0 +1,15 @@
+.big-movie-item {
+    text-align: center;
+    margin: 20px;
+}
+
+.big-movie-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.big-movie-item h3 {
+    font-size: 1.5em;
+    margin-top: 10px;
+}

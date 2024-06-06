@@ -1,14 +1,13 @@
-import { SimpleMovie } from '../../../../models/Movie';
+import React from 'react';
+import './BigMovieItems.css';
 
-export interface BigMovieItemsProps {
-  movie: SimpleMovie;
-}
-
-export default function BigMovieItems({ movie }: BigMovieItemsProps) {
+const BigMovieItems: React.FC = () => {
   return (
-    <div>
-      <h2>{movie.title}</h2>
-      <img src={movie.thumbnailUrl} alt={movie.title} />
+    <div className="big-movie-item">
+      <img src="./movinImg.png" alt="Movie Poster" />
+      <h3>Movie Title</h3>
     </div>
   );
 }
+
+export default BigMovieItems;

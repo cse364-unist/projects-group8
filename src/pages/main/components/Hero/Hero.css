@@ -1,0 +1,27 @@
+.hero {
+    background-image: url('./movinImg.png');
+    background-size: cover;
+    background-position: center;
+    text-align: center;
+    padding: 50px;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+.hero button {
+    font-size: 1.2em;
+    padding: 10px 20px;
+    background-color: #ff4500;
+    border: none;
+    color: white;
+    cursor: pointer;
+}

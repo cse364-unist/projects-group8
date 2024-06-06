@@ -1,11 +1,14 @@
-import { DebateRoomWithUserInformation } from '../../../../models/DebateRoom';
+import React from 'react';
+import './JoinedDebateRoomItem.css';
 
-export interface JoinedDebateRoomItemProps {
-  debateRoom: DebateRoomWithUserInformation;
+const JoinedDebateRoomItem: React.FC = () => {
+  return (
+    <div className="debate-room-item">
+      <img src="./movinImg.png" alt="Room Poster" />
+      <h3>Room Title</h3>
+      <p>Date: 2023-06-06</p>
+    </div>
+  );
 }
 
-export default function JoinedDebateRoomItem({
-  debateRoom,
-}: JoinedDebateRoomItemProps) {
-  return <div />;
-}
+export default JoinedDebateRoomItem;
