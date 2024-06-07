@@ -1,6 +1,13 @@
-import { atom, selector } from 'recoil';
+import {
+  atom,
+  selector,
+  useRecoilState,
+  useRecoilValue,
+  useSetRecoilState,
+} from 'recoil';
 import { Movie, SimpleMovie } from '../models/Movie';
 import { getMoviesForMainPage, searchMovies } from '../services/MovieService';
+import { useCallback } from 'react';
 
 const mainPageDisplayMoviesSelector = selector<{
   debatingMovies: Movie[];
@@ -9,6 +16,7 @@ const mainPageDisplayMoviesSelector = selector<{
   key: 'mainPageDisplayMovie',
   get: async () => {
     const result = await getMoviesForMainPage();
+
     return {
       debatingMovies: result.debatingMovies,
       popularMovies: result.popularMovies,
@@ -16,14 +24,14 @@ const mainPageDisplayMoviesSelector = selector<{
   },
 });
 
-export const mainPageDebatingMoviesSelector = selector<Movie[]>({
+export const mainPageDebatingMoviesSelector = selector<SimpleMovie[]>({
   key: 'mainPageDebatingMovies',
-  get: ({ get }) => get(mainPageDisplayMoviesSelector).debatingMovies,
+  get: async ({ get }) => get(mainPageDisplayMoviesSelector).debatingMovies,
 });
 
-export const mainPagePopularMoviesSelector = selector<Movie[]>({
+export const mainPagePopularMoviesSelector = selector<SimpleMovie[]>({
   key: 'mainPagePopularMovies',
-  get: ({ get }) => get(mainPageDisplayMoviesSelector).popularMovies,
+  get: async ({ get }) => get(mainPageDisplayMoviesSelector).popularMovies,
 });
 
 interface IMainPageState {
@@ -40,7 +48,7 @@ const initialState: IMainPageState = {
   searchResult: [],
 };
 
-export const mainPageState = atom<IMainPageState>({
+const mainPageState = atom<IMainPageState>({
   key: 'mainPageState',
   default: initialState,
 });
@@ -48,31 +56,53 @@ export const mainPageState = atom<IMainPageState>({
 export const mainPageSearchKeywordSelector = selector<string>({
   key: 'mainPageSearchKeyword',
   get: ({ get }) => get(mainPageState).searchKeyword,
-  set: ({ set, get }, newKeyword) => {
-    const state = get(mainPageState);
-    if (typeof newKeyword === 'string') {
-      set(mainPageState, {
-        ...state,
-        searchKeyword: newKeyword,
-        searchPage: 1,
-        searchReachedEnd: false,
-        searchResult: [],
-      });
-    }
-  },
 });
 
-export const mainPageSearchTriggerSelector = selector<undefined>({
-  key: 'mainPageSearchTrigger',
-  get: () => undefined,
-  set: ({ set, get }) => {
-    const state = get(mainPageState);
-    set(mainPageState, {
-      ...state,
-      searchPage: state.searchPage + 1,
+export function useSetKeyword() {
+  const [mainPage, setMainPageState] = useRecoilState(mainPageState);
+
+  return useCallback(
+    async (keyword: string) => {
+      const { searchKeyword } = mainPage;
+
+      if (searchKeyword === keyword) {
+        return;
+      }
+
+      const firstResult = await searchMovies(searchKeyword, 1);
+
+      setMainPageState({
+        searchKeyword: keyword,
+        searchPage: 1,
+        searchReachedEnd: firstResult.length === 0,
+        searchResult: firstResult,
+      });
+    },
+    [mainPage, setMainPageState],
+  );
+}
+
+export function useSearchTrigger() {
+  const [mainPage, setMainPageState] = useRecoilState(mainPageState);
+
+  return useCallback(async () => {
+    const { searchKeyword, searchPage, searchReachedEnd, searchResult } =
+      mainPage;
+
+    if (searchReachedEnd) {
+      return;
+    }
+
+    const newResult = await searchMovies(searchKeyword, searchPage + 1);
+
+    setMainPageState({
+      searchKeyword: searchKeyword,
+      searchPage: searchPage + 1,
+      searchReachedEnd: newResult.length === 0,
+      searchResult: [...searchResult, ...newResult],
     });
-  },
-});
+  }, [mainPage, setMainPageState]);
+}
 
 export const movieSearchResultSelector = selector<SimpleMovie[]>({
   key: 'movieSearchResult',

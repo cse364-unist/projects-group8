@@ -1,65 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { useRecoilValue, useRecoilState, useSetRecoilState } from 'recoil';
+import React, { useEffect, useRef } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import Hero from './components/Hero';
 import BigMovieItems from './components/BigMovieItems';
-import JoinedDebateRoomItem from './components/JoinedDebateRoomItem';
 import SearchBox from './components/SearchBox';
 import {
   mainPageDebatingMoviesSelector,
   mainPagePopularMoviesSelector,
   movieSearchResultSelector,
-  mainPageSearchKeywordSelector,
-  mainPageSearchTriggerSelector,
-  mainPageState,
+  useSearchTrigger,
+  useSetKeyword,
 } from '../../states/MainPageState';
-import { getMoviesForMainPage, searchMovies } from '../../services/MovieService';
+
 import './style.css';
+import { isAuthenticatedState } from '../../states/AuthState';
 
 const MainPage: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태 시뮬레이션
+  const isLoggedIn = useRecoilValue(isAuthenticatedState);
   const debateMovies = useRecoilValue(mainPageDebatingMoviesSelector);
   const popularMovies = useRecoilValue(mainPagePopularMoviesSelector);
   const searchResult = useRecoilValue(movieSearchResultSelector);
-  const [mainPage, setMainPageState] = useRecoilState(mainPageState);
+  const IsFirstRef = useRef<boolean>(true);
 
-  const setSearchKeyword = useSetRecoilState(mainPageSearchKeywordSelector);
-  const triggerSearch = useSetRecoilState(mainPageSearchTriggerSelector);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await getMoviesForMainPage();
-      setMainPageState((prevState) => ({
-        ...prevState,
-        debatingMovies: result.debatingMovies,
-        popularMovies: result.popularMovies,
-      }));
-    };
-
-    fetchData();
-  }, [setMainPageState]);
-
-  useEffect(() => {
-    const fetchSearchResults = async () => {
-      if (mainPage.searchKeyword) {
-        const result = await searchMovies(mainPage.searchKeyword, mainPage.searchPage);
-        setMainPageState((prevState) => ({
-          ...prevState,
-          searchResult: [...prevState.searchResult, ...result],
-          searchReachedEnd: result.length === 0,
-        }));
-      }
-    };
-
-    fetchSearchResults();
-  }, [mainPage.searchPage, mainPage.searchKeyword, setMainPageState]);
+  const setSearchKeyword = useSetKeyword();
+  const triggerSearch = useSearchTrigger();
 
   const handleSearch = (keyword: string) => {
     setSearchKeyword(keyword);
   };
 
   const loadMoreSearchResults = () => {
-    triggerSearch(undefined);
+    triggerSearch();
   };
+
+  useEffect(() => {
+    if (IsFirstRef.current) {
+      triggerSearch();
+    }
+    IsFirstRef.current = false;
+  }, [triggerSearch]);
 
   return (
     <div className="main-page">
