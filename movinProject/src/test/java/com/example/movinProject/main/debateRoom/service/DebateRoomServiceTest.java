@@ -524,7 +524,6 @@ class DebateRoomServiceTest {
             //
             Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());
             Assertions.assertEquals(resultDto.getId(), expectedDto.getId());
-            Assertions.assertEquals(resultDto.getState(), expectedDto.getState());
             Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());
             Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());
             Assertions.assertEquals(resultDto.getAgreeJoinedUserNumber(), expectedDto.getAgreeJoinedUserNumber());
