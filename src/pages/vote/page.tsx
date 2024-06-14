@@ -56,17 +56,27 @@ export default function VotePage() {
   async function fetchDebateRoomById() {
     try{
       const result  = await getDebateRoomById(movieId);
-      setDebateRoom(result);
-      if (debateRoom==null) {
-        throw new Error('Failed to fetch debateroom');
+      if (result==null) {
+        setDueDate(String(null));
+        throw new Error('Failed to fetch debate room');
       }
-      setDueDate(String(debateRoom?.startTime))
-      setDiscussionTitle(debateRoom?.title)
-      setDiscussionPoint(debateRoom?.topic)
-      setAgreeCount(debateRoom?.agreeJoinedUserNumber)
-      setDisagreeCount(debateRoom?.disagreeJoinedUserNumber)
-      setChat(debateRoom?.chats)
+      setDebateRoom(result);
+      // if (debateRoom==null) {
+      //   throw new Error('Failed to fetch debateroom');
+      // }
+      setDueDate(String(result.startTime));
+      setDiscussionTitle(result.title);
+      setDiscussionPoint(result.topic);
+      setAgreeCount(result.agreeJoinedUserNumber);
+      setDisagreeCount(result.disagreeJoinedUserNumber);
+      setChat(result.chats);
     } catch (error) {
+      setDueDate("error");
+      setDiscussionTitle("error");
+      setDiscussionPoint("error");
+      setAgreeCount(0);
+      setDisagreeCount(0);
+      setChat(null);
       console.error('Error fetching getDebateRoomsByMovieId:', error);
     }
   }
