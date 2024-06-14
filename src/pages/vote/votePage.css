@@ -66,4 +66,39 @@
   font-weight: bold;
   padding: 12px;
 }
+
+.chat-list {
+    width: 100%;
+    max-width: 600px;
+  }
   
+  .chat-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .chat-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .chat-list strong {
+    font-weight: bold;
+  }
+  
+  .chat-list em {
+    font-size: 0.9em;
+    color: #666;
+  }
+  
+
+   /* .chat-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .chat-message {
+    margin-bottom: 10px;
+  } */

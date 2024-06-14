@@ -201,6 +201,15 @@ export default function VotePage() {
         <p>Start the DISCCUSSION!</p>
         <p>The opening statements from the affirmative side will now begin. Affirmative participants, please proceed with your individual opening statements.</p>
         {/* <p>{chat}</p> */}
+        <div className="chat-list">
+          <ul>
+            {chat && chat.map((chatMessage) => (
+              <li key={chatMessage.id}>
+                <strong>{chatMessage.userName}</strong>: {chatMessage.message} <em>({String(chatMessage.date)})</em>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {isModalOpen && (
