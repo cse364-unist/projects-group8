@@ -16,14 +16,17 @@ import {
 
 import {
   getDebateRoomsByMovieId,
+  getDebateRoomById,
   voteToDebateRoom,
 } from '../../services/DebateRoomService';
+
+import Chat from '../../models/Chat';
 
 export default function VotePage() {
   const [dueDate, setDueDate] = useState<string | null>(null);
   const [discussionTitle, setDiscussionTitle] = useState<string | null>(null);
   const [discussionPoint, setDiscussionPoint] = useState<string | null>(null);
-  const [chat, setChat] = useState<string[]>([]);
+  const [chat, setChat] = useState<Chat[] | null>(null);
   const [agreeCount, setAgreeCount] = useState<number>(0);
   const [disagreeCount, setDisagreeCount] = useState<number>(0);
 
@@ -37,16 +40,36 @@ export default function VotePage() {
     waitingForVote: [],
     debateOpened: [],
   });
+  const [debateRoom, setDebateRoom] = useState<DebateRoom | null>(null);
 
   useEffect(() => {
     // 여기서 백엔드 API를 호출하여 데이터를 가져올 수 있습니다.
     // 예를 들어, fetch() 함수나 axios 라이브러리를 사용할 수 있습니다.
-    fetchDebateRoomData();
-    fetchDueDate();
-    fetchDiscussionTitle();
-    fetchDiscussionPoint();
+    fetchDebateRoomById();
+    // fetchDebateRoomData();
+    // fetchDueDate();
+    // fetchDiscussionTitle();
+    // fetchDiscussionPoint();
     
   }, []);
+
+  async function fetchDebateRoomById() {
+    try{
+      const result  = await getDebateRoomById(movieId);
+      setDebateRoom(result);
+      if (debateRoom==null) {
+        throw new Error('Failed to fetch debateroom');
+      }
+      setDueDate(String(debateRoom?.startTime))
+      setDiscussionTitle(debateRoom?.title)
+      setDiscussionPoint(debateRoom?.topic)
+      setAgreeCount(debateRoom?.agreeJoinedUserNumber)
+      setDisagreeCount(debateRoom?.disagreeJoinedUserNumber)
+      setChat(debateRoom?.chats)
+    } catch (error) {
+      console.error('Error fetching getDebateRoomsByMovieId:', error);
+    }
+  }
 
   async function fetchDebateRoomData() {
     try{
@@ -163,11 +186,11 @@ export default function VotePage() {
       <div className="section section-2">
         <div className="vote-counts">
           <div className="agree-count">AGREEMENT: {agreeCount}</div>
-          <div className="disagree-count">DISAGREEMET: {disagreeCount}</div>
+          <div className="disagree-count">DISAGREEMENT: {disagreeCount}</div>
         </div>
         <p>Start the DISCCUSSION!</p>
         <p>The opening statements from the affirmative side will now begin. Affirmative participants, please proceed with your individual opening statements.</p>
-        <p>{chat}</p>
+        {/* <p>{chat}</p> */}
       </div>
 
       {isModalOpen && (
