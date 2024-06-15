@@ -1,10 +1,4 @@
-import {
-  atom,
-  selector,
-  useRecoilState,
-  useRecoilValue,
-  useSetRecoilState,
-} from 'recoil';
+import { atom, selector, useRecoilState } from 'recoil';
 import { Movie, SimpleMovie } from '../models/Movie';
 import { getMoviesForMainPage, searchMovies } from '../services/MovieService';
 import { useCallback } from 'react';

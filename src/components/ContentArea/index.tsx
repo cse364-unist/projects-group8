@@ -15,7 +15,7 @@ interface ContentAreaProps {
 function ContentArea({
   children,
   width = desktopContentAreaWidth,
-  shrink = false,
+  shrink = true,
   fitHeight = false,
   padding = desktopContentAreaPadding,
   style,
