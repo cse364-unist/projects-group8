@@ -23,7 +23,7 @@ const BigMovieItems = lazy(() => import('./components/BigMovieItems'));
 const SearchBox = lazy(() => import('./components/SearchBox'));
 
 const StyledSection = styled.section`
-  margin-bottom: 86px;
+  margin-bottom: 66px;
 
   &.last {
     margin-bottom: 0;
@@ -35,6 +35,7 @@ const StyledSection = styled.section`
     flex-direction: row;
     overflow-x: auto;
     gap: 26px;
+    padding-bottom: 20px;
 
     & > * {
       flex-shrink: 0;
@@ -110,16 +111,21 @@ const MainPage: React.FC = () => {
       />
 
       {isLoggedIn && (
-        <StyledSection className="discussion-rooms">
-          <Title text="Your Discussion Rooms" />
-          <div className="room-list">
-            <Suspense fallback={<div>Loading...</div>}>
-              {userJoinedDebateRooms.map((debateRoom) => (
-                <JoinedDebateRoomItem key={debateRoom.id} room={debateRoom} />
-              ))}
-            </Suspense>
-          </div>
-        </StyledSection>
+        <ContentArea>
+          <StyledSection className="discussion-rooms">
+            <Title text="Your Discussion Rooms" />
+            <div className="room-list">
+              <Suspense fallback={<div>Loading...</div>}>
+                {userJoinedDebateRooms.map((debateRoom) => (
+                  <JoinedDebateRoomItem
+                    key={debateRoom.id}
+                    debateRoom={debateRoom}
+                  />
+                ))}
+              </Suspense>
+            </div>
+          </StyledSection>
+        </ContentArea>
       )}
 
       {/* Discussing Active Movies Section */}

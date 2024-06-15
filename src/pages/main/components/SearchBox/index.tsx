@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import './SearchBox.css';
+import React from 'react';
 import styled from 'styled-components';
 
-import SearchIcon from './SearchIcon.svg';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import {
   mainPageSearchKeywordSelector,
   useSetKeyword,
