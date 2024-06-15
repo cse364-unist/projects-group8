@@ -59,7 +59,11 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    login();
+    login().then((success) => {
+      if (success) {
+        navigate('/');
+      }
+    });
   };
 
   return (

@@ -1,22 +1,12 @@
-import queryString from 'query-string';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
+import { authState } from '../states/AuthState';
+import { emptyUser } from '../models/User';
 
 export default function useLogout() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const setAuth = useSetRecoilState(authState);
 
   return () => {
-    const query = queryString.parse(location.search);
-
-    const newQuery = { ...query };
-    newQuery.logout = 'true';
-    const newSearch = queryString.stringify(newQuery);
-    navigate(
-      {
-        pathname: location.pathname,
-        search: newSearch,
-      },
-      { replace: true },
-    );
+    localStorage.removeItem('token');
+    setAuth((prev) => ({ ...prev, isAuthenticated: false, user: emptyUser }));
   };
 }

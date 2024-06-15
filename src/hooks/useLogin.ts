@@ -10,7 +10,7 @@ export default function useLogin() {
   const setAuth = useSetRecoilState(authState);
 
   return () => {
-    new Promise((resolve) =>
+    return new Promise((resolve) =>
       login(loginPage.email, loginPage.password)
         .then(async () => {
           const user = await getUser();
@@ -27,7 +27,7 @@ export default function useLogin() {
             isAuthenticated: true,
             user,
           }));
-          resolve(null);
+          resolve(true);
         })
         .catch((error) => {
           setLoginPage((prev) => ({
@@ -40,8 +40,8 @@ export default function useLogin() {
             isAuthenticated: false,
             user: emptyUser,
           }));
-          resolve(null);
+          resolve(false);
         }),
-    ).then(() => {});
+    );
   };
 }
