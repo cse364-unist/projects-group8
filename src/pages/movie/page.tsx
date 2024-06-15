@@ -16,8 +16,12 @@ import './style.css';
 
 const MoviePageContent: React.FC = () => {
   const movie = useRecoilValueLoadable(moviePageMovieSelector);
-  const waitingForVoteRooms = useRecoilValueLoadable(moviePageWaitingForVoteDebateRoomSelector);
-  const debateOpenedRooms = useRecoilValueLoadable(moviePageDebateOpenedDebateRoomSelector);
+  const waitingForVoteRooms = useRecoilValueLoadable(
+    moviePageWaitingForVoteDebateRoomSelector,
+  );
+  const debateOpenedRooms = useRecoilValueLoadable(
+    moviePageDebateOpenedDebateRoomSelector,
+  );
   const [movieId] = useRecoilState(moviePageMovieIdSelector);
 
   const [isCreatePopupOpen, setCreatePopupOpen] = React.useState(false);
@@ -26,7 +30,11 @@ const MoviePageContent: React.FC = () => {
   if (movie.state === 'loading') return <div>Loading...</div>;
   if (movie.state === 'hasError') return <div>Error loading movie data</div>;
 
-  const handleCreateNewDiscussion = async (title: string, points: string, startTime: Date) => {
+  const handleCreateNewDiscussion = async (
+    title: string,
+    points: string,
+    startTime: Date,
+  ) => {
     console.log('handleCreateNewDiscussion:', title, points, startTime); // 디버깅을 위해 로그 추가
     try {
       await createDebateRoom(title, points, startTime, movieId);
@@ -47,28 +55,39 @@ const MoviePageContent: React.FC = () => {
       <div className="debate-rooms">
         <h2>Waiting for vote</h2>
         {waitingForVoteRooms.state === 'loading' && <div>Loading...</div>}
-        {waitingForVoteRooms.state === 'hasError' && <div>Error loading debate rooms</div>}
+        {waitingForVoteRooms.state === 'hasError' && (
+          <div>Error loading debate rooms</div>
+        )}
         {waitingForVoteRooms.state === 'hasValue' &&
-          waitingForVoteRooms.contents.map(room => (
+          waitingForVoteRooms.contents.map((room) => (
             <DebateRoomItem key={room.id} debateRoom={room} />
           ))}
 
         <h2>You can join</h2>
         {debateOpenedRooms.state === 'loading' && <div>Loading...</div>}
-        {debateOpenedRooms.state === 'hasError' && <div>Error loading debate rooms</div>}
+        {debateOpenedRooms.state === 'hasError' && (
+          <div>Error loading debate rooms</div>
+        )}
         {debateOpenedRooms.state === 'hasValue' &&
-          debateOpenedRooms.contents.map(room => (
+          debateOpenedRooms.contents.map((room) => (
             <DebateRoomItem key={room.id} debateRoom={room} />
           ))}
       </div>
-      <button onClick={() => setCreatePopupOpen(true)}>Create new discussion!</button>
+      <button onClick={() => setCreatePopupOpen(true)}>
+        Create new discussion!
+      </button>
       {isCreatePopupOpen && (
         <CreateNewDiscussionPopup
           onClose={() => setCreatePopupOpen(false)}
           onCreate={handleCreateNewDiscussion}
         />
       )}
-      {isJoinPopupOpen && <JoinDebateRoomPopup onClose={() => setJoinPopupOpen(false)} onJoin={handleJoinDebateRoom} />}
+      {isJoinPopupOpen && (
+        <JoinDebateRoomPopup
+          onClose={() => setJoinPopupOpen(false)}
+          onJoin={handleJoinDebateRoom}
+        />
+      )}
     </div>
   );
 };

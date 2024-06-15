@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import Hero from './components/Hero';
 import BigMovieItems from './components/BigMovieItems';
 import SearchBox from './components/SearchBox';
@@ -11,8 +11,31 @@ import {
   useSetKeyword,
 } from '../../states/MainPageState';
 
-import './style.css';
 import { isAuthenticatedState } from '../../states/AuthState';
+import ContentArea from '../../components/ContentArea';
+import Title from './components/Title';
+import styled from 'styled-components';
+
+const StyledSection = styled.section`
+  margin-bottom: 86px;
+
+  &.last {
+    margin-bottom: 0;
+  }
+`;
+
+const StyledExploreList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  gap: 36px 25px;
+
+  & > div {
+    flex: 1 1 30%;
+    margin: 10px;
+  }
+`;
 
 const MainPage: React.FC = () => {
   const isLoggedIn = useRecoilValue(isAuthenticatedState);
@@ -43,53 +66,65 @@ const MainPage: React.FC = () => {
     <div className="main-page">
       {/* Hero Section */}
       <Hero />
+      <div
+        style={{
+          height: 86,
+        }}
+      />
 
       {isLoggedIn && (
-        <section className="discussion-rooms">
+        <StyledSection className="discussion-rooms">
           <h2>Your Discussion Rooms</h2>
           <div className="room-list">
             {/* 여기에 유저가 참가한 토론 방 정보를 넣어야 합니다. */}
           </div>
-        </section>
+        </StyledSection>
       )}
 
       {/* Discussing Active Movies Section */}
-      <section className="trending-rooms">
-        <h2>Discussing Active Movies</h2>
-        <div className="room-list">
-          {debateMovies.map((movie) => (
-            <BigMovieItems key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </section>
+
+      <ContentArea>
+        <StyledSection className="trending-rooms">
+          <Title text="Discussing Active Movies" />
+          <div className="room-list">
+            {debateMovies.map((movie) => (
+              <BigMovieItems key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </StyledSection>
+      </ContentArea>
 
       {/* Hot Movies Section */}
-      <section className="hot-movies">
-        <h2>Hot Movies</h2>
-        <div className="room-list">
-          {popularMovies.map((movie) => (
-            <BigMovieItems key={movie.id} movie={movie} />
-          ))}
-        </div>
-      </section>
+      <ContentArea>
+        <StyledSection className="hot-movies">
+          <Title text="Hot Movies" />
+          <div className="room-list">
+            {popularMovies.map((movie) => (
+              <BigMovieItems key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </StyledSection>
+      </ContentArea>
 
       {/* Explore Section */}
-      <section className="explore">
-        <h2>Explore</h2>
-        <SearchBox onSearch={handleSearch} />
-        <div className="explore-list">
-          {searchResult.length > 0
-            ? searchResult.map((movie) => (
-                <BigMovieItems key={movie.id} movie={movie} />
-              ))
-            : popularMovies.map((movie) => (
-                <BigMovieItems key={movie.id} movie={movie} />
-              ))}
-        </div>
-        {searchResult.length > 0 && (
-          <button onClick={loadMoreSearchResults}>Load More</button>
-        )}
-      </section>
+      <ContentArea>
+        <StyledSection className="explore last">
+          <Title text="Explore" />
+          <SearchBox onSearch={handleSearch} />
+          <StyledExploreList className="explore-list">
+            {searchResult.length > 0
+              ? searchResult.map((movie) => (
+                  <BigMovieItems key={movie.id} movie={movie} />
+                ))
+              : popularMovies.map((movie) => (
+                  <BigMovieItems key={movie.id} movie={movie} />
+                ))}
+          </StyledExploreList>
+          {searchResult.length > 0 && (
+            <button onClick={loadMoreSearchResults}>Load More</button>
+          )}
+        </StyledSection>
+      </ContentArea>
     </div>
   );
 };
