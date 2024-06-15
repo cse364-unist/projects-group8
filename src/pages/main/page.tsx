@@ -13,7 +13,7 @@ import {
 
 import { isAuthenticatedState } from '../../states/AuthState';
 import ContentArea from '../../components/ContentArea';
-import Title from './components/Title';
+import Title from '../../components/Title';
 import styled from 'styled-components';
 
 const StyledSection = styled.section`
