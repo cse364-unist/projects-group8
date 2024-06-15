@@ -40,7 +40,7 @@ class LoadDatabase {
 
                     // CSV의 각 열을 Movie 엔티티 필드에 매핑
                     String title = values[0];
-                    System.out.println("title is : " + title);
+//                    System.out.println("title is : " + title);
                     int year = Integer.parseInt(values[1]);
                     Double avgRating = Double.parseDouble(values[2]);
                     String genre = values[3];
@@ -49,10 +49,14 @@ class LoadDatabase {
 
 
                     // Movie 엔티티 생성 및 저장
-                    Movie movie = new Movie();
-                    movie = Movie.loadCreate(title, year, avgRating, genre, description, thumbnailUrl);
-                    repository.save(movie);
-                    log.info("Preloading " + movie);
+                    if (!repository.existsByTitle(title)) {
+                        // Movie 엔티티 생성 및 저장
+                        Movie movie = Movie.loadCreate(title, year, avgRating, genre, description, thumbnailUrl);
+                        repository.save(movie);
+                        log.info("Preloading " + movie);
+                    } else {
+                        log.info("Movie with title " + title + " already exists.");
+                    }
 
 
                 }
