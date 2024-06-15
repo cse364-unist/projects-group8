@@ -26,6 +26,7 @@ const StyledHeader = styled.header`
     font-size: 15px;
     color: black;
     font-weight: medium;
+    text-decoration: none;
   }
 `;
 
@@ -42,7 +43,9 @@ export default function Header() {
           {isAuthenticated ? (
             <div className="action">Logout</div>
           ) : (
-            <div className="action">Login</div>
+            <Link to="/login" className="action">
+              Login
+            </Link>
           )}
         </div>
       </ContentArea>

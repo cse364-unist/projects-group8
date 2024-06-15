@@ -3,7 +3,6 @@ import { useRecoilState, useRecoilValueLoadable } from 'recoil';
 import { useParams } from 'react-router-dom';
 import MovieInformation from './components/MovieInformation';
 import DebateRoomItem from './components/DebateRoomItem';
-import CreateNewDiscussionPopup from './popup/CreateNewDiscussionPopup';
 import JoinDebateRoomPopup from './popup/JoinDebateRoomPopup';
 import {
   moviePageMovieIdSelector,
@@ -11,7 +10,6 @@ import {
   moviePageWaitingForVoteDebateRoomSelector,
   moviePageDebateOpenedDebateRoomSelector,
 } from '../../states/MoviePageState';
-import { createDebateRoom } from '../../services/DebateRoomService';
 import './style.css';
 import Title from '../../components/Title';
 import ContentArea from '../../components/ContentArea';

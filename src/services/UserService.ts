@@ -16,7 +16,7 @@ export async function registerUser(
 ): Promise<User> {
   const result = (
     await api.post('/users/register', {
-      nameName: name,
+      userName: name,
       email,
       password,
     })
