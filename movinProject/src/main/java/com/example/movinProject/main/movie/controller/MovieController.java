@@ -3,6 +3,7 @@ package com.example.movinProject.main.movie.controller;
 import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.main.movie.dto.MovieDto;
 import com.example.movinProject.main.movie.dto.MovieSearchDto;
+import com.example.movinProject.main.movie.dto.MovieSearchReturnDto;
 import com.example.movinProject.main.movie.service.MovieService;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class MovieController {
     @GetMapping("/mainPage")
     public ResponseEntity<Map<String, List<Movie>>> getMainPageMovies() {
         List<Movie> debateMovies = movieService.findDebateMovies();
-        List<Movie> popularMovies = movieService.findPopularMovies(4.3);
+        List<Movie> popularMovies = movieService.findPopularMovies(9.0);
 
         Map<String, List<Movie>> response = new HashMap<>();
         response.put("debateMovies", debateMovies);
@@ -34,18 +35,19 @@ public class MovieController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<Map<String, List<MovieDto>>> searchMovies(@RequestBody MovieSearchDto movieSearchDto) {
+    public ResponseEntity<Map<String, List<MovieSearchReturnDto>>> searchMovies(@RequestBody MovieSearchDto movieSearchDto) {
         List<Movie> movies = movieService.searchMoviesByKeyword(movieSearchDto.getKeyword(), movieSearchDto.getPage());
-        List<MovieDto> movieDtos = movies.stream()
-                .map(movie -> MovieDto.builder()
+        List<MovieSearchReturnDto> movieSearchReturnDtos = movies.stream()
+                .map(movie -> MovieSearchReturnDto.builder()
                         .id(movie.getId())
                         .thumbnailUrl(movie.getThumbnailUrl())
                         .name(movie.getTitle())
+                        .year(movie.getYear())
                         .build())
                 .collect(Collectors.toList());
 
-        Map<String, List<MovieDto>> response = new HashMap<>();
-        response.put("movies", movieDtos);
+        Map<String, List<MovieSearchReturnDto>> response = new HashMap<>();
+        response.put("movies", movieSearchReturnDtos);
         return ResponseEntity.ok(response);
     }
 
