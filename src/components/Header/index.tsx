@@ -53,9 +53,14 @@ export default function Header() {
             <img className="logo" src="/logo.png" alt="logo" />
           </Link>
           {isAuthenticated ? (
-            <button className="action" type="button" onClick={handleLogout}>
-              Logout
-            </button>
+            <div style={{ display: 'flex', gap: 14 }}>
+              <button className="action" type="button" onClick={handleLogout}>
+                Logout
+              </button>
+              <Link to="/my" className="action">
+                My Page
+              </Link>
+            </div>
           ) : (
             <Link to="/login" className="action">
               Login

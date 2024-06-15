@@ -37,6 +37,7 @@ export function simpleMovieDtoToSimpleMovie(dto: SimpleMovieDto): SimpleMovie {
     id: dto.id,
     thumbnailUrl: dto.thumbnailUrl,
     title: dto.name, // TODO: Fix Backend
+    year: dto.year,
   };
 }
 
@@ -48,5 +49,6 @@ export function movieDtoToMovie(dto: MovieDto): Movie {
     genre: dto.genre,
     avgRating: dto.avgRating,
     description: dto.description,
+    year: dto.year,
   };
 }

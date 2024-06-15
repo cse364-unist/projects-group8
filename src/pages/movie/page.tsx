@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValueLoadable } from 'recoil';
 import { useParams } from 'react-router-dom';
 import MovieInformation from './components/MovieInformation';
@@ -14,6 +14,24 @@ import './style.css';
 import Title from '../../components/Title';
 import ContentArea from '../../components/ContentArea';
 import CreateButton from './components/CreateButton';
+import styled from 'styled-components';
+
+const StyledWrapContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 36px 14px;
+`;
+
+const StyledSection = styled.section`
+  width: 100%;
+  margin-bottom: 86px;
+
+  &.last {
+    margin-bottom: 0;
+  }
+`;
 
 const MoviePageContent: React.FC = () => {
   const movie = useRecoilValueLoadable(moviePageMovieSelector);
@@ -24,47 +42,76 @@ const MoviePageContent: React.FC = () => {
     moviePageDebateOpenedDebateRoomSelector,
   );
 
-  const [isJoinPopupOpen, setJoinPopupOpen] = React.useState(false);
+  const [isJoinPopupOpen, setJoinPopupOpen] = useState({
+    isOpen: false,
+    roomId: 0,
+  });
+
+  const handleOnJoinItemClick = (roomId: number) => {
+    setJoinPopupOpen({ isOpen: true, roomId });
+  };
 
   if (movie.state === 'loading') return <div>Loading...</div>;
   if (movie.state === 'hasError') return <div>Error loading movie data</div>;
-
-  const handleJoinDebateRoom = (position: string) => {
-    console.log('Joined debate room with position:', position);
-  };
 
   return (
     <div className="movie-detailed-page">
       <MovieInformation />
       <div style={{ height: 80 }} />
       <ContentArea>
-        <div className="debate-rooms">
-          <Title text="Waiting for vote" />
-          {waitingForVoteRooms.state === 'loading' && <div>Loading...</div>}
-          {waitingForVoteRooms.state === 'hasError' && (
-            <div>Error loading debate rooms</div>
-          )}
-          {waitingForVoteRooms.state === 'hasValue' &&
-            waitingForVoteRooms.contents.map((room) => (
-              <DebateRoomItem key={room.id} debateRoom={room} />
-            ))}
-
-          <Title text="You Can Join" />
-          {debateOpenedRooms.state === 'loading' && <div>Loading...</div>}
-          {debateOpenedRooms.state === 'hasError' && (
-            <div>Error loading debate rooms</div>
-          )}
-          {debateOpenedRooms.state === 'hasValue' &&
-            debateOpenedRooms.contents.map((room) => (
-              <DebateRoomItem key={room.id} debateRoom={room} />
-            ))}
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <StyledSection>
+            <Title text="Waiting for vote" />
+            {waitingForVoteRooms.state === 'loading' && <div>Loading...</div>}
+            {waitingForVoteRooms.state === 'hasError' && (
+              <div>Error loading debate rooms</div>
+            )}
+            {waitingForVoteRooms.state === 'hasValue' && (
+              <StyledWrapContainer>
+                {waitingForVoteRooms.contents.map((room) => (
+                  <DebateRoomItem
+                    key={room.id}
+                    debateRoom={room}
+                    onClick={() => {}}
+                  />
+                ))}
+              </StyledWrapContainer>
+            )}
+          </StyledSection>
+          <StyledSection>
+            <Title text="You Can Join" />
+            {debateOpenedRooms.state === 'loading' && <div>Loading...</div>}
+            {debateOpenedRooms.state === 'hasError' && (
+              <div>Error loading debate rooms</div>
+            )}
+            {debateOpenedRooms.state === 'hasValue' && (
+              <StyledWrapContainer>
+                {debateOpenedRooms.contents.map((room) => (
+                  <DebateRoomItem
+                    key={room.id}
+                    debateRoom={room}
+                    onClick={() => handleOnJoinItemClick(room.id)}
+                  />
+                ))}
+              </StyledWrapContainer>
+            )}
+          </StyledSection>
+          <CreateButton />
         </div>
-        <CreateButton />
+        <div style={{ height: 80 }} />
 
         {isJoinPopupOpen && (
           <JoinDebateRoomPopup
-            onClose={() => setJoinPopupOpen(false)}
-            onJoin={handleJoinDebateRoom}
+            onClose={() => setJoinPopupOpen({ isOpen: false, roomId: 0 })}
+            id={isJoinPopupOpen.roomId}
+            visible={isJoinPopupOpen.isOpen}
           />
         )}
       </ContentArea>

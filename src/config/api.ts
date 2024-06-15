@@ -25,16 +25,17 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response && error.response.status === 403) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const currentUrl = window.location.href;
-        const newUrl = currentUrl.includes('?')
-          ? `${currentUrl}&login=true`
-          : `${currentUrl}?login=true`;
-        window.location.replace(newUrl);
-      }
-    }
+    // if (error.response && error.response.status === 403) {
+    //   const token = localStorage.getItem('token');
+    //   if (token) {
+    //     const currentUrl = window.location.href;
+    //     if (currentUrl.includes('logout=true')) return Promise.reject(error);
+    //     const newUrl = currentUrl.includes('?')
+    //       ? `${currentUrl}&logout=true`
+    //       : `${currentUrl}?logout=true`;
+    //     window.location.replace(newUrl);
+    //   }
+    // }
     return Promise.reject(error);
   },
 );

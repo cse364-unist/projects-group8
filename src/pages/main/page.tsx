@@ -1,8 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { useRecoilValue } from 'recoil';
-import Hero from './components/Hero';
-import BigMovieItems from './components/BigMovieItems';
-import SearchBox from './components/SearchBox';
 import {
   mainPageDebatingMoviesSelector,
   mainPagePopularMoviesSelector,
@@ -11,16 +8,37 @@ import {
   useSetKeyword,
 } from '../../states/MainPageState';
 
-import { isAuthenticatedState } from '../../states/AuthState';
+import {
+  isAuthenticatedState,
+  userJoinedDebateRoomsSelector,
+} from '../../states/AuthState';
 import ContentArea from '../../components/ContentArea';
 import Title from '../../components/Title';
 import styled from 'styled-components';
+import JoinedDebateRoomItem from './components/JoinedDebateRoomItem';
+
+// Lazy load components
+const Hero = lazy(() => import('./components/Hero'));
+const BigMovieItems = lazy(() => import('./components/BigMovieItems'));
+const SearchBox = lazy(() => import('./components/SearchBox'));
 
 const StyledSection = styled.section`
   margin-bottom: 86px;
 
   &.last {
     margin-bottom: 0;
+  }
+
+  & .room-list {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 26px;
+
+    & > * {
+      flex-shrink: 0;
+    }
   }
 `;
 
@@ -43,11 +61,11 @@ function ScrollButtomDetector() {
   useEffect(() => {
     const handleScroll = () => {
       if (
-        window.innerHeight + document.documentElement.scrollTop !==
-        document.documentElement.offsetHeight
-      )
-        return;
-      triggerSearch();
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 200
+      ) {
+        triggerSearch();
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -59,6 +77,7 @@ function ScrollButtomDetector() {
 
 const MainPage: React.FC = () => {
   const isLoggedIn = useRecoilValue(isAuthenticatedState);
+  const userJoinedDebateRooms = useRecoilValue(userJoinedDebateRoomsSelector);
   const debateMovies = useRecoilValue(mainPageDebatingMoviesSelector);
   const popularMovies = useRecoilValue(mainPagePopularMoviesSelector);
   const searchResult = useRecoilValue(movieSearchResultSelector);
@@ -71,10 +90,6 @@ const MainPage: React.FC = () => {
     setSearchKeyword(keyword);
   };
 
-  const loadMoreSearchResults = () => {
-    triggerSearch();
-  };
-
   useEffect(() => {
     if (IsFirstRef.current) {
       triggerSearch();
@@ -85,7 +100,9 @@ const MainPage: React.FC = () => {
   return (
     <div className="main-page">
       {/* Hero Section */}
-      <Hero />
+      <Suspense>
+        <Hero />
+      </Suspense>
       <div
         style={{
           height: 86,
@@ -94,22 +111,27 @@ const MainPage: React.FC = () => {
 
       {isLoggedIn && (
         <StyledSection className="discussion-rooms">
-          <h2>Your Discussion Rooms</h2>
+          <Title text="Your Discussion Rooms" />
           <div className="room-list">
-            {/* 여기에 유저가 참가한 토론 방 정보를 넣어야 합니다. */}
+            <Suspense fallback={<div>Loading...</div>}>
+              {userJoinedDebateRooms.map((debateRoom) => (
+                <JoinedDebateRoomItem key={debateRoom.id} room={debateRoom} />
+              ))}
+            </Suspense>
           </div>
         </StyledSection>
       )}
 
       {/* Discussing Active Movies Section */}
-
       <ContentArea>
         <StyledSection className="trending-rooms">
           <Title text="Discussing Active Movies" />
           <div className="room-list">
-            {debateMovies.map((movie) => (
-              <BigMovieItems key={movie.id} movie={movie} />
-            ))}
+            <Suspense fallback={<div>Loading...</div>}>
+              {debateMovies.map((movie) => (
+                <BigMovieItems key={movie.id} movie={movie} />
+              ))}
+            </Suspense>
           </div>
         </StyledSection>
       </ContentArea>
@@ -119,9 +141,11 @@ const MainPage: React.FC = () => {
         <StyledSection className="hot-movies">
           <Title text="Hot Movies" />
           <div className="room-list">
-            {popularMovies.map((movie) => (
-              <BigMovieItems key={movie.id} movie={movie} />
-            ))}
+            <Suspense fallback={<div>Loading...</div>}>
+              {popularMovies.map((movie) => (
+                <BigMovieItems key={movie.id} movie={movie} />
+              ))}
+            </Suspense>
           </div>
         </StyledSection>
       </ContentArea>
@@ -130,11 +154,15 @@ const MainPage: React.FC = () => {
       <ContentArea>
         <StyledSection className="explore last">
           <Title text="Explore" />
-          <SearchBox onSearch={handleSearch} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <SearchBox onSearch={handleSearch} />
+          </Suspense>
           <StyledExploreList className="explore-list">
-            {searchResult.map((movie) => (
-              <BigMovieItems key={movie.id} movie={movie} />
-            ))}
+            <Suspense fallback={<div>Loading...</div>}>
+              {searchResult.map((movie) => (
+                <BigMovieItems key={movie.id} movie={movie} />
+              ))}
+            </Suspense>
           </StyledExploreList>
           <ScrollButtomDetector />
         </StyledSection>

@@ -54,13 +54,14 @@ export default function CreateButton() {
 
   return (
     <>
-      <StyledButton>+ Create New Discussion</StyledButton>
-      {isCreatePopupOpen && (
-        <CreateNewDiscussionPopup
-          onClose={() => setCreatePopupOpen(false)}
-          onCreate={handleCreateNewDiscussion}
-        />
-      )}
+      <StyledButton onClick={() => setCreatePopupOpen(true)}>
+        + Create New Discussion
+      </StyledButton>
+      <CreateNewDiscussionPopup
+        visible={isCreatePopupOpen}
+        onClose={() => setCreatePopupOpen(false)}
+        onCreate={handleCreateNewDiscussion}
+      />
     </>
   );
 }

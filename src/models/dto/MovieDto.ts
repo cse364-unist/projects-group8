@@ -2,6 +2,7 @@ export interface SimpleMovieDto {
   id: number;
   thumbnailUrl: string;
   name: string;
+  year: number;
 }
 
 export interface MovieDto {
@@ -11,4 +12,5 @@ export interface MovieDto {
   avgRating: number;
   thumbnailUrl: string;
   description: string;
+  year: number;
 }

@@ -7,6 +7,10 @@ const StyledBigMovieItem = styled(Link)`
   width: 274px;
   position: relative;
 
+  text-decoration: none;
+  color: black;
+  text-align: left;
+
   & img {
     width: 100%;
     height: 370px;
@@ -36,6 +40,7 @@ interface BigMovieItemsProps {
     id: number;
     title: string;
     thumbnailUrl: string;
+    year: number;
   };
 }
 
@@ -44,7 +49,7 @@ const BigMovieItems: React.FC<BigMovieItemsProps> = ({ movie }) => {
     <StyledBigMovieItem to={`/movie/${movie.id}`}>
       <img src={movie.thumbnailUrl} alt={`${movie.title} Poster`} />
       <div className="title">{movie.title}</div>
-      <div className="sub">year</div>
+      <div className="sub">{movie.year}</div>
     </StyledBigMovieItem>
   );
 };

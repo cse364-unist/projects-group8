@@ -34,6 +34,7 @@ export const emptyDebateRoom: DebateRoom = {
     id: 0,
     title: '',
     thumbnailUrl: '',
+    year: 0,
   },
   startTime: new Date(),
   duration: 0,
