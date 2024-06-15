@@ -489,9 +489,9 @@ class DebateRoomServiceTest {
                                 .build();
                     })
                     .toList();
-//            for (int i = 0; i < openDebateRoomDtos.size(); i++) {
-//                assertAllFieldsInDebateRoomDto(result.get(openDebateRoomString).get(i), openDebateRoomDtos.get(i));
-//            }
+            for (int i = 0; i < openDebateRoomDtos.size(); i++) {
+                assertAllFieldsInDebateRoomDto(result.get(openDebateRoomString).get(i), openDebateRoomDtos.get(i));
+            }
             for (int i = 0; i < voteDebateRoomDtos.size(); i++) {
                 assertAllFieldsInDebateRoomDto(result.get(voteDebateRoomString).get(i), voteDebateRoomDtos.get(i));
             }
@@ -524,7 +524,6 @@ class DebateRoomServiceTest {
             //
             Assertions.assertEquals(resultDto.getTitle(), expectedDto.getTitle());
             Assertions.assertEquals(resultDto.getId(), expectedDto.getId());
-//            Assertions.assertEquals(resultDto.getState(), expectedDto.getState());
             Assertions.assertEquals(resultDto.getDuration(), expectedDto.getDuration());
             Assertions.assertEquals(resultDto.getTopic(), expectedDto.getTopic());
             Assertions.assertEquals(resultDto.getAgreeJoinedUserNumber(), expectedDto.getAgreeJoinedUserNumber());
