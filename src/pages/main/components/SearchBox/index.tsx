@@ -3,6 +3,11 @@ import './SearchBox.css';
 import styled from 'styled-components';
 
 import SearchIcon from './SearchIcon.svg';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import {
+  mainPageSearchKeywordSelector,
+  useSetKeyword,
+} from '../../../../states/MainPageState';
 
 const StyledSearchBox = styled.div`
   display: flex;
@@ -41,12 +46,9 @@ interface SearchBoxProps {
   onSearch: (keyword: string) => void;
 }
 
-const SearchBox: React.FC<SearchBoxProps> = ({ onSearch }) => {
-  const [keyword, setKeyword] = useState('');
-
-  const handleSearch = () => {
-    onSearch(keyword);
-  };
+const SearchBox: React.FC<SearchBoxProps> = () => {
+  const keyword = useRecoilValue(mainPageSearchKeywordSelector);
+  const setKeyword = useSetKeyword();
 
   return (
     <StyledSearchBox>
@@ -56,9 +58,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch }) => {
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
       />
-      <button onClick={handleSearch} type="button">
-        <img src={SearchIcon} alt="Search" />
-      </button>
     </StyledSearchBox>
   );
 };

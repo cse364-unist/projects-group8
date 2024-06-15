@@ -37,6 +37,26 @@ const StyledExploreList = styled.div`
   }
 `;
 
+function ScrollButtomDetector() {
+  const triggerSearch = useSearchTrigger();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop !==
+        document.documentElement.offsetHeight
+      )
+        return;
+      triggerSearch();
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  });
+
+  return null;
+}
+
 const MainPage: React.FC = () => {
   const isLoggedIn = useRecoilValue(isAuthenticatedState);
   const debateMovies = useRecoilValue(mainPageDebatingMoviesSelector);
@@ -112,17 +132,11 @@ const MainPage: React.FC = () => {
           <Title text="Explore" />
           <SearchBox onSearch={handleSearch} />
           <StyledExploreList className="explore-list">
-            {searchResult.length > 0
-              ? searchResult.map((movie) => (
-                  <BigMovieItems key={movie.id} movie={movie} />
-                ))
-              : popularMovies.map((movie) => (
-                  <BigMovieItems key={movie.id} movie={movie} />
-                ))}
+            {searchResult.map((movie) => (
+              <BigMovieItems key={movie.id} movie={movie} />
+            ))}
           </StyledExploreList>
-          {searchResult.length > 0 && (
-            <button onClick={loadMoreSearchResults}>Load More</button>
-          )}
+          <ScrollButtomDetector />
         </StyledSection>
       </ContentArea>
     </div>
