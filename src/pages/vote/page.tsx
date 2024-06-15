@@ -9,6 +9,7 @@ import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import styled from 'styled-components';
 import VoteActions from './components/VoteActions';
+import ChatHistory from './components/ChatHistory';
 
 const StyledVotePage = styled.div`
   display: flex;
@@ -141,9 +142,9 @@ export default function VotePage() {
 
   useEffect(() => {
     const id = Number(debateRoomId);
-    if (LastDebateRoomIdRef.current !== debateRoom.id) {
-      LastDebateRoomIdRef.current = debateRoom.id;
-      setDebateRoomId(Number(debateRoomId));
+    if (LastDebateRoomIdRef.current !== id) {
+      LastDebateRoomIdRef.current = id;
+      setDebateRoomId(id);
     }
   }, [debateRoomId, setDebateRoomId, debateRoom.id]);
 
@@ -177,23 +178,7 @@ export default function VotePage() {
         </div>
       </div>
       <div className="section section-2">
-        <p>Start the DISCCUSSION!</p>
-        <p>
-          The opening statements from the affirmative side will now begin.
-          Affirmative participants, please proceed with your individual opening
-          statements.
-        </p>
-        {/* <p>{chat}</p> */}
-        <div className="chat-list">
-          <ul>
-            {debateRoom.chats.map((chatMessage) => (
-              <li key={chatMessage.id}>
-                <strong>{chatMessage.userName}</strong>: {chatMessage.message}{' '}
-                <em>({String(chatMessage.date)})</em>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ChatHistory debateRoom={debateRoom} />
       </div>
     </StyledVotePage>
   );

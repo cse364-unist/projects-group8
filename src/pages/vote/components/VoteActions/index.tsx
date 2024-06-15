@@ -55,7 +55,7 @@ function VoteButton({
   return (
     <StyledVoteButton
       style={{
-        backgroundColor: highlighted ? '#ff4d4f' : '#f3f3f3',
+        backgroundColor: highlighted ? '#176485' : '#f3f3f3',
         color: highlighted ? 'white' : 'black',
       }}
       disabled={disabled}
@@ -63,7 +63,7 @@ function VoteButton({
       type="button"
     >
       {agree ? 'Agree' : 'Disagree'}
-      <img src={CheckIcon} alt="check" />
+      {!disabled && <img src={CheckIcon} alt="check" />}
     </StyledVoteButton>
   );
 }

@@ -1,6 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
-import { useClient } from '../../provider/ClientProvider';
+
+import GrayPerson from './GrayPerson.svg';
+import { DebateRoom } from '../../../../models/DebateRoom';
 
 const StyledChatHistory = styled.div`
   width: 100%;
@@ -8,10 +10,9 @@ const StyledChatHistory = styled.div`
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: 20px;
+  padding: 36px 40px;
 
   overflow-y: auto;
-
   gap: 22px;
 
   min-height: 0;
@@ -74,31 +75,69 @@ const StyledNotify = styled.div`
   color: black;
 `;
 
-function ChatHistory() {
-  const client = useClient();
+const StyledHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
 
-  const { messages } = client;
+  & > .member-count {
+    color: #7b7b7b;
+    font-size: 14px;
+    font-weight: medium;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    & > .count {
+      display: flex;
+      flex-direction: row;
+      gap: 2px;
+      align-items: center;
+    }
+  }
+`;
+
+function ChatHistory({ debateRoom }: { debateRoom: DebateRoom }) {
+  const { chats, agreeJoinedUserNumber, disagreeJoinedUserNumber } = debateRoom;
 
   return (
     <StyledChatHistory>
-      {messages.map((message, index) => {
+      <StyledHeader>
+        <div className="member-count">
+          <div>AGREEMENT</div>
+          <div className="count">
+            <img src={GrayPerson} alt="person" />
+            <div>{agreeJoinedUserNumber}</div>
+          </div>
+        </div>
+        <div className="member-count">
+          <div>OPPOSITION</div>
+          <div className="count">
+            <img src={GrayPerson} alt="person" />
+            <div>{disagreeJoinedUserNumber}</div>
+          </div>
+        </div>
+      </StyledHeader>
+
+      {chats.map((chat, index) => {
         return (
           <div
             key={index}
             className={
-              message.senderUserId === -1
+              chat.chatType === 'MODERATE'
                 ? 'center'
-                : message.senderAgree
+                : chat.chatType === 'AGREE'
                   ? 'left'
                   : 'right'
             }
           >
-            {message.senderUserId === -1 ? (
-              <StyledNotify>{message.message}</StyledNotify>
+            {chat.chatType === 'MODERATE' ? (
+              <StyledNotify>{chat.message}</StyledNotify>
             ) : (
               <StyledMessage key={index}>
-                <div className="user-name">{message.senderUserName}</div>
-                <div className="message">{message.message}</div>
+                <div className="user-name">{chat.userName}</div>
+                <div className="message">{chat.message}</div>
               </StyledMessage>
             )}
           </div>
