@@ -2,6 +2,7 @@ import { DebateRoomWithUserInformation } from '../../../../models/DebateRoom';
 import styled from 'styled-components';
 import PersonIcon from './PersonIcon.svg';
 import CalendarIcon from './CalendarIcon.svg';
+import { useNavigate } from 'react-router-dom';
 
 const StyledContainer = styled.div`
   width: 675px;
@@ -121,11 +122,16 @@ function JoinedDebateRoomItem({
 }) {
   // convert startTime to string  like 2024-04-02 18:02
   const startTime = new Date(debateRoom.startTime);
+  const navigate = useNavigate();
   const startTimeStr = `${startTime.getFullYear()}-${
     startTime.getMonth() + 1
   }-${startTime.getDate()} ${startTime.getHours()}:${startTime.getMinutes()}`;
 
   const isStarted = new Date() > startTime;
+
+  const handleOnClickGoIn = () => {
+    navigate(`/debateRoom/${debateRoom.id}`);
+  };
 
   return (
     <StyledContainer>
@@ -162,7 +168,7 @@ function JoinedDebateRoomItem({
           </div>
         </div>
       </div>
-      <StyledGoInButton disabled={!isStarted}>
+      <StyledGoInButton disabled={!isStarted} onClick={handleOnClickGoIn}>
         {isStarted ? 'START!' : 'NOT YET'}
       </StyledGoInButton>
     </StyledContainer>

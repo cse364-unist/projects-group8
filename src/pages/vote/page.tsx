@@ -1,220 +1,200 @@
-import React, { useState, useEffect } from 'react';
-import './votePage.css';
+import React, { useState, useEffect, useRef } from 'react';
 import VotePopup from './popup/VotePopup/index';
 import {
-  votePageDebateRoomIdSelector,
+  useSetVotePageDebateRoomId,
   votePageDebateRoomSelector,
-  votePageUserVotedSelector,
-
 } from '../../states/VotePageState';
 
-import {
-  DebateRoom,
-  DebateRoomWithUserInformation,
-  SimpleDebateRoom,
-} from '../../models/DebateRoom';
+import { useParams } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import styled from 'styled-components';
+import VoteActions from './components/VoteActions';
 
-import {
-  getDebateRoomsByMovieId,
-  getDebateRoomById,
-  voteToDebateRoom,
-} from '../../services/DebateRoomService';
+const StyledVotePage = styled.div`
+  display: flex;
+  height: 100vh;
 
-import Chat from '../../models/Chat';
+  .section-1 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #d9d9d9;
+    box-shadow: 4px 0 8px 0 rgba(0, 0, 0, 0.04);
+    z-index: 1;
+  }
+
+  .section-1 .section-1-1 {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #d9d9d9;
+    padding: 28px 36px;
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 24px;
+    }
+  }
+
+  .section-1 .section-1-2 {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #d9d9d9;
+    padding: 28px 36px;
+    gap: 24px;
+  }
+
+  .section-1 .section-1-3 {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 36px;
+  }
+
+  .section-2 {
+    flex: 3;
+    background-color: #f3f3f3;
+    text-align: center;
+  }
+
+  .vote-button {
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .agree-button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+  }
+
+  .disagree-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+  }
+
+  .vote-counts {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .agree-count,
+  .disagree-count {
+    font-weight: bold;
+    padding: 12px;
+  }
+
+  .chat-list {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .chat-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .chat-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .chat-list strong {
+    font-weight: bold;
+  }
+
+  .chat-list em {
+    font-size: 0.9em;
+    color: #666;
+  }
+`;
+
+const StyledKeyAndValue = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  & .key {
+    font-size: 16px;
+    color: #6e6e6e;
+  }
+
+  & .value {
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+  }
+`;
 
 export default function VotePage() {
-  const [dueDate, setDueDate] = useState<string | null>(null);
-  const [discussionTitle, setDiscussionTitle] = useState<string | null>(null);
-  const [discussionPoint, setDiscussionPoint] = useState<string | null>(null);
-  const [chat, setChat] = useState<Chat[] | null>(null);
-  const [agreeCount, setAgreeCount] = useState<number>(0);
-  const [disagreeCount, setDisagreeCount] = useState<number>(0);
+  const { debateRoomId } = useParams<{ debateRoomId: string }>();
 
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [modalMessage, setModalMessage] = useState<string>('');
-  const [movieId, setMovieId] = useState<number>(0);
-  const [debateRooms, setDebateRooms] = useState<{
-    waitingForVote: SimpleDebateRoom[];
-    debateOpened: SimpleDebateRoom[];
-  }>({
-    waitingForVote: [],
-    debateOpened: [],
-  });
-  const [debateRoom, setDebateRoom] = useState<DebateRoom | null>(null);
+  const LastDebateRoomIdRef = useRef<number | null>(null);
+
+  const setDebateRoomId = useSetVotePageDebateRoomId();
+
+  const debateRoom = useRecoilValue(votePageDebateRoomSelector);
 
   useEffect(() => {
-    // 여기서 백엔드 API를 호출하여 데이터를 가져올 수 있습니다.
-    // 예를 들어, fetch() 함수나 axios 라이브러리를 사용할 수 있습니다.
-    fetchDebateRoomById();
-    // fetchDebateRoomData();
-    // fetchDueDate();
-    // fetchDiscussionTitle();
-    // fetchDiscussionPoint();
-    
-  }, []);
-
-  async function fetchDebateRoomById() {
-    try{
-      const result  = await getDebateRoomById(movieId);
-      if (result==null) {
-        setDueDate(String(null));
-        throw new Error('Failed to fetch debate room');
-      }
-      setDebateRoom(result);
-      // if (debateRoom==null) {
-      //   throw new Error('Failed to fetch debateroom');
-      // }
-      setDueDate(String(result.startTime));
-      setDiscussionTitle(result.title);
-      setDiscussionPoint(result.topic);
-      setAgreeCount(result.agreeJoinedUserNumber);
-      setDisagreeCount(result.disagreeJoinedUserNumber);
-      setChat(result.chats);
-    } catch (error) {
-      setDueDate("error");
-      setDiscussionTitle("error");
-      setDiscussionPoint("error");
-      setAgreeCount(0);
-      setDisagreeCount(0);
-      setChat(null);
-      console.error('Error fetching getDebateRoomsByMovieId:', error);
+    const id = Number(debateRoomId);
+    if (LastDebateRoomIdRef.current !== debateRoom.id) {
+      LastDebateRoomIdRef.current = debateRoom.id;
+      setDebateRoomId(Number(debateRoomId));
     }
-  }
+  }, [debateRoomId, setDebateRoomId, debateRoom.id]);
 
-  async function fetchDebateRoomData() {
-    try{
-      const result  = await getDebateRoomsByMovieId(movieId);
-      setDebateRooms(result);
-    } catch (error) {
-      console.error('Error fetching getDebateRoomsByMovieId:', error);
-    }
-  }
-
-  const fetchDueDate = async () => {
-    try {
-      const response = await fetch('/api/due-date'); // 백엔드 API 엔드포인트
-      if (!response.ok) {
-        throw new Error('Failed to fetch due date');
-      }
-      const data = await response.json();
-      setDiscussionTitle(data.dueDate); // 백엔드에서 가져온 데이터 설정
-    } catch (error) {
-      console.error('Error fetching due date:', error);
-    }
-  };
-
-  const fetchDiscussionTitle = async () => {
-    try {
-      const response = await fetch('/api/due-date'); // 백엔드 API 엔드포인트
-      if (!response.ok) {
-        throw new Error('Failed to fetch discussion title');
-      }
-      const disTitle = await response.json();
-      setDiscussionPoint(disTitle.title); // 백엔드에서 가져온 데이터 설정
-    } catch (error) {
-      console.error('Error fetching discution title:', error);
-    }
-  };
-
-  const fetchDiscussionPoint = async () => {
-    try {
-      const response = await fetch('/api/due-date'); // 백엔드 API 엔드포인트
-      if (!response.ok) {
-        throw new Error('Failed to fetch discussion point');
-      }
-      const point = await response.json();
-      setDueDate(point.topic); // 백엔드에서 가져온 데이터 설정
-    } catch (error) {
-      console.error('Error fetching discussion point:', error);
-    }
-  };
-
-  const fetchChat = async () => {
-    try {
-      const response = await fetch('/api/chat'); // 백엔드 API 엔드포인트
-      if (!response.ok) {
-        throw new Error('Failed to fetch chat');
-      }
-      const chat = await response.json();
-      setChat(chat); // 백엔드에서 가져온 데이터 설정
-    } catch (error) {
-      console.error('Error fetching chat:', error);
-    }
-  };
-
-  const fetchAgreeCount = async () => {
-    try {
-      const response = await fetch('/api/agree-count'); // 백엔드 API 엔드포인트
-      if (!response.ok) {
-        throw new Error('Failed to fetch agree count');
-      }
-      const count = await response.json();
-      setAgreeCount(count); // 백엔드에서 가져온 데이터 설정
-      setDisagreeCount(count); // 백엔드에서 가져온 데이터 설정
-    } catch (error) {
-      console.error('Error fetching agree count:', error);
-    }
-  };
-
-  const handleAgree = () => {
-    setModalMessage('AGREE');
-    setIsModalOpen(true);
-  };
-
-  const handleDisagree = () => {
-    setModalMessage('DISAGREE');
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  const dueDate = new Date(
+    debateRoom.startTime.getTime() + new Date(0, 0, 2).getTime(),
+  );
 
   return (
-    <div className="container">
+    <StyledVotePage>
       <div className="section section-1">
         <div className="section-1-1">
           <h2>Vote</h2>
-          <p>Vote due date: {dueDate}</p>
+          <div>Vote due date: {dueDate.toLocaleString()}</div>
         </div>
         <div className="section-1-2">
-          <h2>Title</h2>
-          <p>{discussionTitle}</p>
-          <h2>Discussion Point</h2>
-          <p>{discussionPoint}</p>
+          <StyledKeyAndValue>
+            <div className="key">Title</div>
+            <div className="value">{debateRoom.title}</div>
+          </StyledKeyAndValue>
+          <StyledKeyAndValue>
+            <div className="key">Discussion Proposition</div>
+            <div className="value">{debateRoom.topic}</div>
+          </StyledKeyAndValue>
         </div>
         <div className="section-1-3">
-          <p>Please read the debate record on the right carefully and click the 'agree' or 'disagree' button.</p>
-          <button onClick={handleAgree} className="vote-button agree-button">
-            AGREE
-          </button>
-          <button onClick={handleDisagree} className="vote-button disagree-button">
-            DISAGREE
-          </button>
+          <p>
+            Please read the debate record on the right carefully and click the
+            'agree' or 'disagree' button.
+          </p>
+          <VoteActions />
         </div>
       </div>
       <div className="section section-2">
-        <div className="vote-counts">
-          <div className="agree-count">AGREEMENT: {agreeCount}</div>
-          <div className="disagree-count">DISAGREEMENT: {disagreeCount}</div>
-        </div>
         <p>Start the DISCCUSSION!</p>
-        <p>The opening statements from the affirmative side will now begin. Affirmative participants, please proceed with your individual opening statements.</p>
+        <p>
+          The opening statements from the affirmative side will now begin.
+          Affirmative participants, please proceed with your individual opening
+          statements.
+        </p>
         {/* <p>{chat}</p> */}
         <div className="chat-list">
           <ul>
-            {chat && chat.map((chatMessage) => (
+            {debateRoom.chats.map((chatMessage) => (
               <li key={chatMessage.id}>
-                <strong>{chatMessage.userName}</strong>: {chatMessage.message} <em>({String(chatMessage.date)})</em>
+                <strong>{chatMessage.userName}</strong>: {chatMessage.message}{' '}
+                <em>({String(chatMessage.date)})</em>
               </li>
             ))}
           </ul>
         </div>
       </div>
-
-      {isModalOpen && (
-        <VotePopup message={modalMessage} onClose={closeModal}/>
-      )}
-    </div>
+    </StyledVotePage>
   );
 }

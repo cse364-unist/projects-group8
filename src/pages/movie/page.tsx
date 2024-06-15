@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react';
-import { useRecoilState, useRecoilValueLoadable } from 'recoil';
-import { useParams } from 'react-router-dom';
+import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from 'recoil';
+import { useNavigate, useParams } from 'react-router-dom';
 import MovieInformation from './components/MovieInformation';
 import DebateRoomItem from './components/DebateRoomItem';
 import JoinDebateRoomPopup from './popup/JoinDebateRoomPopup';
@@ -15,6 +15,8 @@ import Title from '../../components/Title';
 import ContentArea from '../../components/ContentArea';
 import CreateButton from './components/CreateButton';
 import styled from 'styled-components';
+import VoteLinkItem from './components/VoteLinkItem';
+import { isAuthenticatedState } from '../../states/AuthState';
 
 const StyledWrapContainer = styled.div`
   width: 100%;
@@ -34,6 +36,8 @@ const StyledSection = styled.section`
 `;
 
 const MoviePageContent: React.FC = () => {
+  const navigate = useNavigate();
+  const isAuthenticated = useRecoilValue(isAuthenticatedState);
   const movie = useRecoilValueLoadable(moviePageMovieSelector);
   const waitingForVoteRooms = useRecoilValueLoadable(
     moviePageWaitingForVoteDebateRoomSelector,
@@ -48,7 +52,19 @@ const MoviePageContent: React.FC = () => {
   });
 
   const handleOnJoinItemClick = (roomId: number) => {
-    setJoinPopupOpen({ isOpen: true, roomId });
+    if (isAuthenticated) {
+      setJoinPopupOpen({ isOpen: true, roomId });
+    } else {
+      navigate(`/login`);
+    }
+  };
+
+  const handleOnVoteItemClick = (roomId: number) => {
+    if (isAuthenticated) {
+      navigate(`/vote/${roomId}`);
+    } else {
+      navigate(`/login`);
+    }
   };
 
   if (movie.state === 'loading') return <div>Loading...</div>;
@@ -76,10 +92,10 @@ const MoviePageContent: React.FC = () => {
             {waitingForVoteRooms.state === 'hasValue' && (
               <StyledWrapContainer>
                 {waitingForVoteRooms.contents.map((room) => (
-                  <DebateRoomItem
+                  <VoteLinkItem
                     key={room.id}
                     debateRoom={room}
-                    onClick={() => {}}
+                    onClick={() => handleOnVoteItemClick(room.id)}
                   />
                 ))}
               </StyledWrapContainer>

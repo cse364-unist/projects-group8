@@ -1,4 +1,4 @@
-import { atom, selector } from 'recoil';
+import { atom, selector, useSetRecoilState } from 'recoil';
 import { DebateRoom, emptyDebateRoom } from '../models/DebateRoom';
 import { getDebateRoomById } from '../services/DebateRoomService';
 
@@ -20,20 +20,21 @@ const votePageState = atom<IVotePageState>({
 export const votePageDebateRoomIdSelector = selector<number>({
   key: 'votePageDebateRoomIdSelector',
   get: ({ get }) => get(votePageState).debateRoomId,
-  set: async ({ set, get }, newDebateRoomId) => {
-    if (typeof newDebateRoomId !== 'number' || newDebateRoomId <= 0) {
-      throw new Error('Invalid debate room ID');
-    }
+});
 
+export const useSetVotePageDebateRoomId = () => {
+  const setVotePageState = useSetRecoilState(votePageState);
+
+  return async (newDebateRoomId: number) => {
     const debateRoom = await getDebateRoomById(newDebateRoomId);
 
-    set(votePageState, {
-      ...initialState,
+    setVotePageState((prev) => ({
+      ...prev,
       debateRoomId: newDebateRoomId,
       debateRoom,
-    });
-  },
-});
+    }));
+  };
+};
 
 export const votePageDebateRoomSelector = selector<DebateRoom>({
   key: 'votePageDebateRoomSelector',

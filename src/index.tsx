@@ -11,8 +11,17 @@ import MainPage from './pages/main/page';
 import MyPage from './pages/my/page';
 import VotePage from './pages/vote/page';
 import MoviePage from './pages/movie/page';
+import { DebateRoom } from './pages/debateRoom/page';
 
 const router = createBrowserRouter([
+  {
+    path: '/debateRoom/:debateRoomId',
+    element: <DebateRoom />,
+  },
+  {
+    path: '/vote/:debateRoomId',
+    element: <VotePage />,
+  },
   {
     path: '/',
     element: <HeaderLayout />,
@@ -21,6 +30,7 @@ const router = createBrowserRouter([
         path: '/',
         element: <MainPage />,
       },
+
       {
         path: '/login',
         element: <LoginPage />,
@@ -33,10 +43,7 @@ const router = createBrowserRouter([
         path: '/my',
         element: <MyPage />,
       },
-      {
-        path: '/vote',
-        element: <VotePage />,
-      },
+
       {
         path: '/movie/:movieId',
         element: <MoviePage />,
@@ -49,13 +56,11 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
 );
 root.render(
-  <React.StrictMode>
-    <RecoilRoot>
-      <Suspense>
-        <RouterProvider router={router} />
-      </Suspense>
-    </RecoilRoot>
-  </React.StrictMode>,
+  <RecoilRoot>
+    <Suspense>
+      <RouterProvider router={router} />
+    </Suspense>
+  </RecoilRoot>,
 );
 
 // If you want to start measuring performance in your app, pass a function
