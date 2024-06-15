@@ -38,4 +38,7 @@ public class DebateJoinedUser {
 
         return debateJoinedUser;
     }
+    public boolean isDisagree(){
+        return !agree;
+    }
 }
