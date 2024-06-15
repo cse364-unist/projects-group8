@@ -3,6 +3,8 @@ import { SimpleDebateRoom } from '../../../../models/DebateRoom';
 
 import NextIcon from './NextIcon.svg';
 import PersonIcon from './PersonIcon.svg';
+import { useRecoilValue } from 'recoil';
+import { userJoinedDebateRoomsSelector } from '../../../../states/AuthState';
 
 const StyledRoomItem = styled.button`
   box-sizing: border-box;
@@ -16,6 +18,12 @@ const StyledRoomItem = styled.button`
   flex-direction: row;
   align-items: center;
   background-color: #fbfbfb;
+
+  &.already-joined {
+    background-color: #f4f4f4;
+    pointer-events: none;
+    opacity: 0.5;
+  }
 
   &:hover {
     background-color: #f4f4f4;
@@ -72,8 +80,18 @@ export default function DebateRoomItem({
   debateRoom: SimpleDebateRoom;
   onClick: () => void;
 }) {
+  const userJoinedDebateRooms = useRecoilValue(userJoinedDebateRoomsSelector);
+
+  const isAlreadyJoined = userJoinedDebateRooms.some(
+    (joinedRoom) => joinedRoom.id === debateRoom.id,
+  );
+
   return (
-    <StyledRoomItem type="button" onClick={onClick}>
+    <StyledRoomItem
+      type="button"
+      onClick={onClick}
+      className={isAlreadyJoined ? 'already-joined' : ''}
+    >
       <div className="inner">
         <div
           style={{
