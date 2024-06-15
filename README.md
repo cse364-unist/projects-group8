@@ -75,7 +75,7 @@ If you choose debate room which you want to participate in, you will see this po
 ![alt text](image-8.png)
 This popup alert you really join this debate room. \
 You can join debate room by paying 100 game money.
-## Debate chat room page
+## Debate chat room page <Feature1: Real-time debating, Feature2 : ChatGptModerator - Moderator & summary> 
 If you join debate room, you will chat room to debate other participants.
 ![alt text](image-12.png)
 In this room, participants will be assigned speaking turns by the GPT moderator, similar to a real debate. \
@@ -87,7 +87,7 @@ If you click **"Create new Discussion"** button, you will see this popup.
 ![alt text](image-9.png)
 You can enter your debate room title, discussion point and starting time. \
 It alerts that you must pay 100 game money to create debate room.
-## Vote page
+## Vote page <Feature2 : ChatGptModerator - show Summary result>
 If you click one of list in **"Wating for vote"** section, you will see this page. 
 ![alt text](image-10.png)
 You can vote for agree or disagree after reading chat logs. 
@@ -95,6 +95,6 @@ You can vote for agree or disagree after reading chat logs.
 If you select agree or disagree, you will see this popup.
 ![alt text](image-11.png)
 This popup alerts you your selection agree or disagree and you must pay 100 game money to vote in this room.
-## My page
+## My page <Feature3: Game Money System - check remain game money>
 ![alt text](image-13.png)
 In this page, you can see your user name and game money. 
