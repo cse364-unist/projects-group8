@@ -17,7 +17,7 @@ import java.io.IOException;
 class LoadDatabase {
 
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
-
+    /**/
     @Bean
     CommandLineRunner initDatabase(MovieRepository repository) {
 
