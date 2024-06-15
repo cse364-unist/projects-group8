@@ -17,6 +17,7 @@ public class Movie {
 
     private String title;
     private String genre;
+    private int year;
     private Double avgRating;
     private String thumbnailUrl;
     private String description;
@@ -30,6 +31,22 @@ public class Movie {
     ){
         Movie movie = new Movie();
         movie.title = title;
+        movie.genre = genre;
+        movie.avgRating = avgRating;
+        movie.thumbnailUrl = thumbnailUrl;
+        movie.description = description;
+        return movie;
+    }
+    public static Movie loadCreate(String title,
+                                   int year,
+                                   Double avgRating,
+                                   String genre,
+                                   String description,
+                                   String thumbnailUrl
+                                   ){
+        Movie movie = new Movie();
+        movie.title = title;
+        movie.year = year;
         movie.genre = genre;
         movie.avgRating = avgRating;
         movie.thumbnailUrl = thumbnailUrl;

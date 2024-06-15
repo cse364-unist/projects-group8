@@ -2,11 +2,16 @@ package com.example.movinProject;
 
 import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.FileReader;
+import java.io.IOException;
 
 @Configuration
 class LoadDatabase {
@@ -17,8 +22,39 @@ class LoadDatabase {
     CommandLineRunner initDatabase(MovieRepository repository) {
 
         return args -> {
-            log.info("Preloading " + repository.save(Movie.create("aa", "cc", 1.1, "dd", "ee")));
-            log.info("Preloading " + repository.save(Movie.create("bb", "zz", 2.2, "asd", "sda")));
+            String filePath = "./movinProject/imdb_top_250_movies.csv";
+
+            // CSVReader 객체 생성
+            try (CSVReader csvReader = new CSVReader(new FileReader(filePath))) {
+                String[] values;
+                boolean header = true;
+                while ((values = csvReader.readNext()) != null) {
+                    // 헤더는 건너뛰기
+                    if (header) {
+                        header = false;
+                        continue;
+                    }
+
+                    // CSV의 각 열을 Movie 엔티티 필드에 매핑
+                    String title = values[0];
+                    int year = Integer.parseInt(values[1]);
+                    Double avgRating = Double.parseDouble(values[2]);
+                    String genre = values[3];
+                    String description = values[4];
+                    String thumbnailUrl = values[5];
+
+
+                    // Movie 엔티티 생성 및 저장
+                    Movie movie = new Movie();
+                    movie = Movie.loadCreate(title, year, avgRating, genre, description, thumbnailUrl);
+                    repository.save(movie);
+                    log.info("Preloading " + movie);
+
+
+                }
+            } catch (IOException | CsvValidationException e) {
+                log.error("Failed to parse CSV file", e);
+            }
         };
-    }
+}
 }
