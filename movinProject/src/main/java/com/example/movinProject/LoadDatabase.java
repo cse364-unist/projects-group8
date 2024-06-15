@@ -10,8 +10,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 class LoadDatabase {
@@ -25,7 +28,7 @@ class LoadDatabase {
             String filePath = "./movinProject/imdb_top_250_movies.csv";
 
             // CSVReader 객체 생성
-            try (CSVReader csvReader = new CSVReader(new FileReader(filePath))) {
+            try (CSVReader csvReader = new CSVReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8))) {
                 String[] values;
                 boolean header = true;
                 while ((values = csvReader.readNext()) != null) {
@@ -37,6 +40,7 @@ class LoadDatabase {
 
                     // CSV의 각 열을 Movie 엔티티 필드에 매핑
                     String title = values[0];
+//                    System.out.println("title is : " + title);
                     int year = Integer.parseInt(values[1]);
                     Double avgRating = Double.parseDouble(values[2]);
                     String genre = values[3];
@@ -45,10 +49,14 @@ class LoadDatabase {
 
 
                     // Movie 엔티티 생성 및 저장
-                    Movie movie = new Movie();
-                    movie = Movie.loadCreate(title, year, avgRating, genre, description, thumbnailUrl);
-                    repository.save(movie);
-                    log.info("Preloading " + movie);
+                    if (!repository.existsByTitle(title)) {
+                        // Movie 엔티티 생성 및 저장
+                        Movie movie = Movie.loadCreate(title, year, avgRating, genre, description, thumbnailUrl);
+                        repository.save(movie);
+                        log.info("Preloading " + movie);
+                    } else {
+                        log.info("Movie with title " + title + " already exists.");
+                    }
 
 
                 }

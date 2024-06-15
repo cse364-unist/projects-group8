@@ -4,6 +4,7 @@ import com.example.movinProject.domain.movie.domain.Movie;
 import com.example.movinProject.domain.movie.repository.MovieRepository;
 import com.example.movinProject.main.movie.dto.MovieDto;
 import com.example.movinProject.main.movie.dto.MovieSearchDto;
+import com.example.movinProject.main.movie.dto.MovieSearchReturnDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -89,7 +90,7 @@ class MovieControllerTest {
                 .keyword("title")
                 .build();
 
-        ResponseEntity<Map<String, List<MovieDto>>> response = movieController.searchMovies(dto);
+        ResponseEntity<Map<String, List<MovieSearchReturnDto>>> response = movieController.searchMovies(dto);
 
         assertNotNull(response);
     }
@@ -106,7 +107,7 @@ class MovieControllerTest {
                 .keyword("fldi")
                 .build();
 
-        ResponseEntity<Map<String, List<MovieDto>>> response = movieController.searchMovies(dto);
+        ResponseEntity<Map<String, List<MovieSearchReturnDto>>> response = movieController.searchMovies(dto);
 
         assertEquals(response.getBody().size(),1);
     }
