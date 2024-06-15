@@ -25,8 +25,9 @@ public class MovieService {
         return movieRepository.findMoviesWithAverageRatingAbove(rating);
     }
 
-    public List<Movie> searchMoviesByKeyword(String keyword, int size) {
-        return movieRepository.searchMoviesByKeywordwithSize(keyword, size);
+    public List<Movie> searchMoviesByKeyword(String keyword, int pageNum) {
+        final int LIMIT = 8;
+        return movieRepository.searchMoviesByKeywordwithSize(keyword, pageNum, LIMIT);
     }
 
     public Optional<Movie> findById(Long id) {

@@ -91,11 +91,12 @@ class MovieServiceTest {
     @Test
     void searchMoviesByKeyword() {
         String keyword = "movie2 descrip";
-        int size = 5;
+        int pageNum = 5;
+        final int LIMIT = 8;
         List<Movie> expectedMovies = List.of(movie2);
 
-        when(movieRepository.searchMoviesByKeywordwithSize(keyword, size)).thenReturn(List.of(movie2));
-        List<Movie> results = movieService.searchMoviesByKeyword(keyword, size);
+        when(movieRepository.searchMoviesByKeywordwithSize(keyword, pageNum, LIMIT)).thenReturn(List.of(movie2));
+        List<Movie> results = movieService.searchMoviesByKeyword(keyword, pageNum);
         for(int i = 0; i < 1; i++){
             Assertions.assertEquals(expectedMovies.get(i), results.get(i));
         }
