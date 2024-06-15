@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import VotePopup from './popup/VotePopup/index';
+import { useEffect, useRef } from 'react';
 import {
   useSetVotePageDebateRoomId,
   votePageDebateRoomSelector,

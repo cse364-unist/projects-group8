@@ -12,6 +12,7 @@ const StyledHeader = styled.div`
   height: 76px;
   background-color: #313131;
   border-radius: 24px;
+  flex-shrink: 0;
 
   & .inner {
     height: 100%;
@@ -85,7 +86,7 @@ const Timer = observer(() => {
     };
   }, []);
 
-  const diff = stepEndTime.getTime() - now.getTime();
+  const diff = now.getTime() - stepEndTime.getTime();
 
   let minutes = Math.floor(diff / 60000);
   let seconds = Math.floor((diff % 60000) / 1000);

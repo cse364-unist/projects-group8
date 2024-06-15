@@ -12,6 +12,7 @@ import MyPage from './pages/my/page';
 import VotePage from './pages/vote/page';
 import MoviePage from './pages/movie/page';
 import { DebateRoom } from './pages/debateRoom/page';
+import Error from './Error';
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <HeaderLayout />,
+    errorElement: <Error />,
     children: [
       {
         path: '/',
