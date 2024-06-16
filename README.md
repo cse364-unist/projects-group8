@@ -110,6 +110,13 @@ can vote for this debate. In this page you can see the previous date session wit
 13. user3 Registers
 <img width="1512" alt="KakaoTalk_20240616_194415369" src="https://github.com/cse364-unist/projects-group8/assets/113990328/2178bfac-1fe2-4ca2-961c-f08b2e9876fa">
 
+14. In this case, user3 votes for Disagree with 100 gold deduction.
+<img width="1512" alt="KakaoTalk_20240616_194458559" src="https://github.com/cse364-unist/projects-group8/assets/113990328/ca6bc319-b3c5-4277-a3cc-a11392306978">
+
+15. Ending debaterooms and distrubte game moeny to winner team.
+<img width="1512" alt="KakaoTalk_20240616_194705377" src="https://github.com/cse364-unist/projects-group8/assets/113990328/db86a6fa-f70d-4216-9928-f963d952a301">
+
+
 # Result
 
 User1 participated as the agreejoined user, user2 participated as the disagreejoineduser, user1 voted for the agree side, user2 voted for the disagree side, and user3 voted for the disagree side.
@@ -122,5 +129,7 @@ you can see the game moeny on each user's my page
 - user 1 : 500 - 100 - 100 => 400 
 - user 2 : 500 - 100 - 100 + 250 => 550
 - user 3 : 500 - 100 + 250 => 650
-<img width="1512" alt="KakaoTalk_20240616_194753383" src="https://github.com/cse364-unist/projects-group8/assets/113990328/f228c7ba-525d-4532-8a78-841fc6498d12">
+
 <img width="1512" alt="KakaoTalk_20240616_194828544" src="https://github.com/cse364-unist/projects-group8/assets/113990328/36c062c7-eba6-490a-8c90-cedd9cb88526">
+<img width="1512" alt="KakaoTalk_20240616_194942063" src="https://github.com/cse364-unist/projects-group8/assets/113990328/3409f223-963a-45be-b223-e0bb880bc643">
+<img width="1512" alt="KakaoTalk_20240616_194753383" src="https://github.com/cse364-unist/projects-group8/assets/113990328/f228c7ba-525d-4532-8a78-841fc6498d12">
