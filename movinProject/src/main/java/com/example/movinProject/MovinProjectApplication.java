@@ -10,4 +10,3 @@ public class MovinProjectApplication extends SpringBootServletInitializer {
 		SpringApplication.run(MovinProjectApplication.class, args);
 	}
 }
-
