@@ -5,9 +5,11 @@ import com.example.movinProject.main.debateRoom.dto.*;
 import com.example.movinProject.main.debateRoom.service.DebateRoomService;
 import com.example.movinProject.main.debateVote.dto.Joins;
 import com.example.movinProject.main.debateVote.dto.Vote;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -51,21 +53,36 @@ public class DebateRoomController {
     }
 
     @PostMapping("/{id}/vote")
-    public ResponseEntity<DebateRoomVoteDto> vote(@PathVariable Long id, @RequestBody Vote vote, @AuthenticationPrincipal UserDetails userDetails) {
-        DebateRoomVoteDto dto = debateRoomService.castVote(id, userDetails.getUsername(), vote.isVote());
+    public ResponseEntity<DebateRoomVoteDto> vote(@PathVariable Long id, @RequestParam boolean vote, @AuthenticationPrincipal UserDetails userDetails) {
+        Vote votein = new Vote();
+        votein.setVote(vote);
+        DebateRoomVoteDto dto = debateRoomService.castVote(id, userDetails.getUsername(), votein.isVote());
         return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/{id}/join")
-    public ResponseEntity<DebateRoomVoteDto> join(@PathVariable Long id, @RequestBody Joins joins, @AuthenticationPrincipal UserDetails userDetails) {
-        DebateRoomVoteDto dto = debateRoomService.castjoin(id, userDetails.getUsername(), joins.isAgree());
+    public ResponseEntity<DebateRoomVoteDto> join(@PathVariable Long id, @RequestParam boolean joins, @AuthenticationPrincipal UserDetails userDetails) {
+        Joins join = new Joins();
+        join.setAgree(joins);
+        DebateRoomVoteDto dto = debateRoomService.castjoin(id, userDetails.getUsername(), join.isAgree());
         return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Long> create(@RequestBody DebateRoomCreateDto debateRoomCreateDto, @AuthenticationPrincipal UserDetails userDetails)
-    {
-        Long debateRoomId =  debateRoomService.create(debateRoomCreateDto);
+    public ResponseEntity<Long> create(
+            @RequestParam String title,
+            @RequestParam String topic,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam Long movieId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        DebateRoomCreateDto debateRoomCreateDto = new DebateRoomCreateDto();
+        debateRoomCreateDto.setTitle(title);
+        debateRoomCreateDto.setTopic(topic);
+        debateRoomCreateDto.setStartTime(startTime);
+        debateRoomCreateDto.setMovieId(movieId);
+
+        Long debateRoomId = debateRoomService.create(debateRoomCreateDto);
         return new ResponseEntity<>(debateRoomId, HttpStatus.CREATED);
     }
 

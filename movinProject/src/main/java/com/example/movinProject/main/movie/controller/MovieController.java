@@ -34,8 +34,15 @@ public class MovieController {
         return ResponseEntity.ok(response);
     }
 
+
     @PostMapping("/search")
-    public ResponseEntity<Map<String, List<MovieSearchReturnDto>>> searchMovies(@RequestBody MovieSearchDto movieSearchDto) {
+    public ResponseEntity<Map<String, List<MovieSearchReturnDto>>> searchMovies(
+            @RequestParam String keyword,
+            @RequestParam int page) {
+        MovieSearchDto movieSearchDto = MovieSearchDto.builder()
+                .keyword(keyword)
+                .page(page)
+                .build();
         List<Movie> movies = movieService.searchMoviesByKeyword(movieSearchDto.getKeyword(), movieSearchDto.getPage());
         List<MovieSearchReturnDto> movieSearchReturnDtos = movies.stream()
                 .map(movie -> MovieSearchReturnDto.builder()

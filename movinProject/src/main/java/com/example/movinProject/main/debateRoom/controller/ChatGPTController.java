@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,10 +23,11 @@ public class ChatGPTController {
 
 
     @PostMapping("/summarize")
-    public ResponseEntity<List<String>> processInputRequest(@RequestBody ChatGPTSummarizeDto dto) {
-        final int AGREE = 0;
-        final int DISAGREE = 1;
-        List<String> summarizedOpinions = chatGPTService.summarizeOpinions(dto.getDebateRoomId());
+    public ResponseEntity<List<String>> processInputRequest(@RequestParam Long debateRoomId) {
+
+        ChatGPTSummarizeDto chatGPTSummarizeDto = new ChatGPTSummarizeDto();
+        chatGPTSummarizeDto.setDebateRoomId(debateRoomId);
+        List<String> summarizedOpinions = chatGPTService.summarizeOpinions(chatGPTSummarizeDto.getDebateRoomId());
 
         return new ResponseEntity<>(summarizedOpinions, HttpStatus.OK);
     }

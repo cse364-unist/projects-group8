@@ -20,7 +20,11 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody UserRegisterRequest request) {
+    public ResponseEntity<UserDto> register(
+        @RequestParam String userName,
+        @RequestParam String password,
+        @RequestParam String email) {
+        UserRegisterRequest request = UserRegisterRequest.create(userName, password, email);
         return userService.registerUser(request)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.badRequest().build());

@@ -90,7 +90,7 @@ class MovieControllerTest {
                 .keyword("title")
                 .build();
 
-        ResponseEntity<Map<String, List<MovieSearchReturnDto>>> response = movieController.searchMovies(dto);
+        ResponseEntity<Map<String, List<MovieSearchReturnDto>>> response = movieController.searchMovies("title",1);
 
         assertNotNull(response);
     }
@@ -107,7 +107,7 @@ class MovieControllerTest {
                 .keyword("fldi")
                 .build();
 
-        ResponseEntity<Map<String, List<MovieSearchReturnDto>>> response = movieController.searchMovies(dto);
+        ResponseEntity<Map<String, List<MovieSearchReturnDto>>> response = movieController.searchMovies("fldi",1);
 
         assertEquals(response.getBody().size(),1);
     }
