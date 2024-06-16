@@ -1,11 +1,20 @@
 # Milestone3
+## 1. 
+## 2. 
+## 3. 
+## 4. 
+
+
+
+
+# Scenario
 ## Login & Register User
 You can register and login in main page. \
 <img width="1512" alt="KakaoTalk_20240616_193433610" src="https://github.com/cse364-unist/projects-group8/assets/113990328/bf453433-a31b-499e-8eed-3329850f97b6">
 ## Main Page
 <img width="1512" alt="KakaoTalk_20240616_193706152" src="https://github.com/cse364-unist/projects-group8/assets/113990328/d5860448-bd8f-4c18-8b38-42873667b8ee">
 <img width="1512" alt="KakaoTalk_20240616_193909966" src="https://github.com/cse364-unist/projects-group8/assets/113990328/25f1785b-77df-4dc9-a451-c3c499075c3e">
-![image](https://github.com/cse364-unist/projects-group8/assets/84537288/8d8e7055-03c2-498b-a3b5-1b66995d1d5e)
+![img_7.png](img_7.png)
 This is our main page figure.
 
 In main page, user can access discussion room, HOT movie and Explore sections.
@@ -28,6 +37,8 @@ If you choose debate room which you want to participate in, you will see this po
 <img width="1512" alt="KakaoTalk_20240616_193848488" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e5cf0f82-ebdd-4569-bc68-f171bdc37a2a">
 This popup alert you really join this debate room. \
 You can join debate room by paying 100 game money.
+
+Join In the debate room, join is a kind of reservation rather than participation. Clicking join does not mean you can participate in the discussion right away, but clicking join will make a reservation and you can see the discussion room you reserved in your discussion room on the main page. After the designated start time, real-time discussion begins when all reserved users press start and enter the discussion room.
 
 
 ## Debate chat room page <Feature1: Real-time debating, Feature2 : ChatGptModerator - Moderator & summary>
@@ -80,7 +91,7 @@ In this page, you can see your user name and game money.
 7. And next user2 join the DebateROom with Disagree with deduction of 100 gold also.
 <img width="1512" alt="KakaoTalk_20240616_193943232" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e5cf0f82-ebdd-4569-bc68-f171bdc37a2a">
 
-8. Start Debate! 
+8. Start Debate !!! 
 <img width="1512" alt="KakaoTalk_20240616_193943232" src="https://github.com/cse364-unist/projects-group8/assets/113990328/7f4452ef-d86f-4d6f-ba03-e4fdb5594ad8">
 
 9. When the all Debate session finished, chatgpt summarizes the debate and notice debators.
@@ -90,9 +101,26 @@ In this page, you can see your user name and game money.
 can vote for this debate. In this page you can see the previous date session with summarization
 <img width="1512" alt="KakaoTalk_20240616_194149736" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4fe0ec7e-4d1c-4dc8-893a-1c7cff8582cd">
 <img width="1512" alt="KakaoTalk_20240616_194229869" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4d31e141-ff0e-4fa0-9bf4-3707af76dadc">
+11. In this case, user1 votes for Agree with 100 gold deduction.
 <img width="1512" alt="KakaoTalk_20240616_194238487" src="https://github.com/cse364-unist/projects-group8/assets/113990328/8f541a7f-173d-4194-bde9-8731ae6801a7">
-<img width="1512" alt="KakaoTalk_20240616_194415369" src="https://github.com/cse364-unist/projects-group8/assets/113990328/2178bfac-1fe2-4ca2-961c-f08b2e9876fa">
-<img width="1512" alt="KakaoTalk_20240616_194443897" src="https://github.com/cse364-unist/projects-group8/assets/113990328/661cf7d2-4702-4649-ab67-0c580378786a">
+
+12. In this case, user2 votes for Disagree with 100 gold deduction.
 <img width="1512" alt="KakaoTalk_20240616_194458559" src="https://github.com/cse364-unist/projects-group8/assets/113990328/ca6bc319-b3c5-4277-a3cc-a11392306978">
+
+13. user3 Registers
+<img width="1512" alt="KakaoTalk_20240616_194415369" src="https://github.com/cse364-unist/projects-group8/assets/113990328/2178bfac-1fe2-4ca2-961c-f08b2e9876fa">
+
+# Result
+
+User1 participated as the agreejoined user, user2 participated as the disagreejoineduser, user1 voted for the agree side, user2 voted for the disagree side, and user3 voted for the disagree side.
+The total money raised was 500 gold, and the disagree team won with 2 votes for the opposing side and 1 vote for the agreeing side. <br>
+A total of 500 gold will be distributed 250 to each of the two members of the opposing team, user1 and user2.
+
+
+you can see the game moeny on each user's my page
+
+- user 1 : 500 - 100 - 100 => 400 
+- user 2 : 500 - 100 - 100 + 250 => 550
+- user 3 : 500 - 100 + 250 => 650
 <img width="1512" alt="KakaoTalk_20240616_194753383" src="https://github.com/cse364-unist/projects-group8/assets/113990328/f228c7ba-525d-4532-8a78-841fc6498d12">
 <img width="1512" alt="KakaoTalk_20240616_194828544" src="https://github.com/cse364-unist/projects-group8/assets/113990328/36c062c7-eba6-490a-8c90-cedd9cb88526">
