@@ -29,11 +29,11 @@ const StyledVoteButton = styled.button`
   font-weight: bold;
 
   &:hover {
-    background-color: #f3f3f3;
+    background-color: #e8e8e8;
   }
 
   &:active {
-    background-color: #e9e9e9;
+    background-color: #e1e1e1;
   }
 
   &:disabled {
@@ -55,8 +55,8 @@ function VoteButton({
   return (
     <StyledVoteButton
       style={{
-        backgroundColor: highlighted ? '#176485' : '#f3f3f3',
-        color: highlighted ? 'white' : 'black',
+        backgroundColor: highlighted ? '#176485' : undefined,
+        color: highlighted ? 'white' : undefined,
       }}
       disabled={disabled}
       onClick={onClick}

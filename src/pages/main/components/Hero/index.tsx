@@ -83,6 +83,14 @@ const StyledHero = styled.div`
 
     padding: 28px 40px;
 
+    &:hover {
+      background-color: #ffffff1a;
+    }
+
+    &:active {
+      background-color: #ffffff1f;
+    }
+
     & img:nth-child(1) {
       height: 31px;
       object-fit: contain;
@@ -97,6 +105,13 @@ const StyledHero = styled.div`
 `;
 
 const Hero: React.FC = () => {
+  const handleOnClick = () => {
+    window.scrollTo({
+      top: 800,
+      behavior: 'smooth',
+    });
+  };
+
   return (
     <StyledHero>
       <ContentArea fitHeight>
@@ -104,7 +119,7 @@ const Hero: React.FC = () => {
           <img src={Hero1} alt="hero1" />
           <img src={Hero2} alt="hero2" />
           <img src={Hero3} alt="hero3" />
-          <button>
+          <button type="button" onClick={handleOnClick}>
             <img src={JoinMessage} alt="join" />
             <img src={RightIcon} alt="right" />
           </button>

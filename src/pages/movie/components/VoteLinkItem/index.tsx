@@ -17,6 +17,9 @@ const StyledRoomItem = styled.button`
   align-items: center;
   background-color: #fbfbfb;
 
+  flex: 1;
+  min-width: 400px;
+
   &:hover {
     background-color: #f4f4f4;
   }

@@ -23,7 +23,8 @@ const StyledWrapContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 36px 14px;
+  gap: 14px 14px;
+  flex-wrap: wrap;
 `;
 
 const StyledSection = styled.section`

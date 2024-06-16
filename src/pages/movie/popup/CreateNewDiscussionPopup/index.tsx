@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import Modal from '../../../../components/Modal';
 
-import CoinItem from './CoinItem.svg';
 import { createDebateRoom } from '../../../../services/DebateRoomService';
 import { useRecoilValue } from 'recoil';
 import { moviePageMovieIdSelector } from '../../../../states/MoviePageState';
@@ -75,22 +74,6 @@ const StyledInputItem = styled.div`
   }
 `;
 
-const StyledMoneyIndicator = styled.div`
-  padding: 14px 10px;
-  width: 240px;
-  background-color: #f4f4f4;
-  border-radius: 14px;
-  border: 1px solid #d9d9d9;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #db4f4f;
-  font-weight: medium;
-  gap: 4px;
-  box-shadow: inset 2px 2px 2px 0px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
-`;
-
 interface CreateNewDiscussionPopupProps {
   visible: boolean;
   onClose: () => void;
@@ -149,14 +132,7 @@ const CreateNewDiscussionPopup: React.FC<CreateNewDiscussionPopupProps> = ({
             onChange={(e) => setStartTime(e.target.value)}
           />
         </StyledInputItem>
-        <StyledInputItem>
-          <div>when you create a discussion room, you consume 100 points.</div>
-          <StyledMoneyIndicator>
-            <div>-</div>
-            <img src={CoinItem} alt="Coin" />
-            <div>100</div>
-          </StyledMoneyIndicator>
-        </StyledInputItem>
+
         <div className="actions">
           <button onClick={onClose}>Cancel</button>
           <button
