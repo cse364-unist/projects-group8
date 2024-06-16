@@ -15,11 +15,17 @@ export async function registerUser(
   password: string,
 ): Promise<User> {
   const result = (
-    await api.post('/users/register', {
-      userName: name,
-      email,
-      password,
-    })
+    await api.post(
+      '/users/register',
+      {},
+      {
+        params: {
+          userName: name,
+          email,
+          password,
+        },
+      },
+    )
   ).data;
 
   return userDtoToUser(result);

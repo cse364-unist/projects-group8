@@ -24,8 +24,9 @@ export async function searchMovies(
   query: string,
   page: number, // Start from 1~
 ): Promise<SimpleMovie[]> {
-  const result = (await api.post('/movies/search', { keyword: query, page }))
-    .data.movies;
+  const result = (
+    await api.post('/movies/search', {}, { params: { keyword: query, page } })
+  ).data.movies;
 
   return result.map(simpleMovieDtoToSimpleMovie);
 }

@@ -63,13 +63,14 @@ export async function createDebateRoom(
   const id = (
     await api.post(
       '/debateRooms/create',
+      {},
       {
-        title,
-        topic,
-        startTime: startTime.toISOString(),
-        movieId,
-      },
-      {
+        params: {
+          title,
+          topic,
+          startTime: startTime.toISOString(),
+          movieId,
+        },
         withCredentials: true,
       },
     )
@@ -85,10 +86,11 @@ export async function voteToDebateRoom(
   const result = (
     await api.post(
       `/debateRooms/${debateRoomId}/vote`,
+      {},
       {
-        vote,
-      },
-      {
+        params: {
+          vote,
+        },
         withCredentials: true,
       },
     )
@@ -104,10 +106,11 @@ export async function joinDebateRoom(
   const result = (
     await api.post(
       `/debateRooms/${debateRoomId}/join`,
+      {},
       {
-        agree,
-      },
-      {
+        params: {
+          joins: agree,
+        },
         withCredentials: true,
       },
     )
