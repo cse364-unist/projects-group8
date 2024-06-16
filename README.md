@@ -16,7 +16,7 @@ At the trouble case where tomcat war file doesn't work, then you can run the run
 
 —————————————————————-
 ## CI - Continuous Integration
-contiguous integration will be done when you 'push' or 'pull request' on master branch. it will run jacoco:report & mvn package which will test & build. you can find the CI log in the action section. You can find the workflow file in the .github/workflow/ folder. 
+contiguous integration will be done when you 'push' or 'pull request' on master branch. it will run jacoco:report & mvn package which will test & build. you can find the CI log in the action section. You can find the workflow file in the .github/workflows folder. And in the workflow file, you can check the step name "Build and test project with Maven" which will test & build the jar file.
 
 ## Login & Register User
 You can register and login in main page. \
