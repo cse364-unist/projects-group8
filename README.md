@@ -1,4 +1,58 @@
-# milestone 3
+# Milestone3
+## Login & Register User
+You can log-in or register in main page. \
+If ypu click log-in button.
+<img width="1512" alt="KakaoTalk_20240616_193433610" src="https://github.com/cse364-unist/projects-group8/assets/113990328/bf453433-a31b-499e-8eed-3329850f97b6">
+## Main Page
+<img width="1512" alt="KakaoTalk_20240616_193706152" src="https://github.com/cse364-unist/projects-group8/assets/113990328/d5860448-bd8f-4c18-8b38-42873667b8ee">
+<img width="1512" alt="KakaoTalk_20240616_193909966" src="https://github.com/cse364-unist/projects-group8/assets/113990328/25f1785b-77df-4dc9-a451-c3c499075c3e">
+
+This is our main page figure.
+
+In main page, user can access discussion room, HOT movie and Explore sections.
+
+
+You can check the list of discussion rooms you have joined under **"Your Discussion Room"** \
+You can also view a list of movies currently being discussed under **"Discussing Active Movie"**. \
+You can also check out the list of trending movies based on ratings under **"HOT Movies"**. \
+And also explore other movies under **"Explore"** section.
+
+## Movie Detail page
+If you click Movie thumbnail button, you will see this page.
+<img width="1512" alt="KakaoTalk_20240616_193722176" src="https://github.com/cse364-unist/projects-group8/assets/113990328/f516c1fd-10ed-4cff-ad8c-508a7e1363e2">
+In this page, you can participate other debate rooms and create new debate rooms. \
+You can check the list of discussion rooms that are awaiting votes after the discussion has ended under **"Wating for vote"**. \
+You can check the list of discussion rooms where you can participate in **"You can join"** section. \
+Also you can create your debate room to **"Create new Discussion"** button.
+## Join debate room popup
+If you choose debate room which you want to participate in, you will see this popup.
+<img width="1512" alt="KakaoTalk_20240616_193848488" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e5cf0f82-ebdd-4569-bc68-f171bdc37a2a">
+This popup alert you really join this debate room. \
+You can join debate room by paying 100 game money.
+
+
+## Debate chat room page <Feature1: Real-time debating, Feature2 : ChatGptModerator - Moderator & summary>
+If you join debate room, you will chat room to debate other participants.
+<img width="1512" alt="KakaoTalk_20240616_194033055" src="https://github.com/cse364-unist/projects-group8/assets/113990328/a0258726-4457-4bfb-bd1d-9106c361d14f">
+In this room, participants will be assigned speaking turns by the GPT moderator, similar to a real debate. \
+Agreements and Disagreements will have a designated time to express their opinions, after which further speech will not be allowed. \
+Additionally, the GPT moderator will summarize both sides' views after the debate concludes.
+
+## Create debate room popup
+If you click **"Create new Discussion"** button, you will see this popup.
+<img width="1512" alt="KakaoTalk_20240616_193731703" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e1718c2f-fe5f-4abf-933c-dd3461d2805f">
+You can enter your debate room title, discussion point and starting time.
+## Vote page <Feature2 : ChatGptModerator - show Summary result>
+If you click one of list in **"Wating for vote"** section, you will see this page.
+<img width="1512" alt="KakaoTalk_20240616_194229869" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4d31e141-ff0e-4fa0-9bf4-3707af76dadc">
+You can vote for agree or disagree after reading chat logs.
+## Vote page popup
+If you select agree or disagree, you will see this popup.
+<img width="1512" alt="KakaoTalk_20240616_194458559" src="https://github.com/cse364-unist/projects-group8/assets/113990328/ca6bc319-b3c5-4277-a3cc-a11392306978">
+This popup alerts you your selection agree or disagree and you must pay 100 game money to vote in this room.
+## My page <Feature3: Game Money System - check remain game money>
+In this page, you can see your user name and game money.
+<img width="1512" alt="KakaoTalk_20240616_194828544" src="https://github.com/cse364-unist/projects-group8/assets/113990328/36c062c7-eba6-490a-8c90-cedd9cb88526">
 
 
 
@@ -6,29 +60,15 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-<img width="1512" alt="KakaoTalk_20240616_194942063" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4ad71262-6daf-434a-acf4-b07ed272c8f2">
-<img width="1512" alt="KakaoTalk_20240616_191512463" src="https://github.com/cse364-unist/projects-group8/assets/113990328/6607e846-99cd-447b-a247-2fff9cda30f7">
-<img width="1512" alt="KakaoTalk_20240616_191535862" src="https://github.com/cse364-unist/projects-group8/assets/113990328/a1d9c449-0421-4903-ae22-6a0a9b06cb77">
-<img width="1512" alt="KakaoTalk_20240616_191650884" src="https://github.com/cse364-unist/projects-group8/assets/113990328/acc471d1-9a4b-46e2-bf64-f5e10cf145cc">
-<img width="1512" alt="KakaoTalk_20240616_191701310" src="https://github.com/cse364-unist/projects-group8/assets/113990328/16d2cfc2-be91-42c6-a6d6-722ba954fb3c">
-<img width="1512" alt="KakaoTalk_20240616_191711074" src="https://github.com/cse364-unist/projects-group8/assets/113990328/48bcf249-3685-4fb3-bcc2-ebf34c4bfb34">
-<img width="1512" alt="KakaoTalk_20240616_191728101" src="https://github.com/cse364-unist/projects-group8/assets/113990328/d97e390f-e5e7-406c-8b5e-17e9270affe2">
-<img width="1512" alt="KakaoTalk_20240616_191923752" src="https://github.com/cse364-unist/projects-group8/assets/113990328/1c592fc2-fcf9-4c4f-b236-54ddff6a0b62">
+# Common Scenario of Movin 
+1. make the user1, user2 (with ID test1, test2)
 <img width="1512" alt="KakaoTalk_20240616_193433610" src="https://github.com/cse364-unist/projects-group8/assets/113990328/bf453433-a31b-499e-8eed-3329850f97b6">
 <img width="1512" alt="KakaoTalk_20240616_193623567" src="https://github.com/cse364-unist/projects-group8/assets/113990328/3b292089-20e3-495d-bd84-12ea5b9d9e4a">
-<img width="1512" alt="KakaoTalk_20240616_193706152" src="https://github.com/cse364-unist/projects-group8/assets/113990328/d5860448-bd8f-4c18-8b38-42873667b8ee">
+2. click arbitrary movie which is in the movie chart
+## 이거지금 안넣어 놨음 사진 넣어야 함
+3. we click the "Escape from Shawshank" movie
 <img width="1512" alt="KakaoTalk_20240616_193722176" src="https://github.com/cse364-unist/projects-group8/assets/113990328/f516c1fd-10ed-4cff-ad8c-508a7e1363e2">
+4. click the "Create New Discussion" button and fill in the "title", "Discussion points", and "Start time"(if you want to test, set it to past time) 
 <img width="1512" alt="KakaoTalk_20240616_193731703" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e1718c2f-fe5f-4abf-933c-dd3461d2805f">
 <img width="1512" alt="KakaoTalk_20240616_193804880" src="https://github.com/cse364-unist/projects-group8/assets/113990328/8a60e698-fd4a-44b9-bb02-39b303768207">
 <img width="1512" alt="KakaoTalk_20240616_193816965" src="https://github.com/cse364-unist/projects-group8/assets/113990328/a5da19da-84c2-4177-9139-38d643e57de5">
