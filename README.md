@@ -9,7 +9,7 @@ NOTE) we use
 2. Spring boot application
 3. React for front page
 4. tomcat for deployment
-![Uploading image.png…]()
+<img width="1512" alt="스크린샷 2024-06-16 오후 11 44 37" src="https://github.com/cse364-unist/projects-group8/assets/113850887/7a518b25-1ceb-4a73-a284-e29c974fff61">
 
 —————————————————
 ## Trouble on above case, you can run jar file in docker container.
