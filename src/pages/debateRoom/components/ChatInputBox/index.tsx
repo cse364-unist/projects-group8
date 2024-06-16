@@ -4,7 +4,9 @@ import styled from 'styled-components';
 import SendIcon from './SendIcon.svg';
 import { useClient } from '../../provider/ClientProvider';
 
-const StyledInputBox = styled.div`
+const StyledInputBox = styled.div<{
+  disabled: boolean;
+}>`
   width: 100%;
   height: 136px;
   background-color: #ffffff;
@@ -18,6 +20,9 @@ const StyledInputBox = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 14px;
+
+  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
   & > div {
     flex: 1;
@@ -68,7 +73,7 @@ function ChatInputBox() {
 
   return (
     <ContentArea>
-      <StyledInputBox>
+      <StyledInputBox disabled={!client.getIsChatAvailable()}>
         <div>
           <div>
             You are: {client.debateRoom.agree ? 'Agreement' : 'Disagreement'} |{' '}

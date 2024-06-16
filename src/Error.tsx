@@ -3,17 +3,16 @@ import useLogout from './hooks/useLogout';
 
 export default function Error() {
   const logout = useLogout();
-  const navigate = useNavigate();
 
   const handleOnClick = () => {
     logout();
-    navigate('/');
+    window.location.reload();
   };
   return (
     <div>
       <h1>Error</h1>
       <p>There was an error</p>
-      <button onClick={() => handleOnClick}>Try Logout</button>
+      <button onClick={handleOnClick}>Try Logout</button>
     </div>
   );
 }

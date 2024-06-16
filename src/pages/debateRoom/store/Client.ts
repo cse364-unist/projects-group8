@@ -70,6 +70,65 @@ export default class Client {
     this.message = message;
   }
 
+  getIsChatAvailable() {
+    if (this.isLoggedIn === false || this.errorMessage !== null) {
+      return false;
+    }
+    if (this.curStep === 0 || this.curStep === 7) {
+      return false;
+    }
+
+    const userPosition = this.debateRoom.agree;
+
+    const isAgreementStep =
+      this.curStep === 1 ||
+      this.curStep === 2 ||
+      this.curStep === 4 ||
+      this.curStep === 5;
+
+    const isDisagreementStep =
+      this.curStep === 2 ||
+      this.curStep === 3 ||
+      this.curStep === 4 ||
+      this.curStep === 6;
+
+    if (userPosition === true) {
+      return isAgreementStep;
+    }
+    return isDisagreementStep;
+  }
+
+  parseDate(dateString: string) {
+    const regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})Z/;
+    const match = dateString.match(regex);
+
+    if (!match) {
+      throw new Error('Invalid date format');
+    }
+
+    const [_, year, month, day, hour, minute, second, millisecond] =
+      match.map(Number);
+
+    const localDate = new Date(
+      year,
+      month - 1,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond,
+    );
+
+    // 한국 시간대를 고려하여 시간대를 설정합니다.
+    const offset = localDate.getTimezoneOffset() * 60000; // 로컬 시간대 오프셋을 밀리초로 변환
+    const utcDate = new Date(localDate.getTime() + offset); // UTC로 변환
+    const kstOffset = 9 * 60 * 60000; // 한국 시간대 오프셋 (UTC+9)
+
+    const koreanDate = new Date(utcDate.getTime() + kstOffset); // 한국 시간대로 변환
+
+    return koreanDate;
+  }
+
   connect() {
     if (!this.isLoggedIn) {
       runInAction(() => {
@@ -119,7 +178,7 @@ export default class Client {
               this.state = 'debating';
             }
             this.curStep = data.step;
-            this.stepEndTime = new Date(data.stepEndTime);
+            this.stepEndTime = this.parseDate(data.stepEndTime);
           } else if (data.messageType === 'ENTER') {
             this.messages = [
               ...this.messages,
@@ -128,7 +187,7 @@ export default class Client {
                 message: data.senderUserName + ' entered the room',
                 senderUserName: 'System',
                 senderAgree: data.senderAgree,
-                sendTime: new Date(data.sendTime),
+                sendTime: this.parseDate(data.sendTime),
               },
             ];
           } else {
@@ -136,7 +195,7 @@ export default class Client {
               ...this.messages,
               {
                 ...data,
-                sendTime: new Date(data.sendTime),
+                sendTime: this.parseDate(data.sendTime),
               },
             ];
           }
@@ -166,6 +225,7 @@ export default class Client {
         token: this.token,
       }),
     );
+    this.message = '';
   }
 
   exit() {

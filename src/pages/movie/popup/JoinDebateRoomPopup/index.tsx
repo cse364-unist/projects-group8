@@ -6,6 +6,7 @@ import CoinItem from './CoinItem.svg';
 import { joinDebateRoom } from '../../../../services/DebateRoomService';
 import { useSetRecoilState } from 'recoil';
 import { userJoinedDebateRoomsSelector } from '../../../../states/AuthState';
+import { useNavigate } from 'react-router-dom';
 
 const StyledPopup = styled.div`
   display: flex;
@@ -169,6 +170,7 @@ const JoinDebateRoomPopup: React.FC<JoinDebateRoomPopupProps> = ({
   const [position, setPosition] = useState<'AGREEMENT' | 'OPPOSITION'>(
     'AGREEMENT',
   );
+  const navigate = useNavigate();
   const setUserJoinedDebateRoomsSelector = useSetRecoilState(
     userJoinedDebateRoomsSelector,
   );
@@ -178,6 +180,7 @@ const JoinDebateRoomPopup: React.FC<JoinDebateRoomPopupProps> = ({
       .then((room) => {
         setUserJoinedDebateRoomsSelector((prev) => [...prev, room]);
         onClose();
+        navigate(0);
       })
       .catch(() => {
         alert('Failed to join the debate room');

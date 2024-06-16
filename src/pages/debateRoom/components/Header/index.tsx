@@ -86,7 +86,7 @@ const Timer = observer(() => {
     };
   }, []);
 
-  const diff = now.getTime() - stepEndTime.getTime();
+  const diff = stepEndTime.getTime() - now.getTime();
 
   let minutes = Math.floor(diff / 60000);
   let seconds = Math.floor((diff % 60000) / 1000);

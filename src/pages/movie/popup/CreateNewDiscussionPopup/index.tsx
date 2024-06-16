@@ -6,6 +6,7 @@ import CoinItem from './CoinItem.svg';
 import { createDebateRoom } from '../../../../services/DebateRoomService';
 import { useRecoilValue } from 'recoil';
 import { moviePageMovieIdSelector } from '../../../../states/MoviePageState';
+import { useNavigate } from 'react-router-dom';
 
 const StyledPopup = styled.div`
   display: flex;
@@ -104,12 +105,14 @@ const CreateNewDiscussionPopup: React.FC<CreateNewDiscussionPopupProps> = ({
   const [title, setTitle] = useState('');
   const [points, setPoints] = useState('');
   const [startTime, setStartTime] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     const date = new Date(startTime);
     createDebateRoom(title, points, date, movieId)
       .then((id) => {
         onClose();
+        navigate(0);
       })
       .catch((e) => {
         alert('Failed to create a discussion room');
