@@ -104,9 +104,13 @@ can vote for this debate. In this page you can see the previous date session wit
 14. In this case, user3 votes for Disagree with 100 gold deduction.
 <img width="1512" alt="KakaoTalk_20240616_194458559" src="https://github.com/cse364-unist/projects-group8/assets/113990328/ca6bc319-b3c5-4277-a3cc-a11392306978">
 
-15. Ending debaterooms and distrubte game moeny to winner team.
+15. And you can see the discussion room for vote.
+<img width="1512" alt="KakaoTalk_20240616_194443897" src="https://github.com/cse364-unist/projects-group8/assets/113990328/35dbbb04-0f9b-4ff1-9c5a-8ae21a5b618c">
+
+16. Ending debaterooms and distrubte game moeny to winner team.
 <img width="1512" alt="KakaoTalk_20240616_194705377" src="https://github.com/cse364-unist/projects-group8/assets/113990328/db86a6fa-f70d-4216-9928-f963d952a301">
 
+Originally, when the time for debate participants to vote was over, a winning team was automatically determined based on the number of voters and money was distributed. However, since this is a demo application, for ease of testing, user3 used the end button to end the discussion and settle the settlement.
 
 # Result
 
