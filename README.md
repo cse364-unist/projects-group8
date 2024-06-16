@@ -1,5 +1,5 @@
 # Milestone3
-
+## Docker Settings
 you can build the image & run tomcat server in background by using 
 - docker build -t milestone3 /path/to/dockerfile
 - docker run -d -p 8080:8080 milestone3
@@ -7,12 +7,15 @@ you can build the image & run tomcat server in background by using
 NOTE) we use 
 1. MySQL
 2. Spring boot application
-3. tomcat for deployment
+3. React for front page
+4. tomcat for deployment
+
 —————————————————
-At the trouble case where tomcat war file doesn't work, then you can run the run.sh in the /root/project/ in docker container. At that time, because jar file doesn't include the frontend webpage, you should following fe_dev instruction for testing website in web browser. This run.sh will drop the movin database and recreate database for jar application. And database's ID will be changed from "root" into "group8" which is the datasource.username in github project. (it is different from war file). you don't need to worry about anything. just run the run.sh :)
+## Trouble on above case, you can run jar file in docker container.
+At the trouble case where tomcat war file doesn't work, then you can run the run.sh in the /root/project/ in docker container. It will stop the tomcat server and run the jar file. At that time, because jar file doesn't include the frontend webpage, you should follow fe_dev instruction for testing website in web browser. This run.sh will drop the movin database and recreate database for jar application. And database's ID will be changed from "root" into "group8" which is the datasource.username in github project. (it is different from war file). you don't need to worry about anything. just run the run.sh :)
 
 —————————————————————-
-CI - Continuous Integration
+## CI - Continuous Integration
 contiguous integration will be done when you 'push' or 'pull request' on master branch. it will run jacoco:report & mvn package which will test & build. you can find the CI log in the action section.
 
 ## Login & Register User
