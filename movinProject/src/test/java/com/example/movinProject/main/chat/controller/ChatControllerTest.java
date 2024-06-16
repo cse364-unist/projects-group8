@@ -33,7 +33,7 @@ class ChatControllerTest {
                 .chatType(ChatType.AGREE)
                 .build();
 
-        ResponseEntity<Long> response = chatController.create(chatCreateDto);
+        ResponseEntity<Long> response = chatController.create(1L,"Hello World", ChatType.AGREE);
 
         // Assert
         assertNotNull(response);
@@ -50,7 +50,7 @@ class ChatControllerTest {
                 .chatType(ChatType.DISAGREE)
                 .build();
 
-        ResponseEntity<Long> response = chatController.create(chatCreateDto);
+        ResponseEntity<Long> response = chatController.create(2L, "Hello World2!", ChatType.DISAGREE);
 
         // Assert
         assertNotNull(response);

@@ -13,6 +13,7 @@ import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepositor
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+
 import com.example.movinProject.domain.debateVote.domain.DebateVote;
 import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
 import com.example.movinProject.domain.movie.domain.Movie;
@@ -68,7 +69,7 @@ public class DebateRoomService {
 
 
     @Transactional
-    public Long create(DebateRoomCreateDto dto){
+    public Long create(DebateRoomCreateDto dto) {
         DebateRoom debateRoom = DebateRoom.init(
                 dto.getTitle(),
                 dto.getTopic(),
@@ -108,7 +109,7 @@ public class DebateRoomService {
                         }
                     });
 
-                    if(step == 7) {
+                    if (step == 7) {
                         // 토론방 상태 변경 (토론 종료, 투표 시작)
                         DebateRoom debateRoom = room.getDebateRoom();
                         debateRoom.setStateType(StateType.VOTE);
@@ -160,11 +161,11 @@ public class DebateRoomService {
     }
 
 
-    public void userEnter(WebSocketSession session, Long debateRoomId, String userName){
+    public void userEnter(WebSocketSession session, Long debateRoomId, String userName) {
         RealtimeDebateRoom room = findRoomById(debateRoomId);
 
         // if room is not exist, create new room
-        if(room == null) {
+        if (room == null) {
             DebateRoom debateRoom = debateRoomRepository.findById(debateRoomId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 토론방입니다."));
             room = new RealtimeDebateRoom(debateRoom, chatGPTService);
             chatRooms.put(debateRoomId, room);
@@ -179,7 +180,7 @@ public class DebateRoomService {
 
         // Get user's agree
         Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(user.getUserName(), debateRoomId);
-        if(debateJoinedUser.isEmpty()) {
+        if (debateJoinedUser.isEmpty()) {
             throw new IllegalArgumentException("토론방에 참여하지 않은 사용자입니다.");
         }
         boolean isAgree = debateJoinedUser.get().isAgree();
@@ -205,7 +206,7 @@ public class DebateRoomService {
 
         // 만약 모든 사용자가 입장했다면, 토론 시작
         List<DebateJoinedUser> userIds = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);
-        if(room.getSessions().size() == userIds.size()) {
+        if (room.getSessions().size() == userIds.size()) {
             // 토론 시작
             startDebate(room);
         }
@@ -213,7 +214,7 @@ public class DebateRoomService {
 
     public void userLeave(WebSocketSession session) {
         Long debateRoomId = sessionToDebateRoomId.get(session);
-        if(debateRoomId == null) {
+        if (debateRoomId == null) {
             throw new IllegalArgumentException("비정상적 접근입니다.");
         }
 
@@ -233,7 +234,7 @@ public class DebateRoomService {
         sessionToDebateRoomId.remove(session);
 
         // 만약 모든 사용자가 퇴장했다면, 방 삭제
-        if(room.getSessions().isEmpty()) {
+        if (room.getSessions().isEmpty()) {
             room.stopAll();
             chatRooms.remove(debateRoomId);
             return;
@@ -254,7 +255,7 @@ public class DebateRoomService {
         // 채팅방에 있는 모든 사용자에게 메시지 전송
         // find the room that findDebateRoomSessionInfoBySession is not null
         RealtimeDebateRoom room = findRoomById(sessionToDebateRoomId.get(session));
-        if(room == null) {
+        if (room == null) {
             throw new IllegalArgumentException("오류가 발생했습니다.");
         }
 
@@ -293,30 +294,42 @@ public class DebateRoomService {
         Map<String, List<DebateRoomDto>> groupedRooms = new HashMap<>();
         groupedRooms.put("openDebateRooms", rooms.stream()
                 .filter(room -> StateType.OPEN.equals(room.getStateType()))
-                .map( room ->  DebateRoomDto.builder()
-                            .id(room.getId())
-                            .title(room.getTitle())
-                            .topic(room.getTopic())
-                            .state(room.getStateType())
-                            .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
-                            .startTime(room.getStartTime())
-                            .duration(room.getDuration())
-                            .maxUserNumber(room.getMaxUserNumber())
-                            .build()
+                .map(room -> DebateRoomDto.builder()
+                        .id(room.getId())
+                        .title(room.getTitle())
+                        .topic(room.getTopic())
+                        .state(room.getStateType())
+                        .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
+                        .startTime(room.getStartTime())
+                        .duration(room.getDuration())
+                        .maxUserNumber(room.getMaxUserNumber())
+                        .agreeJoinedUserNumber((int) debateJoinedUserRepository.findByDebateRoomId(room.getId()).stream()
+                                .filter(DebateJoinedUser::isAgree)
+                                .count())
+                        .disagreeJoinedUserNumber((int) debateJoinedUserRepository.findByDebateRoomId(room.getId()).stream()
+                                .filter(DebateJoinedUser::isDisagree)
+                                .count())
+                        .build()
                 )
                 .collect(Collectors.toList()));
         groupedRooms.put("voteDebateRooms", rooms.stream()
                 .filter(room -> StateType.VOTE.equals(room.getStateType()))
-                .map( room ->  DebateRoomDto.builder()
-                            .id(room.getId())
-                            .title(room.getTitle())
-                            .topic(room.getTopic())
-                            .state(room.getStateType())
-                            .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
-                            .startTime(room.getStartTime())
-                            .duration(room.getDuration())
-                            .maxUserNumber(room.getMaxUserNumber())
-                            .build()
+                .map(room -> DebateRoomDto.builder()
+                        .id(room.getId())
+                        .title(room.getTitle())
+                        .topic(room.getTopic())
+                        .state(room.getStateType())
+                        .movie(getMovieDto(room.getMovieId()).orElseThrow(() -> new RuntimeException("영화 정보를 찾을 수 없습니다.")))
+                        .startTime(room.getStartTime())
+                        .duration(room.getDuration())
+                        .maxUserNumber(room.getMaxUserNumber())
+                        .agreeJoinedUserNumber((int) debateJoinedUserRepository.findByDebateRoomId(room.getId()).stream()
+                                .filter(DebateJoinedUser::isAgree)
+                                .count())
+                        .disagreeJoinedUserNumber((int) debateJoinedUserRepository.findByDebateRoomId(room.getId()).stream()
+                                .filter(DebateJoinedUser::isDisagree)
+                                .count())
+                        .build()
                 )
                 .collect(Collectors.toList()));
 
@@ -387,21 +400,19 @@ public class DebateRoomService {
         dto.setSummarize(debateRoom.getSummarize());
 
         DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(userName, id);
-        if(debateVote != null) {
+        if (debateVote != null) {
             dto.setVoted(true);
             dto.setVoteAgree(debateVote.isAgree());
-        }
-        else {
+        } else {
             dto.setVoted(false);
             dto.setVoteAgree(false);
         }
 
         Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(userName, id);
-        if(debateJoinedUser.isPresent()){
+        if (debateJoinedUser.isPresent()) {
             dto.setJoined(true);
             dto.setAgree(debateJoinedUser.get().isAgree());
-        }
-        else {
+        } else {
             dto.setJoined(false);
             dto.setAgree(false);
         }
@@ -414,20 +425,20 @@ public class DebateRoomService {
     @Transactional
     public DebateRoomVoteDto castjoin(Long id, String username, boolean agree) {
         Optional<DebateJoinedUser> oriDebateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
-        if(oriDebateJoinedUser.isPresent()) {
+        if (oriDebateJoinedUser.isPresent()) {
             throw new RuntimeException("이미 참여한 토론입니다.");
         }
 
         DebateJoinedUser debateJoinedUser = DebateJoinedUser.create(
-        id, username, agree);
+                id, username, agree);
 
         debateJoinedUserRepository.save(debateJoinedUser);
 
-        DebateRoom debateRoom = debateRoomRepository.findById(id).orElseThrow(() ->new RuntimeException("cannot find debateRoom"));
+        DebateRoom debateRoom = debateRoomRepository.findById(id).orElseThrow(() -> new RuntimeException("cannot find debateRoom"));
 
         debateRoom.addTotleMoney(100);
         debateRoomRepository.save(debateRoom);
-        User user = userRepository.findByUserName(username).orElseThrow(()-> new RuntimeException("cannot find user"));
+        User user = userRepository.findByUserName(username).orElseThrow(() -> new RuntimeException("cannot find user"));
 
         user.subMoney(100);
         userRepository.save(user);
@@ -445,11 +456,10 @@ public class DebateRoomService {
         setJoinedUserNumberToDTO(dto, id);
 
         DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, id);
-        if(debateVote != null) {
+        if (debateVote != null) {
             dto.setVoted(true);
             dto.setVoteAgree(debateVote.isAgree());
-        }
-        else {
+        } else {
             dto.setVoted(false);
             dto.setVoteAgree(false);
         }
@@ -467,7 +477,7 @@ public class DebateRoomService {
     public DebateRoomVoteDto castVote(Long id, String username, boolean agree) {
 
         DebateVote vote = DebateVote.create(
-            id, username, agree, LocalDateTime.of(2024,4,1,0,0));
+                id, username, agree, LocalDateTime.of(2024, 4, 1, 0, 0));
 
         debateVoteRepository.save(vote);
         DebateRoom debateRoom = debateRoomRepository.findById(id).orElse(null);
@@ -499,10 +509,10 @@ public class DebateRoomService {
         dto.setVoteAgree(agree);
 
         Optional<DebateJoinedUser> debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, id);
-        if(debateJoinedUser.isPresent()) {
+        if (debateJoinedUser.isPresent()) {
             dto.setJoined(true);
             dto.setAgree(debateJoinedUser.get().isAgree());
-        }else {
+        } else {
             dto.setJoined(false);
             dto.setAgree(false);
         }
@@ -535,13 +545,12 @@ public class DebateRoomService {
                 agreeNum++;
 
                 User foundUser = userRepository.findByUserName(v.getUserName())
-                        .orElseThrow(()-> new RuntimeException("cannot find user"));
+                        .orElseThrow(() -> new RuntimeException("cannot find user"));
                 agreeUser.add(foundUser);
-            }
-            else {
+            } else {
                 disagreeNum++;
                 User foundUser = userRepository.findByUserName(v.getUserName())
-                        .orElseThrow(()-> new RuntimeException("cannot find user"));
+                        .orElseThrow(() -> new RuntimeException("cannot find user"));
                 disagreeUser.add(foundUser);
             }
         }
@@ -549,7 +558,7 @@ public class DebateRoomService {
         List<DebateJoinedUser> allDebateJoinedUser = debateJoinedUserRepository.findByDebateRoomId(id);
 
         List<User> allUsers = allDebateJoinedUser.stream()
-                .map(j -> userRepository.findByUserName(j.getUserName()).orElseThrow(()-> new RuntimeException("cannot find user")))
+                .map(j -> userRepository.findByUserName(j.getUserName()).orElseThrow(() -> new RuntimeException("cannot find user")))
                 .toList();
         List<User> notVotedUsers = allUsers.stream()
                 .filter(u -> list.stream().noneMatch(v -> v.getUserName().equals(u.getUserName())))
@@ -582,5 +591,5 @@ public class DebateRoomService {
         voteInfo.setState(endRoom.getStateType());
         return voteInfo;
     }
-    
+
 }

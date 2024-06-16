@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.config.SpringSecurity.service.impl</a> &gt; <span class="el_source">AuthServiceImpl.java</span></div><h1>AuthServiceImpl.java</h1><pre class="source lang-java linenums">package com.example.movinProject.config.SpringSecurity.service.impl;
+
+
+import com.example.movinProject.config.SpringSecurity.dto.UserLoginRequest;
+import com.example.movinProject.config.SpringSecurity.service.AuthService;
+import com.example.movinProject.config.SpringSecurity.service.JwtService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+@Service
+<span class="fc" id="L18">@RequiredArgsConstructor</span>
+<span class="fc" id="L19">@Slf4j</span>
+public class AuthServiceImpl implements AuthService {
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    @Override
+    public Map&lt;String, String&gt; authRequest(UserLoginRequest userLoginRequest) {
+        try {
+<span class="fc" id="L26">            final var authenticate = authenticationManager.authenticate(</span>
+<span class="fc" id="L27">                    new UsernamePasswordAuthenticationToken(userLoginRequest.getUserName(), userLoginRequest.getPassword())</span>
+            );
+<span class="fc" id="L29">            final var userDetails = (UserDetails) authenticate.getPrincipal();</span>
+<span class="fc" id="L30">            return getToken(userDetails);</span>
+<span class="fc" id="L31">        } catch (AuthenticationException e) {</span>
+<span class="fc" id="L32">            log.error(&quot;Authentication error for user {}: {}&quot;, userLoginRequest.getUserName(), e.getMessage());</span>
+<span class="fc" id="L33">            throw e;</span>
+        }
+    }
+
+    public Map&lt;String, String&gt; getToken( UserDetails userDetails) {
+<span class="fc" id="L38">        final var roles = userDetails.getAuthorities();</span>
+<span class="fc" id="L39">        final var username = userDetails.getUsername();</span>
+<span class="fc" id="L40">        final var token = jwtService.generateToken(Map.of(&quot;role&quot;, roles), username);</span>
+<span class="fc" id="L41">        return Map.of(&quot;token&quot;, token);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

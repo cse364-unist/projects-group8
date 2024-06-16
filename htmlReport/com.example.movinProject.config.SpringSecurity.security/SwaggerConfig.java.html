@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwaggerConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.config.SpringSecurity.security</a> &gt; <span class="el_source">SwaggerConfig.java</span></div><h1>SwaggerConfig.java</h1><pre class="source lang-java linenums">package com.example.movinProject.config.SpringSecurity.security;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.customizers.OpenApiCustomiser;
+
+@Configuration
+<span class="fc" id="L13">public class SwaggerConfig {</span>
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+<span class="fc" id="L17">        return new OpenAPI()</span>
+<span class="fc" id="L18">                .info(new Info().title(&quot;Movin Project API&quot;).version(&quot;v1&quot;))</span>
+<span class="fc" id="L19">                .addSecurityItem(new SecurityRequirement().addList(&quot;bearerAuth&quot;))</span>
+<span class="fc" id="L20">                .components(new io.swagger.v3.oas.models.Components()</span>
+<span class="fc" id="L21">                        .addSecuritySchemes(&quot;bearerAuth&quot;, new SecurityScheme()</span>
+<span class="fc" id="L22">                                .name(&quot;bearerAuth&quot;)</span>
+<span class="fc" id="L23">                                .type(SecurityScheme.Type.HTTP)</span>
+<span class="fc" id="L24">                                .scheme(&quot;bearer&quot;)</span>
+<span class="fc" id="L25">                                .bearerFormat(&quot;JWT&quot;)));</span>
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi() {
+<span class="fc" id="L30">        return GroupedOpenApi.builder()</span>
+<span class="fc" id="L31">                .group(&quot;springshop-public&quot;)</span>
+<span class="fc" id="L32">                .packagesToScan(&quot;com.example.movinProject&quot;)</span>
+<span class="fc" id="L33">                .pathsToMatch(&quot;/auth/v1/**&quot;, &quot;/users/**&quot;)</span>
+<span class="fc" id="L34">                .addOpenApiCustomiser(securityOpenApiCustomiser())</span>
+<span class="fc" id="L35">                .build();</span>
+    }
+
+    private OpenApiCustomiser securityOpenApiCustomiser() {
+<span class="pc" id="L39">        return openApi -&gt; openApi.getPaths().values().forEach(pathItem -&gt; pathItem.readOperations().forEach(operation -&gt; {</span>
+<span class="nc" id="L40">            operation.addSecurityItem(new SecurityRequirement().addList(&quot;bearerAuth&quot;));</span>
+<span class="nc" id="L41">        }));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.user.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.user.service;
+
+import com.example.movinProject.domain.debateJoinedUser.domain.DebateJoinedUser;
+import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
+import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
+import com.example.movinProject.domain.debateVote.domain.DebateVote;
+import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
+import com.example.movinProject.domain.movie.domain.Movie;
+import com.example.movinProject.domain.movie.repository.MovieRepository;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomVoteDto;
+import com.example.movinProject.main.movie.dto.MovieDto;
+import com.example.movinProject.main.user.dto.UserDto;
+import com.example.movinProject.main.user.dto.UserRegisterRequest;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Service
+<span class="fc" id="L30">public class UserService {</span>
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private DebateRoomRepository debateRoomRepository;
+
+    @Autowired
+    private DebateJoinedUserRepository debateJoinedUserRepository;
+
+    @Autowired
+    private DebateVoteRepository debateVoteRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private MovieRepository movieRepository;
+
+    @Transactional
+    public Optional&lt;UserDto&gt; registerUser(UserRegisterRequest request) {
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (userRepository.existsByUserName(request.getUserName())) {</span>
+<span class="fc" id="L52">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L55">        String encodedPassword = passwordEncoder.encode(request.getPassword());</span>
+
+<span class="fc" id="L57">        User newUser = User.create(request.getUserName(), encodedPassword,request.getEmail());</span>
+<span class="fc" id="L58">        userRepository.save(newUser);</span>
+
+<span class="fc" id="L60">        UserDto userDto = new UserDto();</span>
+<span class="fc" id="L61">        userDto.setId(newUser.getId());</span>
+<span class="fc" id="L62">        userDto.setName(newUser.getUserName());</span>
+<span class="fc" id="L63">        userDto.setMoney(500);</span>
+<span class="fc" id="L64">        userDto.setLastAttendance(LocalDateTime.of(2024, 4, 1, 0, 0));</span>
+
+<span class="fc" id="L66">        return Optional.of(userDto);</span>
+    }
+
+    private void setJoinedUserNumberToDTO(DebateRoomVoteDto debateRoomVoteDTO, Long debateRoomId) {
+<span class="nc" id="L70">        List&lt;DebateJoinedUser&gt; allJoinedUsers = debateJoinedUserRepository.findByDebateRoomId(debateRoomId);</span>
+<span class="nc" id="L71">        debateRoomVoteDTO.setAgreeJoinedUserNumber(</span>
+<span class="nc" id="L72">                (int) allJoinedUsers.stream().filter(DebateJoinedUser::isAgree).count()</span>
+        );
+<span class="nc" id="L74">        debateRoomVoteDTO.setDisagreeJoinedUserNumber(</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                (int) allJoinedUsers.stream().filter(j -&gt; !j.isAgree()).count()</span>
+        );
+<span class="nc" id="L77">    }</span>
+
+    public UserDto getUserDetails(String username) {
+<span class="pc" id="L80">        User user = userRepository.findByUserName(username).orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found&quot;));</span>
+<span class="fc" id="L81">        List&lt;Long&gt; debateRoomIds = debateJoinedUserRepository.findIdsByUserName(username);</span>
+<span class="fc" id="L82">        List&lt;DebateRoom&gt; debateRooms = debateRoomRepository.findAllById(debateRoomIds);</span>
+
+<span class="fc" id="L84">        List&lt;DebateRoomVoteDto&gt; debateRoomVoteDtos = debateRooms.stream().map(debateRoom -&gt; {</span>
+<span class="nc" id="L85">            Movie movie = movieRepository.findById(debateRoom.getMovieId()).orElseThrow();</span>
+<span class="nc" id="L86">            MovieDto movieDto = MovieDto.builder()</span>
+<span class="nc" id="L87">                    .id(movie.getId())</span>
+<span class="nc" id="L88">                    .name(movie.getTitle())</span>
+<span class="nc" id="L89">                    .thumbnailUrl(movie.getThumbnailUrl())</span>
+<span class="nc" id="L90">                    .build();</span>
+
+
+<span class="nc" id="L93">            DebateRoomVoteDto dto = new DebateRoomVoteDto();</span>
+<span class="nc" id="L94">            dto.setTitle(debateRoom.getTitle());</span>
+<span class="nc" id="L95">            dto.setTopic(debateRoom.getTopic());</span>
+<span class="nc" id="L96">            dto.setStateType(debateRoom.getStateType());</span>
+<span class="nc" id="L97">            dto.setStartTime(debateRoom.getStartTime());</span>
+<span class="nc" id="L98">            dto.setDuration(debateRoom.getDuration());</span>
+<span class="nc" id="L99">            dto.setMaxUserNumber(debateRoom.getMaxUserNumber());</span>
+<span class="nc" id="L100">            setJoinedUserNumberToDTO(dto, debateRoom.getId());</span>
+<span class="nc" id="L101">            dto.setSummarize(debateRoom.getSummarize());</span>
+<span class="nc" id="L102">            dto.setMovie(movieDto);</span>
+<span class="nc" id="L103">            Long debateRoomId = debateRoom.getId();</span>
+<span class="nc" id="L104">            DebateVote debateVote = debateVoteRepository.findByUserNameAndDebateRoomId(username, debateRoomId);</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (debateVote != null) {</span>
+<span class="nc" id="L106">                dto.setVoted(true);</span>
+<span class="nc" id="L107">                dto.setVoteAgree(debateVote.isAgree());</span>
+            }else{
+<span class="nc" id="L109">                dto.setVoted(false);</span>
+<span class="nc" id="L110">                dto.setVoteAgree(false);</span>
+            }
+
+<span class="nc" id="L113">            Optional&lt;DebateJoinedUser&gt; debateJoinedUser = debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, debateRoomId);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            if (debateJoinedUser.isPresent()) {</span>
+<span class="nc" id="L115">                dto.setJoined(true);</span>
+<span class="nc" id="L116">                dto.setAgree(debateJoinedUser.get().isAgree());</span>
+            }else {
+<span class="nc" id="L118">                dto.setJoined(false);</span>
+<span class="nc" id="L119">                dto.setAgree(false);</span>
+            }
+
+<span class="nc" id="L122">            return dto;</span>
+<span class="fc" id="L123">        }).toList();</span>
+
+<span class="fc" id="L125">        UserDto userDto = new UserDto();</span>
+
+<span class="fc" id="L127">        userDto.setId(user.getId());</span>
+<span class="fc" id="L128">        userDto.setName(user.getUserName());</span>
+<span class="fc" id="L129">        userDto.setJoinedDebateRooms(debateRoomVoteDtos);</span>
+<span class="fc" id="L130">        userDto.setMoney(user.getMoney());</span>
+<span class="fc" id="L131">        userDto.setLastAttendance(user.getLastAttendance());</span>
+
+
+<span class="fc" id="L134">        return userDto;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

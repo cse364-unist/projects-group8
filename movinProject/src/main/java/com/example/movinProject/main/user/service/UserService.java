@@ -3,6 +3,7 @@ package com.example.movinProject.main.user.service;
 import com.example.movinProject.domain.debateJoinedUser.domain.DebateJoinedUser;
 import com.example.movinProject.domain.debateJoinedUser.repository.DebateJoinedUserRepository;
 import com.example.movinProject.domain.debateRoom.domain.DebateRoom;
+import com.example.movinProject.domain.debateRoom.model.StateType;
 import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
 import com.example.movinProject.domain.debateVote.domain.DebateVote;
 import com.example.movinProject.domain.debateVote.repository.DebateVoteRepository;
@@ -83,7 +84,9 @@ public class UserService {
         List<Long> debateRoomIds = debateJoinedUserRepository.findDebateRoomIdsByUserName(username);
         List<DebateRoom> debateRooms = debateRoomRepository.findAllById(debateRoomIds);
 
-        List<DebateRoomVoteDto> debateRoomVoteDtos = debateRooms.stream().map(debateRoom -> {
+        List<DebateRoomVoteDto> debateRoomVoteDtos = debateRooms.stream()
+                .filter(debateRoom -> debateRoom.getStateType() == StateType.OPEN || debateRoom.getStateType() == StateType.DISCUSS)
+                .map(debateRoom -> {
             Movie movie = movieRepository.findById(debateRoom.getMovieId()).orElseThrow();
             MovieDto movieDto = MovieDto.builder()
                     .id(movie.getId())

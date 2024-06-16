@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RealtimeMessageDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.chatApiProxy.dto</a> &gt; <span class="el_source">RealtimeMessageDto.java</span></div><h1>RealtimeMessageDto.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.chatApiProxy.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
+
+<span class="pc" id="L9">@Builder</span>
+@Getter
+<span class="pc" id="L11">@Setter</span>
+<span class="fc" id="L12">@AllArgsConstructor</span>
+<span class="fc" id="L13">@NoArgsConstructor</span>
+public class RealtimeMessageDto {
+
+    // 메시지  타입 : 입장, 채팅
+<span class="fc" id="L17">    public enum MessageType {</span>
+<span class="fc" id="L18">        ENTER, TALK, QUIT, StepChange</span>
+    }
+
+<span class="nc" id="L21">    private MessageType messageType; // 메시지 타입</span>
+<span class="nc" id="L22">    private int step; // 현재 스텝</span>
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;, timezone = &quot;Asia/Seoul&quot;)
+<span class="nc" id="L26">    private LocalDateTime stepEndTime; // 보낸 시간</span>
+
+<span class="fc" id="L28">    private Long debateRoomId; // 방 번호</span>
+<span class="fc" id="L29">    private Long senderUserId; // 채팅을 보낸 사람, 만약 사회자 메세지라면 -1</span>
+<span class="fc" id="L30">    private String senderUserName; // 채팅을 보낸 사람 이름</span>
+<span class="fc" id="L31">    private boolean isSenderAgree; // 찬성인지 반대인지</span>
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;, timezone = &quot;Asia/Seoul&quot;)
+<span class="fc" id="L35">    private LocalDateTime sendTime; // 보낸 시간</span>
+
+<span class="fc" id="L37">    private String message; // 메시지</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

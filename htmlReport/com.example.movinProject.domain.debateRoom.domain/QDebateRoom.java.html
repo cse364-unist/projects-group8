@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QDebateRoom.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.domain.debateRoom.domain</a> &gt; <span class="el_source">QDebateRoom.java</span></div><h1>QDebateRoom.java</h1><pre class="source lang-java linenums">package com.example.movinProject.domain.debateRoom.domain;
+
+import static com.querydsl.core.types.PathMetadataFactory.*;
+
+import com.querydsl.core.types.dsl.*;
+
+import com.querydsl.core.types.PathMetadata;
+import javax.annotation.processing.Generated;
+import com.querydsl.core.types.Path;
+
+
+/**
+ * QDebateRoom is a Querydsl query type for DebateRoom
+ */
+@Generated(&quot;com.querydsl.codegen.DefaultEntitySerializer&quot;)
+public class QDebateRoom extends EntityPathBase&lt;DebateRoom&gt; {
+
+    private static final long serialVersionUID = -248021919L;
+
+<span class="fc" id="L20">    public static final QDebateRoom debateRoom = new QDebateRoom(&quot;debateRoom&quot;);</span>
+
+<span class="pc" id="L22">    public final NumberPath&lt;Integer&gt; duration = createNumber(&quot;duration&quot;, Integer.class);</span>
+
+<span class="pc" id="L24">    public final NumberPath&lt;Long&gt; id = createNumber(&quot;id&quot;, Long.class);</span>
+
+<span class="pc" id="L26">    public final NumberPath&lt;Integer&gt; maxUserNumber = createNumber(&quot;maxUserNumber&quot;, Integer.class);</span>
+
+<span class="pc" id="L28">    public final NumberPath&lt;Long&gt; movieId = createNumber(&quot;movieId&quot;, Long.class);</span>
+
+<span class="pc" id="L30">    public final DateTimePath&lt;java.time.LocalDateTime&gt; startTime = createDateTime(&quot;startTime&quot;, java.time.LocalDateTime.class);</span>
+
+<span class="pc" id="L32">    public final EnumPath&lt;com.example.movinProject.domain.debateRoom.model.StateType&gt; stateType = createEnum(&quot;stateType&quot;, com.example.movinProject.domain.debateRoom.model.StateType.class);</span>
+
+<span class="pc" id="L34">    public final StringPath summarize = createString(&quot;summarize&quot;);</span>
+
+<span class="pc" id="L36">    public final StringPath title = createString(&quot;title&quot;);</span>
+
+<span class="pc" id="L38">    public final StringPath topic = createString(&quot;topic&quot;);</span>
+
+<span class="pc" id="L40">    public final NumberPath&lt;Integer&gt; totalMoney = createNumber(&quot;totalMoney&quot;, Integer.class);</span>
+
+    public QDebateRoom(String variable) {
+<span class="fc" id="L43">        super(DebateRoom.class, forVariable(variable));</span>
+<span class="fc" id="L44">    }</span>
+
+    public QDebateRoom(Path&lt;? extends DebateRoom&gt; path) {
+<span class="nc" id="L47">        super(path.getType(), path.getMetadata());</span>
+<span class="nc" id="L48">    }</span>
+
+    public QDebateRoom(PathMetadata metadata) {
+<span class="nc" id="L51">        super(DebateRoom.class, metadata);</span>
+<span class="nc" id="L52">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

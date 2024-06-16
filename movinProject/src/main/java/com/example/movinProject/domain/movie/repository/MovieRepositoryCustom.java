@@ -9,6 +9,6 @@ public interface MovieRepositoryCustom {
 
     List<Movie> findMoviesWithAverageRatingAbove(Double rating);
 
-    List<Movie> searchMoviesByKeywordwithSize(String keyword, int size);
+    List<Movie> searchMoviesByKeywordwithSize(String keyword, int pageNum, int limit);
 
 }

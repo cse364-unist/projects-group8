@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BadRequestType.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.config.exception</a> &gt; <span class="el_source">BadRequestType.java</span></div><h1>BadRequestType.java</h1><pre class="source lang-java linenums">package com.example.movinProject.config.exception;
+
+import lombok.Getter;
+
+<span class="fc" id="L5">@Getter</span>
+public enum BadRequestType {
+<span class="fc" id="L7">    EXISTS_USER(&quot;이미 존재하는 사용자 id입니다.&quot;),</span>
+<span class="fc" id="L8">    CANNOT_FIND_USER(&quot;존재하지 않는 유저입니다.&quot;),</span>
+<span class="fc" id="L9">    CANNOT_FIND_DEBATE_ROOM(&quot;존재하지 않는 토론방입니다&quot;);</span>
+    ;
+
+    private final String message;
+
+<span class="fc" id="L14">    BadRequestType(String message) {</span>
+<span class="fc" id="L15">        this.message = message;</span>
+<span class="fc" id="L16">    }</span>
+
+    public String getMessage() {
+<span class="fc" id="L19">        return this.message;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

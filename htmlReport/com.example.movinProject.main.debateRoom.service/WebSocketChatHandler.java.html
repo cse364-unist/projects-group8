@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebSocketChatHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.service</a> &gt; <span class="el_source">WebSocketChatHandler.java</span></div><h1>WebSocketChatHandler.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.service;
+
+import com.example.movinProject.config.SpringSecurity.service.JwtService;
+import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.domain.user.repository.UserRepository;
+import com.example.movinProject.main.chatApiProxy.RealtimeMessage;
+import com.example.movinProject.main.chatApiProxy.chatRoom.RealtimeDebateRoom;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.util.Set;
+
+<span class="fc" id="L25">@Slf4j</span>
+@Component
+<span class="fc" id="L27">@RequiredArgsConstructor</span>
+public class WebSocketChatHandler extends TextWebSocketHandler {
+    private final ObjectMapper objectMapper;
+    private final DebateRoomService debateRoomService;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+<span class="nc" id="L36">    }</span>
+
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+<span class="nc" id="L41">        String payload = message.getPayload();</span>
+<span class="nc" id="L42">        RealtimeMessage realtimeMessage = objectMapper.readValue(payload, RealtimeMessage.class);</span>
+
+<span class="nc" id="L44">        String jwtToken = realtimeMessage.getToken();</span>
+<span class="nc" id="L45">        final String userId = jwtService.extractUsername(jwtToken);</span>
+<span class="nc" id="L46">        String userName = &quot;&quot;;</span>
+
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (userId != null) {</span>
+<span class="nc" id="L49">            var userDetails = this.userDetailsService.loadUserByUsername(userId);</span>
+<span class="nc" id="L50">            userName = userDetails.getUsername();</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (!jwtService.isTokenValid(jwtToken, userDetails)) {</span>
+<span class="nc" id="L52">                throw new Exception(&quot;Invalid token&quot;);</span>
+            }
+<span class="nc" id="L54">        }else {</span>
+<span class="nc" id="L55">            throw new Exception(&quot;Invalid token&quot;);</span>
+        }
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (realtimeMessage.getType().equals(RealtimeMessage.MessageType.ENTER)) {</span>
+<span class="nc" id="L59">            this.debateRoomService.userEnter(session, realtimeMessage.getDebateRoomId(), userName);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        } else if (realtimeMessage.getType().equals(RealtimeMessage.MessageType.TALK)) {</span>
+<span class="nc" id="L61">            this.debateRoomService.chatMessageReceived(session, realtimeMessage.getMessage());</span>
+        } else {
+            // Unknown message type
+<span class="nc" id="L64">            log.error(&quot;Unknown message type&quot;);</span>
+        }
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+<span class="nc" id="L70">        this.debateRoomService.userLeave(session);</span>
+<span class="nc" id="L71">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

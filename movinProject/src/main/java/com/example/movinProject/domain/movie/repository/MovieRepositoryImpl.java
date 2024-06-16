@@ -34,14 +34,15 @@ public class MovieRepositoryImpl implements MovieRepositoryCustom {
     }
 
     @Override
-    public List<Movie> searchMoviesByKeywordwithSize(String keyword, int size) {
+    public List<Movie> searchMoviesByKeywordwithSize(String keyword, int pageNum, int limit) {
         QMovie movie = QMovie.movie;
         return queryFactory
                 .selectFrom(movie)
                 .where(movie.title.containsIgnoreCase(keyword)
                         .or(movie.description.containsIgnoreCase(keyword)))
                 .orderBy(movie.title.asc())
-                .limit(size)
+                .offset((long) (pageNum - 1) * limit)
+                .limit(limit)
                 .fetch();
     }
 }

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebateRoom.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.domain.debateRoom.domain</a> &gt; <span class="el_source">DebateRoom.java</span></div><h1>DebateRoom.java</h1><pre class="source lang-java linenums">package com.example.movinProject.domain.debateRoom.domain;
+
+import com.example.movinProject.domain.debateRoom.model.StateType;
+import com.example.movinProject.domain.user.domain.User;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomCreateDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
+
+@Entity
+<span class="fc" id="L17">@NoArgsConstructor</span>
+@Getter
+public class DebateRoom {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+
+    private String topic;
+
+    @Enumerated(EnumType.STRING)
+    private StateType stateType;
+
+    private Long movieId;
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;, timezone = &quot;Asia/Seoul&quot;)
+    private LocalDateTime startTime;
+
+    private int duration;
+
+    private int maxUserNumber;
+
+    private int totalMoney;
+
+    private String summarize;
+
+    public static DebateRoom init(String title, String topic, StateType stateType, LocalDateTime startTime, Long movieId){
+<span class="nc" id="L46">        DebateRoom debateRoom = new DebateRoom();</span>
+<span class="nc" id="L47">        debateRoom.title = title;</span>
+<span class="nc" id="L48">        debateRoom.topic = topic;</span>
+<span class="nc" id="L49">        debateRoom.stateType =stateType;</span>
+<span class="nc" id="L50">        debateRoom.startTime = startTime;</span>
+<span class="nc" id="L51">        debateRoom.movieId = movieId;</span>
+<span class="nc" id="L52">        debateRoom.duration = 20;</span>
+<span class="nc" id="L53">        debateRoom.maxUserNumber = 10;</span>
+<span class="nc" id="L54">        return debateRoom;</span>
+    }
+
+    public static DebateRoom initTest(Long id, String title, String topic, StateType stateType, LocalDateTime startTime, Long movieId){
+<span class="fc" id="L58">        DebateRoom debateRoom = new DebateRoom();</span>
+<span class="fc" id="L59">        debateRoom.id = id;</span>
+<span class="fc" id="L60">        debateRoom.title = title;</span>
+<span class="fc" id="L61">        debateRoom.topic = topic;</span>
+<span class="fc" id="L62">        debateRoom.stateType =stateType;</span>
+<span class="fc" id="L63">        debateRoom.startTime = startTime;</span>
+<span class="fc" id="L64">        debateRoom.movieId = movieId;</span>
+<span class="fc" id="L65">        debateRoom.duration = 20;</span>
+<span class="fc" id="L66">        debateRoom.maxUserNumber = 10;</span>
+<span class="fc" id="L67">        return debateRoom;</span>
+    }
+
+<span class="fc" id="L70">    public void addTotleMoney(int money) {this.totalMoney += money;};</span>
+
+    public Long getId() {
+<span class="fc" id="L73">        return id;</span>
+    }
+    public void setId(Long id) {
+<span class="nc" id="L76">        this.id = id;</span>
+<span class="nc" id="L77">    }</span>
+
+    public String getTitle() {
+<span class="fc" id="L80">        return title;</span>
+    }
+    public void setTitle(String title) {
+<span class="nc" id="L83">        this.title = title;</span>
+<span class="nc" id="L84">    }</span>
+
+    public String getTopic() {
+<span class="fc" id="L87">        return topic;</span>
+    }
+    public void setTopic(String topic) {
+<span class="nc" id="L90">        this.topic = topic;</span>
+<span class="nc" id="L91">    }</span>
+
+    public StateType getStateType() {
+<span class="fc" id="L94">        return stateType;</span>
+    }
+    public void setStateType(StateType stateType) {
+<span class="fc" id="L97">        this.stateType = stateType;</span>
+<span class="fc" id="L98">    }</span>
+
+    public Long getMovieId() {
+<span class="fc" id="L101">        return movieId;</span>
+    }
+    public void setMovieId(Long movieId) {
+<span class="nc" id="L104">        this.movieId = movieId;</span>
+<span class="nc" id="L105">    }</span>
+
+    public LocalDateTime getStartTime() {
+<span class="fc" id="L108">        return startTime;</span>
+    }
+    public void setStartTime(LocalDateTime startTime) {
+<span class="nc" id="L111">        this.startTime = startTime;</span>
+<span class="nc" id="L112">    }</span>
+
+    public int getDuration() {
+<span class="fc" id="L115">        return duration;</span>
+    }
+    public void setDuration(int duration) {
+<span class="nc" id="L118">        this.duration = duration;</span>
+<span class="nc" id="L119">    }</span>
+
+    public int getMaxUserNumber() {
+<span class="fc" id="L122">        return maxUserNumber;</span>
+    }
+    public void setMaxUserNumber(int maxUserNumber) {
+<span class="nc" id="L125">        this.maxUserNumber = maxUserNumber;</span>
+<span class="nc" id="L126">    }</span>
+
+
+    public String getSummarize() {
+<span class="fc" id="L130">        return summarize;</span>
+    }
+    public void setSummarize(String summarize) {
+<span class="fc" id="L133">        this.summarize = summarize;</span>
+<span class="fc" id="L134">    }</span>
+
+    public void setTotalMoney(int totalMoney) {
+<span class="fc" id="L137">        this.totalMoney = totalMoney;</span>
+<span class="fc" id="L138">    }</span>
+
+    public int getTotalMoney() {
+<span class="fc" id="L141">        return totalMoney;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

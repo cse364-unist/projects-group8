@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebateRoomControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.controller</a> &gt; <span class="el_source">DebateRoomControllerTest.java</span></div><h1>DebateRoomControllerTest.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.controller;
+import com.example.movinProject.domain.debateRoom.repository.DebateRoomRepository;
+import com.example.movinProject.domain.movie.repository.MovieRepository;
+import com.example.movinProject.main.debateRoom.dto.DebateRoomChatDto;
+import com.example.movinProject.main.debateRoom.service.DebateRoomService;
+import javax.inject.Inject;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+
+
+<span class="fc" id="L22">public class DebateRoomControllerTest {</span>
+
+    @Mock
+    private DebateRoomService debateRoomService;
+
+    @Mock
+    private DebateRoomRepository debateRoomRepository;
+
+
+    @Mock
+    private MovieRepository movieRepository;
+
+    @InjectMocks
+    private DebateRoomController debateRoomController;
+
+    @BeforeEach
+    void setUp() {
+<span class="fc" id="L39">        MockitoAnnotations.initMocks(this);</span>
+<span class="fc" id="L40">    }</span>
+
+    @Test
+    public void getDebateRoomTest() {
+<span class="fc" id="L44">        UserDetails mockUserDetails = mock(UserDetails.class);</span>
+<span class="fc" id="L45">        when(mockUserDetails.getUsername()).thenReturn(&quot;ti&quot;);</span>
+
+        // Set up service method expectations
+<span class="fc" id="L48">        when(debateRoomService.getDebateRoomDetails(1L, &quot;ti&quot;)).thenReturn(null);</span>
+
+        // Execute the method under test
+<span class="fc" id="L51">        ResponseEntity&lt;DebateRoomChatDto&gt; response = debateRoomController.getDebateRoom(1L, mockUserDetails);</span>
+
+        // Verify the response
+<span class="fc" id="L54">        assertNotNull(response);</span>
+<span class="fc" id="L55">        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());</span>
+<span class="fc" id="L56">    }</span>
+
+    @Test
+    public void getDebateRoomTest2() {
+<span class="fc" id="L60">        UserDetails mockUserDetails = mock(UserDetails.class);</span>
+<span class="fc" id="L61">        when(mockUserDetails.getUsername()).thenReturn(&quot;ti&quot;);</span>
+
+<span class="fc" id="L63">        DebateRoomChatDto dto = DebateRoomChatDto.createtest(&quot;tis&quot;);</span>
+
+        // Set up service method expectations
+<span class="fc" id="L66">        when(debateRoomService.getDebateRoomDetails(1L, &quot;ti&quot;)).thenReturn(dto);</span>
+
+        // Execute the method under test
+<span class="fc" id="L69">        ResponseEntity&lt;DebateRoomChatDto&gt; response = debateRoomController.getDebateRoom(1L, mockUserDetails);</span>
+
+        // Verify the response
+<span class="fc" id="L72">        assertNotNull(response);</span>
+<span class="fc" id="L73">        assertEquals(HttpStatus.OK, response.getStatusCode());</span>
+<span class="fc" id="L74">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

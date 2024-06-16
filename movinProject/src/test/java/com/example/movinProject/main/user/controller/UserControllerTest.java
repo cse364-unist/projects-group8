@@ -44,7 +44,7 @@ class UserControllerTest {
         request.setPassword("testPassword");
         request.setEmail("test@example.com");
 
-        ResponseEntity<UserDto> response = userController.register(request);
+        ResponseEntity<UserDto> response = userController.register("testUser", "testPassword","test@example.com");
         assertEquals(200, response.getStatusCodeValue());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getId());
@@ -69,7 +69,7 @@ class UserControllerTest {
         request.setPassword("newPassword123");
         request.setEmail("test2@example.com");
 
-        ResponseEntity<UserDto> response = userController.register(request);
+        ResponseEntity<UserDto> response = userController.register("testUser", "newPassword123","test2@example.com");
         assertEquals(400, response.getStatusCodeValue()); // Expect a Bad Request response
     }
 

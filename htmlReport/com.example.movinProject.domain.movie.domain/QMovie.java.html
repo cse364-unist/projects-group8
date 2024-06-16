@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QMovie.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.domain.movie.domain</a> &gt; <span class="el_source">QMovie.java</span></div><h1>QMovie.java</h1><pre class="source lang-java linenums">package com.example.movinProject.domain.movie.domain;
+
+import static com.querydsl.core.types.PathMetadataFactory.*;
+
+import com.querydsl.core.types.dsl.*;
+
+import com.querydsl.core.types.PathMetadata;
+import javax.annotation.processing.Generated;
+import com.querydsl.core.types.Path;
+
+
+/**
+ * QMovie is a Querydsl query type for Movie
+ */
+@Generated(&quot;com.querydsl.codegen.DefaultEntitySerializer&quot;)
+public class QMovie extends EntityPathBase&lt;Movie&gt; {
+
+    private static final long serialVersionUID = 816092945L;
+
+<span class="fc" id="L20">    public static final QMovie movie = new QMovie(&quot;movie&quot;);</span>
+
+<span class="pc" id="L22">    public final NumberPath&lt;Double&gt; avgRating = createNumber(&quot;avgRating&quot;, Double.class);</span>
+
+<span class="pc" id="L24">    public final StringPath description = createString(&quot;description&quot;);</span>
+
+<span class="pc" id="L26">    public final StringPath genre = createString(&quot;genre&quot;);</span>
+
+<span class="pc" id="L28">    public final NumberPath&lt;Long&gt; id = createNumber(&quot;id&quot;, Long.class);</span>
+
+<span class="pc" id="L30">    public final StringPath thumbnailUrl = createString(&quot;thumbnailUrl&quot;);</span>
+
+<span class="pc" id="L32">    public final StringPath title = createString(&quot;title&quot;);</span>
+
+    public QMovie(String variable) {
+<span class="fc" id="L35">        super(Movie.class, forVariable(variable));</span>
+<span class="fc" id="L36">    }</span>
+
+    public QMovie(Path&lt;? extends Movie&gt; path) {
+<span class="nc" id="L39">        super(path.getType(), path.getMetadata());</span>
+<span class="nc" id="L40">    }</span>
+
+    public QMovie(PathMetadata metadata) {
+<span class="nc" id="L43">        super(Movie.class, metadata);</span>
+<span class="nc" id="L44">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

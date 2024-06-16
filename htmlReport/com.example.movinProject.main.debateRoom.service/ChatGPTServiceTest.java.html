@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatGPTServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.main.debateRoom.service</a> &gt; <span class="el_source">ChatGPTServiceTest.java</span></div><h1>ChatGPTServiceTest.java</h1><pre class="source lang-java linenums">package com.example.movinProject.main.debateRoom.service;
+
+import com.example.movinProject.domain.chat.domain.Chat;
+import com.example.movinProject.domain.chat.model.ChatType;
+import com.example.movinProject.domain.chat.repository.ChatRepository;
+import com.example.movinProject.main.debateRoom.controller.ChatGPTController;
+import com.example.movinProject.main.debateRoom.model.ChatGPTRequest;
+import com.example.movinProject.main.debateRoom.model.Message;
+import com.example.movinProject.main.debateRoom.response.ChatGPTResponse;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
+
+import java.lang.module.Configuration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+@SpringBootTest
+<span class="fc" id="L32">class ChatGPTServiceTest {</span>
+
+
+    private static final String OPEN_AI_CHAT_ENDPOINT = &quot;https://api.openai.com/v1/chat/completions&quot;;
+
+    @Autowired
+    private ChatRepository chatRepository;
+
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+
+    @Autowired
+    private ChatGPTService chatGPTService;
+
+
+    private Chat agreeChat1;
+    private Chat agreeChat2;
+    private Chat disagreeChat1;
+    private Chat disagreeChat2;
+
+
+
+
+    @BeforeEach
+    void setUp() {
+<span class="fc" id="L59">        LocalDateTime now = LocalDateTime.now();</span>
+
+<span class="fc" id="L61">        agreeChat1 = Chat.createTest(1L, &quot;agree opinion1&quot;, ChatType.AGREE, now,  1L);</span>
+<span class="fc" id="L62">        agreeChat2 = Chat.createTest(2L, &quot;agree opinion2&quot;, ChatType.AGREE, now,  1L);</span>
+<span class="fc" id="L63">        disagreeChat1 = Chat.createTest(3L, &quot;disagree opinion1&quot;, ChatType.DISAGREE, now,  1L);</span>
+<span class="fc" id="L64">        disagreeChat2 = Chat.createTest(4L,  &quot;disagree opinion2&quot;, ChatType.DISAGREE, now,  1L);</span>
+<span class="fc" id="L65">        List&lt;Chat&gt; chats = List.of(agreeChat1, agreeChat2, disagreeChat1, disagreeChat2);</span>
+
+<span class="fc" id="L67">        chatRepository.saveAll(chats);</span>
+<span class="fc" id="L68">    }</span>
+
+    @Test
+    void getChatGPTResponse() {
+
+<span class="fc" id="L73">    }</span>
+
+    @Test
+    void summarizeOpinions() {
+<span class="fc" id="L77">        Long debateRoomId = 1L;</span>
+<span class="fc" id="L78">        int AGREE = 0;</span>
+<span class="fc" id="L79">        int DISAGREE = 1;</span>
+<span class="fc" id="L80">        List&lt;String&gt; summarizedOpinions = chatGPTService.summarizeOpinions(debateRoomId);</span>
+<span class="fc" id="L81">        Assertions.assertNotNull(summarizedOpinions.get(AGREE));</span>
+<span class="fc" id="L82">        Assertions.assertNotNull(summarizedOpinions.get(DISAGREE));</span>
+
+<span class="fc" id="L84">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -11,6 +11,10 @@ RUN apt-get update \
     #
     && apt-get install -y sudo \
     && apt-get install -y mysql-server \
+    && wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.53/bin/apache-tomcat-9.0.53.tar.gz \
+    && tar -xzf apache-tomcat-9.0.53.tar.gz \
+    && mkdir tomcat \
+    && mv apache-tomcat-9.0.53/* tomcat/ \
     && apt-get clean \
     #
     && rm -rf /var/lib/apt/lists/*
@@ -30,8 +34,8 @@ RUN apt-get update && \
     git
 
 WORKDIR /root/project
-
+COPY movinProject-0.0.1-SNAPSHOT-with-dependencies.war tomcat/webapps/
 # ADD milestone2 /root/project/milestone2
-ADD run.sh /root/project/run.sh
+# ADD run.sh /root/project/run.sh
 
-CMD ["/bin/bash"]
+CMD ["sh", "run.sh"]

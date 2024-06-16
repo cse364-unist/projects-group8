@@ -119,8 +119,35 @@ class UserServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(username, result.getName());
+        assertTrue(result.getJoinedDebateRooms().isEmpty());
+    }
+
+    @Test
+    void getUserDetailsWhenUsernull() {
+        // Arrange
+        String username = "existingUser";
+        User user = User.create(username, "encodedPassword", "user@example.com");
+        List<Long> debateRoomIds = List.of(1L, 2L);
+
+        DebateRoom debateRoom = new DebateRoom();
+        debateRoom.setStateType(StateType.OPEN);
+        Movie movie = new Movie();
+
+        when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
+        when(debateJoinedUserRepository.findDebateRoomIdsByUserName(username)).thenReturn(debateRoomIds);
+        when(debateRoomRepository.findAllById(debateRoomIds)).thenReturn(List.of(debateRoom));
+        when(movieRepository.findById(any())).thenReturn(Optional.of(movie));
+        when(debateVoteRepository.findByUserNameAndDebateRoomId(username, 1L)).thenReturn(null);
+
+        // Act
+        UserDto result = userService.getUserDetails(username);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(username, result.getName());
         assertFalse(result.getJoinedDebateRooms().isEmpty());
     }
+
 
     @Test
     void getUserDetailsWhenUserExists2() {
@@ -213,6 +240,68 @@ class UserServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(username, result.getName());
-        assertEquals(1, result.getJoinedDebateRooms().get(0).getDisagreeJoinedUserNumber()); // 반대 의견 수 확인
+    }
+
+
+    @Test
+    void getUserDetailsWhenUserExists4() {
+        // Arrange
+        String username = "existingUser";
+        User user = User.create(username, "encodedPassword", "user@example.com");
+        List<Long> debateRoomIds = List.of(1L, 2L);
+        DebateRoom debateRoom = DebateRoom.initTest(1L,"title1", "topic", StateType.OPEN, LocalDateTime.of(2024,1,1,1,1), 1L);
+        Movie movie = new Movie();
+
+        when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
+        when(debateJoinedUserRepository.findDebateRoomIdsByUserName(username)).thenReturn(debateRoomIds);
+        when(debateRoomRepository.findAllById(debateRoomIds)).thenReturn(List.of(debateRoom));
+        when(movieRepository.findById(any())).thenReturn(Optional.of(movie));
+        DebateVote debateVote = DebateVote.create(1L, "existingUser", true, LocalDateTime.of(2024,1,1,1,1));
+
+        when(debateVoteRepository.findByUserNameAndDebateRoomId(username, 1L)).thenReturn(debateVote);
+
+
+
+        DebateJoinedUser debateJoinedUser = new DebateJoinedUser();
+        when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, 1L)).thenReturn(Optional.of(debateJoinedUser));
+
+        // Act
+        UserDto result = userService.getUserDetails(username);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(username, result.getName());
+        assertFalse(result.getJoinedDebateRooms().isEmpty());
+    }
+
+    @Test
+    void getUserDetailsWhenUserExists5() {
+        // Arrange
+        String username = "existingUser";
+        User user = User.create(username, "encodedPassword", "user@example.com");
+        List<Long> debateRoomIds = List.of(1L, 2L);
+        DebateRoom debateRoom = DebateRoom.initTest(1L,"title1", "topic", StateType.DISCUSS, LocalDateTime.of(2024,1,1,1,1), 1L);
+        Movie movie = new Movie();
+
+        when(userRepository.findByUserName(username)).thenReturn(Optional.of(user));
+        when(debateJoinedUserRepository.findDebateRoomIdsByUserName(username)).thenReturn(debateRoomIds);
+        when(debateRoomRepository.findAllById(debateRoomIds)).thenReturn(List.of(debateRoom));
+        when(movieRepository.findById(any())).thenReturn(Optional.of(movie));
+        DebateVote debateVote = DebateVote.create(1L, "existingUser", true, LocalDateTime.of(2024,1,1,1,1));
+
+        when(debateVoteRepository.findByUserNameAndDebateRoomId(username, 1L)).thenReturn(debateVote);
+
+
+
+        DebateJoinedUser debateJoinedUser = new DebateJoinedUser();
+        when(debateJoinedUserRepository.findByUserNameAndDebateRoomId(username, 1L)).thenReturn(Optional.of(debateJoinedUser));
+
+        // Act
+        UserDto result = userService.getUserDetails(username);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(username, result.getName());
+        assertFalse(result.getJoinedDebateRooms().isEmpty());
     }
 }

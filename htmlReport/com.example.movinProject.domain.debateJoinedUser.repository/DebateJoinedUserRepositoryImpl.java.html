@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ko"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebateJoinedUserRepositoryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jacoco.exec</a> &gt; <a href="index.source.html" class="el_package">com.example.movinProject.domain.debateJoinedUser.repository</a> &gt; <span class="el_source">DebateJoinedUserRepositoryImpl.java</span></div><h1>DebateJoinedUserRepositoryImpl.java</h1><pre class="source lang-java linenums">package com.example.movinProject.domain.debateJoinedUser.repository;
+
+import com.example.movinProject.domain.debateJoinedUser.domain.DebateJoinedUser;
+import com.example.movinProject.domain.debateJoinedUser.domain.QDebateJoinedUser;
+import com.example.movinProject.domain.debateVote.domain.DebateVote;
+import com.example.movinProject.domain.debateVote.domain.QDebateVote;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.example.movinProject.domain.debateJoinedUser.domain.QDebateJoinedUser;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+
+
+import java.util.List;
+import java.util.Optional;
+
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
+public class DebateJoinedUserRepositoryImpl implements DebateJoinedUserRepositoryCustom{
+    private final JPAQueryFactory queryFactory;
+    @Override
+    public List&lt;DebateJoinedUser&gt; findByDebateRoomId(Long debateRoomId) {
+<span class="nc" id="L21">        QDebateJoinedUser qDebateJoinedUser = QDebateJoinedUser.debateJoinedUser;</span>
+<span class="nc" id="L22">        return queryFactory</span>
+<span class="nc" id="L23">                .selectFrom(qDebateJoinedUser)</span>
+<span class="nc" id="L24">                .where(qDebateJoinedUser.debateRoomId.eq(debateRoomId))</span>
+<span class="nc" id="L25">                .fetch();</span>
+    }
+
+    @Override
+    public Optional&lt;DebateJoinedUser&gt; findByUserNameAndDebateRoomId(String username, Long debateRoomId) {
+<span class="nc" id="L30">        QDebateJoinedUser qDebateJoinedUser = QDebateJoinedUser.debateJoinedUser;</span>
+<span class="nc" id="L31">            return Optional.ofNullable(queryFactory</span>
+<span class="nc" id="L32">                    .selectFrom(qDebateJoinedUser)</span>
+<span class="nc" id="L33">                    .where(qDebateJoinedUser.userName.eq(username)</span>
+<span class="nc" id="L34">                            .and(qDebateJoinedUser.debateRoomId.eq(debateRoomId)))</span>
+<span class="nc" id="L35">                    .fetchOne());</span>
+    }
+
+    @Override
+    public List&lt;Long&gt; findIdsByUserName(String userName) {
+<span class="fc" id="L40">        QDebateJoinedUser qDebateJoinedUser = QDebateJoinedUser.debateJoinedUser;</span>
+<span class="fc" id="L41">        return queryFactory</span>
+<span class="fc" id="L42">                .select(qDebateJoinedUser.id)</span>
+<span class="fc" id="L43">                .from(qDebateJoinedUser)</span>
+<span class="fc" id="L44">                .where(qDebateJoinedUser.userName.eq(userName))</span>
+<span class="fc" id="L45">                .fetch();</span>
+}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
