@@ -1,23 +1,14 @@
 # Milestone3
-## 1. 
-## 2. 
-## 3. 
-## 4. 
-
-
-
-
-# Scenario
 ## Login & Register User
 You can register and login in main page. \
 <img width="1512" alt="KakaoTalk_20240616_193433610" src="https://github.com/cse364-unist/projects-group8/assets/113990328/bf453433-a31b-499e-8eed-3329850f97b6">
 ## Main Page
 <img width="1512" alt="KakaoTalk_20240616_193706152" src="https://github.com/cse364-unist/projects-group8/assets/113990328/d5860448-bd8f-4c18-8b38-42873667b8ee">
 <img width="1512" alt="KakaoTalk_20240616_193909966" src="https://github.com/cse364-unist/projects-group8/assets/113990328/25f1785b-77df-4dc9-a451-c3c499075c3e">
-![img_7.png](img_7.png)
 This is our main page figure.
 
 In main page, user can access discussion room, HOT movie and Explore sections.
+![alt text](image.png)
 
 
 You can check the list of discussion rooms you have joined under **"Your Discussion Room"** \
