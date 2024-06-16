@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import api from '../config/api';
 import Chat from '../models/Chat';
 import {
@@ -43,6 +44,14 @@ export async function getDebateRoomById(id: number): Promise<DebateRoom> {
   ).data;
 
   return debateRoomChatDtoToDebateRoom(result);
+}
+
+export async function endDebateRoom(id: number): Promise<void> {
+  await api.post(
+    `/debateRooms/${id}/end?id=${id}`,
+    {},
+    { withCredentials: true },
+  );
 }
 
 export async function createDebateRoom(

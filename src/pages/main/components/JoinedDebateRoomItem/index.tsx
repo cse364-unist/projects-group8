@@ -160,12 +160,6 @@ function JoinedDebateRoomItem({
             <img src={PersonIcon} alt="person" />
             {debateRoom.disagreeJoinedUserNumber}
           </div>
-          <div className="divider" />
-          <div>max</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <img src={PersonIcon} alt="person" />
-            {debateRoom.disagreeJoinedUserNumber}
-          </div>
         </div>
       </div>
       <StyledGoInButton disabled={!isStarted} onClick={handleOnClickGoIn}>

@@ -9,6 +9,7 @@ import { useRecoilValue } from 'recoil';
 import styled from 'styled-components';
 import VoteActions from './components/VoteActions';
 import ChatHistory from './components/ChatHistory';
+import EndButton from './components/EndButton';
 
 const StyledVotePage = styled.div`
   display: flex;
@@ -21,6 +22,8 @@ const StyledVotePage = styled.div`
     border-right: 1px solid #d9d9d9;
     box-shadow: 4px 0 8px 0 rgba(0, 0, 0, 0.04);
     z-index: 1;
+    overflow-y: auto;
+    min-width: 300px;
   }
 
   .section-1 .section-1-1 {
@@ -49,12 +52,21 @@ const StyledVotePage = styled.div`
     display: flex;
     flex-direction: column;
     padding: 28px 36px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .section-1 .section-1-4 {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 36px;
+    border-bottom: 1px solid #d9d9d9;
   }
 
   .section-2 {
     flex: 3;
     background-color: #f3f3f3;
     text-align: center;
+    min-width: 0;
   }
 
   .vote-button {
@@ -174,6 +186,14 @@ export default function VotePage() {
             'agree' or 'disagree' button.
           </p>
           <VoteActions />
+        </div>
+        <div className="section-1-4">
+          <p>
+            This is the button for demo. If the user clicks the button, the
+            debate room vote will be closed, and the game money will be
+            distributed to the users.
+          </p>
+          <EndButton />
         </div>
       </div>
       <div className="section section-2">
