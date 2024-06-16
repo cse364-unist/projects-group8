@@ -11,7 +11,7 @@
 	<groupId>com.example</groupId>
 	<artifactId>movinProject</artifactId>
 	<version>0.0.1-SNAPSHOT-with-dependencies</version>
-	<packaging>war</packaging>
+<!--	<packaging>war</packaging>-->
 	<name>movinProject</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
