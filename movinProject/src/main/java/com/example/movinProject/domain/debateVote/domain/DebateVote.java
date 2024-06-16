@@ -65,6 +65,7 @@ public class DebateVote {
 
 
     public String getUserId() {
+        // userName 
         return userName;
     }
 }
