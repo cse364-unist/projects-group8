@@ -1,3 +1,22 @@
+# milestone 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <img width="1512" alt="KakaoTalk_20240616_194942063" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4ad71262-6daf-434a-acf4-b07ed272c8f2">
 <img width="1512" alt="KakaoTalk_20240616_191512463" src="https://github.com/cse364-unist/projects-group8/assets/113990328/6607e846-99cd-447b-a247-2fff9cda30f7">
 <img width="1512" alt="KakaoTalk_20240616_191535862" src="https://github.com/cse364-unist/projects-group8/assets/113990328/a1d9c449-0421-4903-ae22-6a0a9b06cb77">
