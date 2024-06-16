@@ -85,7 +85,7 @@ public class UserService {
         List<DebateRoom> debateRooms = debateRoomRepository.findAllById(debateRoomIds);
 
         List<DebateRoomVoteDto> debateRoomVoteDtos = debateRooms.stream()
-                .filter(debateRoom -> debateRoom.getStateType() != StateType.CLOSE)
+                .filter(debateRoom -> debateRoom.getStateType() == StateType.OPEN || debateRoom.getStateType() == StateType.DISCUSS)
                 .map(debateRoom -> {
             Movie movie = movieRepository.findById(debateRoom.getMovieId()).orElseThrow();
             MovieDto movieDto = MovieDto.builder()
