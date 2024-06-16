@@ -33,10 +33,12 @@ export function userDtoToUser(dto: UserDto): User {
     name: dto.name,
     money: dto.money,
     lastAttendance: dto.lastAttendance ? new Date(dto.lastAttendance) : null,
-    joinedDebateRooms: dto.joinedDebateRooms?.map(
-      (debateRoomVoteDto) =>
-        debateRoomVoteDtoToDebateRoomWithUserInformation(debateRoomVoteDto) ??
-        [], // TODO: Fix Backend
-    ),
+    joinedDebateRooms: dto.joinedDebateRooms
+      .map(
+        (debateRoomVoteDto) =>
+          debateRoomVoteDtoToDebateRoomWithUserInformation(debateRoomVoteDto) ??
+          [],
+      )
+      .reverse(),
   };
 }

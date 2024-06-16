@@ -57,7 +57,6 @@ export default class Client {
     if (token !== null && user !== null && debateRoom !== null) {
       this.token = token;
       this.isLoggedIn = true;
-      this.connect();
     } else {
       this.isLoggedIn = false;
       this.errorMessage = '로그인이 필요합니다';
@@ -217,6 +216,9 @@ export default class Client {
   }
 
   sendMessage() {
+    if (this.message === '') return;
+    if (this.getIsChatAvailable() === false) return;
+
     this.socket?.send(
       JSON.stringify({
         type: 'TALK',

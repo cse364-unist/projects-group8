@@ -1,6 +1,8 @@
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 import { useClient } from '../../provider/ClientProvider';
+import LeaveButton from '../LeaveButton';
+import { useEffect } from 'react';
 
 const StyledChatHistory = styled.div`
   width: 100%;
@@ -72,6 +74,14 @@ const StyledNotify = styled.div`
 
   font-size: 16px;
   color: black;
+
+  &.error {
+    color: red;
+  }
+
+  &.notify {
+    color: blue;
+  }
 `;
 
 function ChatHistory() {
@@ -79,8 +89,26 @@ function ChatHistory() {
 
   const { messages } = client;
 
+  // scroll to bottom if it is near the bottom
+  useEffect(() => {
+    const chatHistory = document.getElementById('chat-history');
+    if (
+      chatHistory &&
+      chatHistory.scrollHeight -
+        chatHistory.scrollTop -
+        chatHistory.clientHeight <
+        100
+    ) {
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+
+      if (client.curStep === 7) {
+        chatHistory.scrollTop = chatHistory.scrollHeight + 100;
+      }
+    }
+  }, [messages.length, client.curStep]);
+
   return (
-    <StyledChatHistory>
+    <StyledChatHistory id="chat-history">
       {messages.map((message, index) => {
         return (
           <div
@@ -104,6 +132,23 @@ function ChatHistory() {
           </div>
         );
       })}
+      {client.curStep === 7 && (
+        <>
+          <div className="center">
+            <StyledNotify className="notify">
+              Debate is over. Vote page is opened.
+            </StyledNotify>
+          </div>
+          <div className="center">
+            <LeaveButton />
+          </div>
+        </>
+      )}
+      {client.errorMessage && (
+        <div className="center">
+          <StyledNotify className="error">{client.errorMessage}</StyledNotify>
+        </div>
+      )}
     </StyledChatHistory>
   );
 }

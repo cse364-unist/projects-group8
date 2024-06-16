@@ -36,7 +36,7 @@ export function simpleMovieDtoToSimpleMovie(dto: SimpleMovieDto): SimpleMovie {
   return {
     id: dto.id,
     thumbnailUrl: dto.thumbnailUrl,
-    title: dto.name, // TODO: Fix Backend
+    title: dto.name,
     year: dto.year,
   };
 }

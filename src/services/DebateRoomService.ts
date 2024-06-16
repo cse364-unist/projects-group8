@@ -26,8 +26,12 @@ export async function getDebateRoomsByMovieId(movieId: number): Promise<{
   ).data;
 
   return {
-    waitingForVote: result.voteDebateRooms.map(debateRoomDtoToSimpleDebateRoom),
-    debateOpened: result.openDebateRooms.map(debateRoomDtoToSimpleDebateRoom),
+    waitingForVote: result.voteDebateRooms
+      .map(debateRoomDtoToSimpleDebateRoom)
+      .reverse(),
+    debateOpened: result.openDebateRooms
+      .map(debateRoomDtoToSimpleDebateRoom)
+      .reverse(),
   };
 }
 

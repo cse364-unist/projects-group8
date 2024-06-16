@@ -180,7 +180,7 @@ const JoinDebateRoomPopup: React.FC<JoinDebateRoomPopupProps> = ({
       .then((room) => {
         setUserJoinedDebateRoomsSelector((prev) => [...prev, room]);
         onClose();
-        navigate(0);
+        navigate('/');
       })
       .catch(() => {
         alert('Failed to join the debate room');

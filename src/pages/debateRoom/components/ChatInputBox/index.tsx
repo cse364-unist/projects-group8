@@ -85,6 +85,11 @@ function ChatInputBox() {
             onChange={(e) => {
               client.setMessage(e.target.value);
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                client.sendMessage();
+              }
+            }}
           />
         </div>
         <button

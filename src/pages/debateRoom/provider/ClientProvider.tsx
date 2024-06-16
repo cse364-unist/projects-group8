@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import Client from '../store/Client';
 import User from '../../../models/User';
 import { DebateRoomWithUserInformation } from '../../../models/DebateRoom';
@@ -20,6 +20,15 @@ export const ClientProvider = ({
     () => new Client(debateRoomId, user, debateRoom),
     [debateRoom, debateRoomId, user],
   );
+
+  useEffect(() => {
+    if (client.isLoggedIn) {
+      client.connect();
+    }
+    return () => {
+      client.exit();
+    };
+  }, [client]);
 
   return (
     <ClientContext.Provider value={client}>{children}</ClientContext.Provider>
