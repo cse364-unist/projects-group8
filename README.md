@@ -2,6 +2,8 @@
 ## Login & Register User
 You can log-in or register in main page. \
 If ypu click log-in button.
+<img width="1512" alt="KakaoTalk_20240616_194942063" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4ad71262-6daf-434a-acf4-b07ed272c8f2">
+<img width="1512" alt="KakaoTalk_20240616_191923752" src="https://github.com/cse364-unist/projects-group8/assets/113990328/1c592fc2-fcf9-4c4f-b236-54ddff6a0b62">
 <img width="1512" alt="KakaoTalk_20240616_193433610" src="https://github.com/cse364-unist/projects-group8/assets/113990328/bf453433-a31b-499e-8eed-3329850f97b6">
 ## Main Page
 <img width="1512" alt="KakaoTalk_20240616_193706152" src="https://github.com/cse364-unist/projects-group8/assets/113990328/d5860448-bd8f-4c18-8b38-42873667b8ee">
