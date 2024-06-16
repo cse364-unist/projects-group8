@@ -81,11 +81,12 @@ In this page, you can see your user name and game money.
 
 
 # Common Scenario of Movin 
+0. Prerequisite
+Since web cookies are shared within a single browser, it is not possible to run multiple accounts simultaneously. Therefore,  should log in with user1 in one browser and user2 in another browser (Safari and Chrome, respectively).
 1. make the user1, user2 (with ID test1, test2)
 <img width="1512" alt="KakaoTalk_20240616_193433610" src="https://github.com/cse364-unist/projects-group8/assets/113990328/bf453433-a31b-499e-8eed-3329850f97b6">
 <img width="1512" alt="KakaoTalk_20240616_193623567" src="https://github.com/cse364-unist/projects-group8/assets/113990328/3b292089-20e3-495d-bd84-12ea5b9d9e4a">
 2. click arbitrary movie which is in the movie chart
-## 이거지금 안넣어 놨음 사진 넣어야 함
 3. we click the "Escape from Shawshank" movie
 <img width="1512" alt="KakaoTalk_20240616_193722176" src="https://github.com/cse364-unist/projects-group8/assets/113990328/f516c1fd-10ed-4cff-ad8c-508a7e1363e2">
 4. click the "Create New Discussion" button and fill in the "title", "Discussion points", and "Start time"(if you want to test, set it to past time) 
