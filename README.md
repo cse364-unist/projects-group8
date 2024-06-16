@@ -70,12 +70,24 @@ In this page, you can see your user name and game money.
 4. click the "Create New Discussion" button and fill in the "title", "Discussion points", and "Start time"(if you want to test, set it to past time) 
 <img width="1512" alt="KakaoTalk_20240616_193731703" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e1718c2f-fe5f-4abf-933c-dd3461d2805f">
 <img width="1512" alt="KakaoTalk_20240616_193804880" src="https://github.com/cse364-unist/projects-group8/assets/113990328/8a60e698-fd4a-44b9-bb02-39b303768207">
+
+5. you can see the created New Discussion Room.
 <img width="1512" alt="KakaoTalk_20240616_193816965" src="https://github.com/cse364-unist/projects-group8/assets/113990328/a5da19da-84c2-4177-9139-38d643e57de5">
+
+6. And now user1 join the DebateRoom with Agree with deduction of 100 gold.
 <img width="1512" alt="KakaoTalk_20240616_193835116" src="https://github.com/cse364-unist/projects-group8/assets/113990328/7e662b7b-f315-4189-a43c-84289245a13c">
-<img width="1512" alt="KakaoTalk_20240616_193848488" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e5cf0f82-ebdd-4569-bc68-f171bdc37a2a">
-<img width="1512" alt="KakaoTalk_20240616_193909966" src="https://github.com/cse364-unist/projects-group8/assets/113990328/25f1785b-77df-4dc9-a451-c3c499075c3e">
+
+7. And next user2 join the DebateROom with Disagree with deduction of 100 gold also.
+<img width="1512" alt="KakaoTalk_20240616_193943232" src="https://github.com/cse364-unist/projects-group8/assets/113990328/e5cf0f82-ebdd-4569-bc68-f171bdc37a2a">
+
+8. Start Debate! 
 <img width="1512" alt="KakaoTalk_20240616_193943232" src="https://github.com/cse364-unist/projects-group8/assets/113990328/7f4452ef-d86f-4d6f-ba03-e4fdb5594ad8">
+
+9. When the all Debate session finished, chatgpt summarizes the debate and notice debators.
 <img width="1512" alt="KakaoTalk_20240616_194033055" src="https://github.com/cse364-unist/projects-group8/assets/113990328/a0258726-4457-4bfb-bd1d-9106c361d14f">
+
+10. When you click the "Go to Vote Page" at the below of chatgpt summarization, you
+can vote for this debate. In this page you can see the previous date session with summarization
 <img width="1512" alt="KakaoTalk_20240616_194149736" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4fe0ec7e-4d1c-4dc8-893a-1c7cff8582cd">
 <img width="1512" alt="KakaoTalk_20240616_194229869" src="https://github.com/cse364-unist/projects-group8/assets/113990328/4d31e141-ff0e-4fa0-9bf4-3707af76dadc">
 <img width="1512" alt="KakaoTalk_20240616_194238487" src="https://github.com/cse364-unist/projects-group8/assets/113990328/8f541a7f-173d-4194-bde9-8731ae6801a7">
